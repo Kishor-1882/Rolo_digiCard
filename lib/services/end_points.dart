@@ -43,6 +43,9 @@ class ApiEndpoints {
   static const String organizationSettings = "/api/organization/settings";
   static const String deactivateOrganization = "/api/organization/deactivate";
   static const String activateOrganization = "/api/organization/activate";
+  static const String addCustomDomain = "/api/organization/domains";
+  static String removeCustomDomain(String domain) => "/api/organization/domains/$domain";
+  static const String transferOwnership = "/api/organization/transfer-ownership";
 
   // User Management
   static const String organizationUsers = "/api/organization/users";

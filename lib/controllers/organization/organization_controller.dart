@@ -245,4 +245,82 @@ class OrganizationController extends GetxController {
       update();
     }
   }
+
+
+  // Add Custom Domain
+  Future<void> addCustomDomain(String domain) async {
+    try {
+      isLoading.value = true;
+      update();
+
+      final response = await _dio.post(
+        ApiEndpoints.addCustomDomain,
+        data: {'domain': domain},
+      );
+
+      if (response.statusCode == 200) {
+        if (response.data['organization'] != null) {
+          organization.value = OrganizationModel.fromJson(response.data['organization']);
+        }
+        CommonSnackbar.success('Domain added successfully');
+      }
+    } on DioException catch (e) {
+      log("Add Domain Error: $e");
+      String msg = "Failed to add domain";
+      if(e.response != null) msg = e.response?.data['message'] ?? msg;
+      CommonSnackbar.error(msg);
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
+
+  // Remove Custom Domain
+  Future<void> removeCustomDomain(String domain) async {
+    try {
+      isLoading.value = true;
+      update();
+
+      final response = await _dio.delete(ApiEndpoints.removeCustomDomain(domain));
+
+      if (response.statusCode == 200) {
+        if (response.data['organization'] != null) {
+          organization.value = OrganizationModel.fromJson(response.data['organization']);
+        }
+        CommonSnackbar.success('Domain removed successfully');
+      }
+    } on DioException catch (e) {
+      log("Remove Domain Error: $e");
+      CommonSnackbar.error("Failed to remove domain");
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
+
+  // Transfer Ownership
+  Future<void> transferOwnership(String newOwnerId) async {
+    try {
+      isLoading.value = true;
+      update();
+
+      final response = await _dio.post(
+        ApiEndpoints.transferOwnership,
+        data: {'userId': newOwnerId},
+      );
+
+      if (response.statusCode == 200) {
+         if (response.data['organization'] != null) {
+          organization.value = OrganizationModel.fromJson(response.data['organization']);
+        }
+        CommonSnackbar.success('Ownership transferred successfully');
+      }
+    } on DioException catch (e) {
+      log("Transfer Ownership Error: $e");
+      CommonSnackbar.error("Failed to transfer ownership");
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
 }
