@@ -1,0 +1,31 @@
+Api:https://digi-bend.roloscan.com/api/organization/groups
+Body:{
+    "name": "Marketing Team",
+    "description": "Global Marketing Dept",
+    "isShared": true
+}
+
+
+Api:https://digi-bend.roloscan.com/api/organization/groups
+
+Api:https://digi-bend.roloscan.com/api/organization/groups/6980a79d401868ebb7846022
+
+Api:https://digi-bend.roloscan.com/api/organization/groups/6980a79d401868ebb7846022
+
+Api:https://digi-bend.roloscan.com/api/organization/groups/6980a79d401868ebb7846022/users
+
+Api:https://digi-bend.roloscan.com/api/organization/groups/6980a79d401868ebb7846022/cards
+Body:{
+    "cardIds": [
+        "6980a535401868ebb7845fc4"
+    ]
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/groups/6980a79d401868ebb7846022/cards/6980a79d401868ebb7846022
+
+Api:https://digi-bend.roloscan.com/api/organization/groups/bulk-status
+Body:{
+    "groupIds": ["6980a79d401868ebb7846022"],
+    "isActive": true
+}
+

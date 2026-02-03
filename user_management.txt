@@ -1,0 +1,140 @@
+Api:https://digi-bend.roloscan.com/api/organization/users
+Response:[
+    {
+        "_id": "69809a28401868ebb7845e91",
+        "email": "new.owner@acme.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "location": "",
+        "city": "",
+        "state": "",
+        "country": "",
+        "isEmailVerified": false,
+        "emailVerificationToken": "b3077b7c1252b174b330c38fee3d2a1b47010f0fe7de5c3234c6dda8de911556",
+        "emailVerificationExpires": "2026-02-03T12:35:52.078Z",
+        "platformRole": "user",
+        "userType": "organization",
+        "organizationName": "Acme Corp",
+        "organizationLogo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+        "userState": "active",
+        "isActive": true,
+        "isBlocked": false,
+        "twoFactorEnabled": false,
+        "permissions": [
+            "user:create",
+            "user:read",
+            "user:update",
+            "user:delete",
+            "card:create",
+            "card:read",
+            "card:update",
+            "card:activate",
+            "card:assign",
+            "card:delete",
+            "group:create",
+            "group:read",
+            "group:update",
+            "group:add-user",
+            "group:remove-user",
+            "group:add-card",
+            "group:remove-card",
+            "group:delete",
+            "analytics:read",
+            "settings:update"
+        ],
+        "organizationId": "69809a28401868ebb7845e92",
+        "organizationRole": "admin",
+        "createdAt": "2026-02-02T12:35:52.230Z",
+        "updatedAt": "2026-02-02T13:01:03.711Z",
+        "__v": 0,
+        "lastLogin": "2026-02-02T12:36:37.292Z",
+        "cardCount": 0
+    },
+    {
+        "_id": "69809fce401868ebb7845ee5",
+        "email": "new.owner@example.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "location": "",
+        "city": "",
+        "state": "",
+        "country": "",
+        "isEmailVerified": false,
+        "emailVerificationToken": "07227ed02fbe53d2ed8146dd6d1d5148155d7339deac75a4d58f1701e8ef1781",
+        "emailVerificationExpires": "2026-02-03T12:59:58.059Z",
+        "platformRole": "user",
+        "userType": "organization",
+        "organizationName": "Acme Corp",
+        "organizationLogo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+        "userState": "active",
+        "isActive": true,
+        "isBlocked": false,
+        "twoFactorEnabled": false,
+        "permissions": [],
+        "organizationId": "69809a28401868ebb7845e92",
+        "organizationRole": "owner",
+        "createdAt": "2026-02-02T12:59:58.209Z",
+        "updatedAt": "2026-02-02T13:22:00.650Z",
+        "__v": 0,
+        "lastLogin": "2026-02-02T13:22:00.649Z",
+        "cardCount": 1
+    }
+]
+
+
+
+Api:https://digi-bend.roloscan.com/api/organization/users/invite
+Body:{
+    "email": "employee@acme.com",
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "role": "user",
+    "permissions": [
+        "card:read",
+        "card:create"
+    ]
+}
+Response:{
+    "message": "User invited successfully",
+    "user": {
+        "id": "698194d6401868ebb78461be",
+        "email": "employee@acme.com",
+        "firstName": "Jane",
+        "lastName": "Smith",
+        "role": "user",
+        "invitedAt": "2026-02-03T06:25:26.944Z"
+    }
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/users/6980a0f8401868ebb7845f07/invite/resend
+
+
+Api:https://digi-bend.roloscan.com/api/organization/users/6980a0f8401868ebb7845f07
+
+Api:https://digi-bend.roloscan.com/api/organization/users/6980a0f8401868ebb7845f07/status
+Body:{
+    "isActive": true
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/users/6980a0f8401868ebb7845f07/permissions
+Body:{
+    "permissions": [
+        "card:read",
+        "card:create",
+        "card:update"
+    ]
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/users/6980a0f8401868ebb7845f07/permissions
+Body:{
+    "role": "admin",
+    "permissions": [
+        "user:create",
+        "user:read",
+        "card:read",
+        "card:create"
+    ]
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/users/6980a0f8401868ebb7845f07
+

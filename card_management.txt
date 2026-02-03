@@ -1,0 +1,276 @@
+Api:https://digi-bend.roloscan.com/api/organization/cards
+Body:{
+    "name": "demo test",
+    "title": "developer",
+    "company": "Tech corp",
+    "industry": "",
+    "bio": "",
+    "website": "",
+    "location": "",
+    "city": "",
+    "state": "",
+    "country": "",
+    "contact": {
+        "email": "demotest@g.com",
+        "phone": "+1 2345678907",
+        "personalEmail": "",
+        "personalPhone": "",
+        "hidePersonalEmail": false,
+        "hidePersonalPhone": false
+    },
+    "profile": "",
+    "profileFileName": "",
+    "linkedinUrl": "",
+    "socialLinks": {
+        "linkedin": "",
+        "twitter": "",
+        "instagram": "",
+        "github": "",
+        "youtube": "",
+        "facebook": ""
+    },
+    "theme": {
+        "primaryColor": "#8B5CF6",
+        "backgroundColor": "#FFFFFF",
+        "textColor": "#1F2937",
+        "cardStyle": "professional",
+        "template": "professional"
+    },
+    "tags": [],
+    "isPublic": true,
+    "mode": "minimal",
+    "isMinimalMode": true
+}
+Response:{
+    "userId": null,
+    "createdBy": "69809fce401868ebb7845ee5",
+    "organizationId": "69809a28401868ebb7845e92",
+    "name": "demo test",
+    "title": "developer",
+    "company": "Tech corp",
+    "industry": "",
+    "profile": "",
+    "profileFileName": "",
+    "linkedinUrl": "",
+    "isLinkedinVerified": false,
+    "contact": {
+        "email": "demotest@g.com",
+        "phone": "+1 2345678907",
+        "personalEmail": "",
+        "personalPhone": "",
+        "hidePersonalEmail": false,
+        "hidePersonalPhone": false,
+        "isEmailVerified": false,
+        "isMobileVerified": false,
+        "isPhoneVerified": false
+    },
+    "website": "",
+    "bio": "",
+    "location": "",
+    "socialLinks": {
+        "linkedin": "",
+        "twitter": "",
+        "facebook": "",
+        "instagram": "",
+        "github": "",
+        "youtube": ""
+    },
+    "theme": {
+        "cardStyle": "professional",
+        "primaryColor": "#8B5CF6",
+        "backgroundColor": "#FFFFFF",
+        "textColor": "#1F2937",
+        "template": "professional"
+    },
+    "tags": [],
+    "qrCodeUrl": "data:image/png;base64,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",
+    "shortUrl": "fah9Cz7Yv",
+    "isPublic": true,
+    "mode": "minimal",
+    "isMinimalMode": true,
+    "isBlocked": false,
+    "isActive": true,
+    "viewCount": 0,
+    "scanCount": 0,
+    "saveCount": 0,
+    "shareCount": 0,
+    "_id": "6981968b401868ebb78461d0",
+    "customLinks": [],
+    "createdAt": "2026-02-03T06:32:43.754Z",
+    "updatedAt": "2026-02-03T06:32:43.754Z",
+    "__v": 0
+}
+
+
+Api:https://digi-bend.roloscan.com/api/organization/cards
+Response:[
+    {
+        "contact": {
+            "email": "demotest@g.com",
+            "phone": "+1 2345678907",
+            "personalEmail": "",
+            "personalPhone": "",
+            "hidePersonalEmail": false,
+            "hidePersonalPhone": false,
+            "isEmailVerified": false,
+            "isMobileVerified": false,
+            "isPhoneVerified": false
+        },
+        "socialLinks": {
+            "linkedin": "",
+            "twitter": "",
+            "facebook": "",
+            "instagram": "",
+            "github": "",
+            "youtube": ""
+        },
+        "theme": {
+            "cardStyle": "professional",
+            "primaryColor": "#8B5CF6",
+            "backgroundColor": "#FFFFFF",
+            "textColor": "#1F2937",
+            "template": "professional"
+        },
+        "_id": "6981968b401868ebb78461d0",
+        "userId": null,
+        "createdBy": {
+            "_id": "69809fce401868ebb7845ee5",
+            "email": "new.owner@example.com",
+            "firstName": "John",
+            "lastName": "Doe",
+            "organizationRole": "owner",
+            "id": "69809fce401868ebb7845ee5"
+        },
+        "organizationId": "69809a28401868ebb7845e92",
+        "name": "demo test",
+        "title": "developer",
+        "company": "Tech corp",
+        "industry": "",
+        "profile": "",
+        "profileFileName": "",
+        "linkedinUrl": "",
+        "isLinkedinVerified": false,
+        "website": "",
+        "bio": "",
+        "location": "",
+        "tags": [],
+        "qrCodeUrl": "data:image/png;base64,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",
+        "shortUrl": "fah9Cz7Yv",
+        "isPublic": true,
+        "mode": "minimal",
+        "isMinimalMode": true,
+        "isBlocked": false,
+        "isActive": true,
+        "viewCount": 0,
+        "scanCount": 0,
+        "saveCount": 0,
+        "shareCount": 0,
+        "customLinks": [],
+        "createdAt": "2026-02-03T06:32:43.754Z",
+        "updatedAt": "2026-02-03T06:32:43.754Z",
+        "__v": 0
+    },
+    {
+        "contact": {
+            "email": "demotest@g.com",
+            "phone": "+1 2345678907",
+            "personalEmail": "",
+            "personalPhone": "",
+            "hidePersonalEmail": false,
+            "hidePersonalPhone": false,
+            "isEmailVerified": false,
+            "isMobileVerified": false,
+            "isPhoneVerified": false
+        },
+        "socialLinks": {
+            "linkedin": "",
+            "twitter": "",
+            "facebook": "",
+            "instagram": "",
+            "github": "",
+            "youtube": ""
+        },
+        "theme": {
+            "cardStyle": "professional",
+            "primaryColor": "#8B5CF6",
+            "backgroundColor": "#FFFFFF",
+            "textColor": "#1F2937",
+            "template": "professional"
+        },
+        "_id": "6980a535401868ebb7845fc4",
+        "userId": null,
+        "createdBy": {
+            "_id": "69809fce401868ebb7845ee5",
+            "email": "new.owner@example.com",
+            "firstName": "John",
+            "lastName": "Doe",
+            "organizationRole": "owner",
+            "id": "69809fce401868ebb7845ee5"
+        },
+        "organizationId": "69809a28401868ebb7845e92",
+        "name": "demo test",
+        "title": "developer",
+        "company": "Tech corp",
+        "industry": "",
+        "profile": "",
+        "profileFileName": "",
+        "linkedinUrl": "",
+        "isLinkedinVerified": false,
+        "website": "",
+        "bio": "",
+        "location": "",
+        "tags": [],
+        "qrCodeUrl": "data:image/png;base64,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",
+        "shortUrl": "Xtnh1Ddss",
+        "isPublic": true,
+        "mode": "minimal",
+        "isMinimalMode": true,
+        "isBlocked": false,
+        "isActive": true,
+        "viewCount": 0,
+        "scanCount": 0,
+        "saveCount": 0,
+        "shareCount": 0,
+        "customLinks": [],
+        "createdAt": "2026-02-02T13:23:01.519Z",
+        "updatedAt": "2026-02-02T13:23:01.519Z",
+        "__v": 0
+    }
+]
+
+Api:https://digi-bend.roloscan.com/api/organization/cards/stats
+Response:{
+    "total": 2,
+    "active": 2,
+    "disabled": 0,
+    "unassigned": 2,
+    "totalSaves": 0,
+    "totalViews": 0,
+    "totalShares": 0
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/cards/6980a549401868ebb7845fde
+
+Api:https://digi-bend.roloscan.com/api/organization/cards/6980a549401868ebb7845fde
+Body:{
+    "name": "Jane Smith",
+    "title": "VP of Sales",
+    "isPublic": true,
+    "mode": "customized",
+    "links": [
+        { "type": "linkedin", "url": "https://linkedin.com/in/jane" }
+    ]
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/cards/6980a549401868ebb7845fde/status
+Body:{
+    "isActive": true
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/cards/6980a549401868ebb7845fde/reassign
+Body:{
+    "userId": "69809a28401868ebb7845e91" 
+}
+
+Delete
+Api:https://digi-bend.roloscan.com/api/organization/cards/6980a549401868ebb7845fde

@@ -55,6 +55,46 @@ class ContactModel {
   }
 }
 
+class AddressModel {
+  final String? addressLine1;
+  final String? addressLine2;
+  final String? city;
+  final String? state;
+  final String? country;
+  final String? zipCode;
+
+  AddressModel({
+    this.addressLine1,
+    this.addressLine2,
+    this.city,
+    this.state,
+    this.country,
+    this.zipCode,
+  });
+
+  factory AddressModel.fromJson(Map<String, dynamic> json) {
+    return AddressModel(
+      addressLine1: json['addressLine1'],
+      addressLine2: json['addressLine2'],
+      city: json['city'],
+      state: json['state'],
+      country: json['country'],
+      zipCode: json['zipCode'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'addressLine1': addressLine1,
+      'addressLine2': addressLine2,
+      'city': city,
+      'state': state,
+      'country': country,
+      'zipCode': zipCode,
+    };
+  }
+}
+
 // theme_model.dart
 class ThemeModel {
   final String cardStyle;
@@ -109,7 +149,13 @@ class CardModel {
   final String shortUrl;
   final String publicUrl;
   final String? linkedinUrl;
+  final String? twitterUrl;
+  final String? instagramUrl;
+  final String? githubUrl;
+  final String? facebookUrl;
+  final String? youtubeUrl;
   final String? website;
+  final AddressModel? address;
   final bool isPublic;
   final bool isMinimalMode;
   final bool isBlocked;
@@ -133,7 +179,13 @@ class CardModel {
     required this.industry,
     this.profile,
     this.linkedinUrl,
+    this.twitterUrl,
+    this.instagramUrl,
+    this.githubUrl,
+    this.facebookUrl,
+    this.youtubeUrl,
     this.website,
+    this.address,
     this.profileFileName,
     this.isLinkedinVerified = false,
     required this.bio,
@@ -163,7 +215,13 @@ class CardModel {
       name: json['name'],
       title: json['title'],
       linkedinUrl: json['linkedinUrl'],
+      twitterUrl: json['twitterUrl'],
+      instagramUrl: json['instagramUrl'],
+      githubUrl: json['githubUrl'],
+      facebookUrl: json['facebookUrl'],
+      youtubeUrl: json['youtubeUrl'],
       website: json['website'],
+      address: json['address'] != null ? AddressModel.fromJson(json['address']) : null,
       company: json['company'],
       industry: json['industry'],
       profile: json['profile'],
@@ -200,7 +258,13 @@ class CardModel {
       'industry': industry,
       'profile': profile,
       'linkedinUrl': linkedinUrl,
+      'twitterUrl': twitterUrl,
+      'instagramUrl': instagramUrl,
+      'githubUrl': githubUrl,
+      'facebookUrl': facebookUrl,
+      'youtubeUrl': youtubeUrl,
       'website': website,
+      'address': address?.toJson(),
       'profileFileName': profileFileName,
       'isLinkedinVerified': isLinkedinVerified,
       'bio': bio,

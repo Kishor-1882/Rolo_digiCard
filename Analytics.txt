@@ -1,0 +1,407 @@
+Api:https://digi-bend.roloscan.com/api/organization/analytics/overview
+Response:{
+    "health": {
+        "totalUsers": 3,
+        "filteredUsersCount": 3,
+        "activeUsersPercentage": 0,
+        "totalCards": 2,
+        "filteredCardsCount": 2,
+        "activeCardsPercentage": "100.0",
+        "totalShares": 0,
+        "totalViews": 0,
+        "assignedCards": 0,
+        "unassignedCards": 2
+    },
+    "engagement": {
+        "chartData": [
+            {
+                "period": "2026-02",
+                "created": 2,
+                "scanned": 0
+            }
+        ],
+        "combinedStatus": [
+            {
+                "name": "Active & Assigned",
+                "value": 0
+            },
+            {
+                "name": "Active & Unassigned",
+                "value": 2
+            },
+            {
+                "name": "Inactive & Assigned",
+                "value": 0
+            },
+            {
+                "name": "Inactive & Unassigned",
+                "value": 0
+            }
+        ],
+        "funnel": [
+            {
+                "id": "created",
+                "value": 2,
+                "label": "Cards Created"
+            },
+            {
+                "id": "shared",
+                "value": 0,
+                "label": "Total Shares"
+            },
+            {
+                "id": "viewed",
+                "value": 0,
+                "label": "Total Views"
+            },
+            {
+                "id": "saved",
+                "value": 0,
+                "label": "Total Saves"
+            }
+        ]
+    },
+    "groupComparison": [
+        {
+            "name": "Global Marketing",
+            "createdBy": "John Doe",
+            "status": "Active",
+            "visibility": "Private",
+            "members": [
+                "69809a28401868ebb7845e91"
+            ],
+            "totalMembers": 1,
+            "totalCards": 1,
+            "createdAt": "2026-02-02T13:33:17.144Z",
+            "activeCardsPct": 100,
+            "avgViewsPerCard": 0
+        }
+    ],
+    "zeroActivityGroups": [
+        {
+            "name": "Global Marketing",
+            "memberCount": 1,
+            "lastActivityDate": null,
+            "daysSinceActivity": "Never"
+        }
+    ],
+    "geography": [],
+    "heatmapPoints": [],
+    "realtimeUsers": [],
+    "regionalFunnel": []
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/analytics/owner?days=30
+Response:{
+    "health": {
+        "totalUsers": 3,
+        "filteredUsersCount": 3,
+        "activeUsersPercentage": 0,
+        "totalCards": 2,
+        "filteredCardsCount": 2,
+        "activeCardsPercentage": "100.0",
+        "totalShares": 0,
+        "totalViews": 0,
+        "assignedCards": 0,
+        "unassignedCards": 2
+    },
+    "engagement": {
+        "chartData": [
+            {
+                "period": "2026-02",
+                "created": 2,
+                "scanned": 0
+            }
+        ],
+        "combinedStatus": [
+            {
+                "name": "Active & Assigned",
+                "value": 0
+            },
+            {
+                "name": "Active & Unassigned",
+                "value": 2
+            },
+            {
+                "name": "Inactive & Assigned",
+                "value": 0
+            },
+            {
+                "name": "Inactive & Unassigned",
+                "value": 0
+            }
+        ],
+        "funnel": [
+            {
+                "id": "created",
+                "value": 2,
+                "label": "Cards Created"
+            },
+            {
+                "id": "shared",
+                "value": 0,
+                "label": "Total Shares"
+            },
+            {
+                "id": "viewed",
+                "value": 0,
+                "label": "Total Views"
+            },
+            {
+                "id": "saved",
+                "value": 0,
+                "label": "Total Saves"
+            }
+        ]
+    },
+    "groupComparison": [
+        {
+            "name": "Global Marketing",
+            "createdBy": "John Doe",
+            "status": "Active",
+            "visibility": "Private",
+            "members": [
+                "69809a28401868ebb7845e91"
+            ],
+            "totalMembers": 1,
+            "totalCards": 1,
+            "createdAt": "2026-02-02T13:33:17.144Z",
+            "activeCardsPct": 100,
+            "avgViewsPerCard": 0
+        }
+    ],
+    "zeroActivityGroups": [
+        {
+            "name": "Global Marketing",
+            "memberCount": 1,
+            "lastActivityDate": null,
+            "daysSinceActivity": "Never"
+        }
+    ],
+    "geography": [],
+    "heatmapPoints": [],
+    "realtimeUsers": [],
+    "regionalFunnel": []
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/analytics/admin?days=30
+Response:{
+    "summary": {
+        "totalUsers": 3,
+        "filteredUsersCount": 3,
+        "totalCards": 2,
+        "filteredCardsCount": 2,
+        "activeCards": 2,
+        "totalShares": 0,
+        "totalViews": 0
+    },
+    "inventory": {
+        "unassignedCards": 2,
+        "inactiveUsers": 1,
+        "inactiveCards": 0,
+        "disabledGroups": 0,
+        "neverSharedCount": 0
+    },
+    "groups": {
+        "totalGroups": 1,
+        "privateGroups": 1,
+        "sharedGroups": 0
+    },
+    "userPerformance": [
+        {
+            "_id": "69809a28401868ebb7845e91",
+            "email": "new.owner@acme.com",
+            "firstName": "John",
+            "lastName": "Doe",
+            "isActive": true,
+            "organizationRole": "admin",
+            "createdAt": "2026-02-02T12:35:52.230Z",
+            "cards": [],
+            "cardsAssigned": 0,
+            "shares": 0,
+            "views": 0,
+            "activeCards": 0
+        },
+        {
+            "_id": "69809fce401868ebb7845ee5",
+            "email": "new.owner@example.com",
+            "firstName": "John",
+            "lastName": "Doe",
+            "isActive": true,
+            "organizationRole": "owner",
+            "createdAt": "2026-02-02T12:59:58.209Z",
+            "cards": [
+                {
+                    "_id": "6980a535401868ebb7845fc4",
+                    "isActive": true
+                },
+                {
+                    "_id": "6981968b401868ebb78461d0",
+                    "isActive": true
+                }
+            ],
+            "cardsAssigned": 2,
+            "shares": 0,
+            "views": 0,
+            "activeCards": 2
+        },
+        {
+            "_id": "698194d6401868ebb78461be",
+            "email": "employee@acme.com",
+            "firstName": "Jane",
+            "lastName": "Smith",
+            "organizationRole": "user",
+            "isActive": false,
+            "createdAt": "2026-02-03T06:25:26.944Z",
+            "cards": [],
+            "cardsAssigned": 0,
+            "shares": 0,
+            "views": 0,
+            "activeCards": 0
+        }
+    ],
+    "topPerformingCards": [
+        {
+            "cardId": "6980a535401868ebb7845fc4",
+            "name": "demo test",
+            "views": 0,
+            "shares": 0,
+            "isActive": true,
+            "createdAt": "2026-02-02T13:23:01.519Z",
+            "userId": null,
+            "createdBy": "69809fce401868ebb7845ee5",
+            "ownerName": "John Doe",
+            "ownerEmail": "new.owner@example.com"
+        },
+        {
+            "cardId": "6981968b401868ebb78461d0",
+            "name": "demo test",
+            "views": 0,
+            "shares": 0,
+            "isActive": true,
+            "createdAt": "2026-02-03T06:32:43.754Z",
+            "userId": null,
+            "createdBy": "69809fce401868ebb7845ee5",
+            "ownerName": "John Doe",
+            "ownerEmail": "new.owner@example.com"
+        }
+    ],
+    "usageTrends": [],
+    "geography": {
+        "usersByLocation": [],
+        "usersByCoordinates": [],
+        "inactiveUsersByRegion": []
+    }
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/analytics/user
+Response:{
+    "kpi": {
+        "totalCards": 2,
+        "activeCards": 2,
+        "views": 0,
+        "shares": 0
+    },
+    "cardPerformance": [
+        {
+            "_id": "6980a535401868ebb7845fc4",
+            "cardName": "demo test",
+            "views": 0,
+            "uniqueViewers": 0,
+            "shares": 0
+        },
+        {
+            "_id": "6981968b401868ebb78461d0",
+            "cardName": "demo test",
+            "views": 0,
+            "uniqueViewers": 0,
+            "shares": 0
+        }
+    ],
+    "activitySummary": {
+        "sharesSent": 0,
+        "viewsGenerated": 0,
+        "period": "All Time"
+    },
+    "topRegions": [],
+    "groupContext": {
+        "totalGroups": 1,
+        "totalPrivateGroups": 1,
+        "totalSharedGroups": 0,
+        "totalGroupCards": 1,
+        "activeGroupCards": 1,
+        "inactiveGroupCards": 0,
+        "avgCardsPerGroupUser": 1,
+        "avgViewsPerGroupCard": 0,
+        "topCardAvg": 0,
+        "yourAvg": 0
+    },
+    "benchmark": {
+        "location": "Global",
+        "yourViews": 0,
+        "avgViews": 0,
+        "engagementRank": 1,
+        "rank": {
+            "engagementScore": 0,
+            "engagementRank": 1,
+            "totalRanked": 1
+        }
+    }
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/analytics/cards
+Response:{
+    "kpi": {
+        "totalCards": 2,
+        "activeCards": 2,
+        "views": 0,
+        "shares": 0
+    },
+    "cardPerformance": [
+        {
+            "_id": "6980a535401868ebb7845fc4",
+            "cardName": "demo test",
+            "views": 0,
+            "uniqueViewers": 0,
+            "shares": 0
+        },
+        {
+            "_id": "6981968b401868ebb78461d0",
+            "cardName": "demo test",
+            "views": 0,
+            "uniqueViewers": 0,
+            "shares": 0
+        }
+    ],
+    "activitySummary": {
+        "sharesSent": 0,
+        "viewsGenerated": 0,
+        "period": "All Time"
+    },
+    "topRegions": [],
+    "groupContext": {
+        "totalGroups": 1,
+        "totalPrivateGroups": 1,
+        "totalSharedGroups": 0,
+        "totalGroupCards": 1,
+        "activeGroupCards": 1,
+        "inactiveGroupCards": 0,
+        "avgCardsPerGroupUser": 1,
+        "avgViewsPerGroupCard": 0,
+        "topCardAvg": 0,
+        "yourAvg": 0
+    },
+    "benchmark": {
+        "location": "Global",
+        "yourViews": 0,
+        "avgViews": 0,
+        "engagementRank": 1,
+        "rank": {
+            "engagementScore": 0,
+            "engagementRank": 1,
+            "totalRanked": 1
+        }
+    }
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/analytics/geography

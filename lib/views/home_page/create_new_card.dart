@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/common/common_textfield.dart';
@@ -109,12 +110,31 @@ class _CreateNewCardState extends State<CreateNewCard> {
     homePageController.phoneController.text = editingCard!.contact.phone ?? '';
     homePageController.emailController.text = editingCard!.contact.email ?? '';
     homePageController.websiteController.text = editingCard!.website ?? '';
-    // homePageController.addressController.text = editingCard!.address ?? '';
+    
+    // New Fields
+    homePageController.personalEmailController.text = editingCard!.contact.personalEmail ?? '';
+    homePageController.personalPhoneController.text = editingCard!.contact.personalPhone ?? '';
+    
+    if (editingCard!.address != null) {
+      homePageController.addressLine1Controller.text = editingCard!.address!.addressLine1 ?? '';
+      homePageController.addressLine2Controller.text = editingCard!.address!.addressLine2 ?? '';
+      homePageController.cityController.text = editingCard!.address!.city ?? '';
+      homePageController.stateController.text = editingCard!.address!.state ?? '';
+      homePageController.countryController.text = editingCard!.address!.country ?? '';
+      homePageController.zipController.text = editingCard!.address!.zipCode ?? '';
+    }
+
     homePageController.industryController.text = editingCard!.industry ?? '';
     // homePageController.departmentController.text = editingCard!.department ?? '';
     homePageController.bioController.text = editingCard!.bio ?? '';
+    
+    // Socials
     homePageController.linkedinController.text = editingCard!.linkedinUrl ?? '';
-    // homePageController.twitterController.text = editingCard!.twitterUrl ?? '';
+    homePageController.twitterController.text = editingCard!.twitterUrl ?? '';
+    homePageController.instagramController.text = editingCard!.instagramUrl ?? '';
+    homePageController.githubController.text = editingCard!.githubUrl ?? '';
+    homePageController.facebookController.text = editingCard!.facebookUrl ?? '';
+    homePageController.youtubeController.text = editingCard!.youtubeUrl ?? '';
 
     // Set theme
     homePageController.selectedTheme.value = editingCard!.theme.cardStyle.capitalize ?? 'Light';
@@ -135,6 +155,65 @@ class _CreateNewCardState extends State<CreateNewCard> {
         controller.skillController.clear();
       });
     }
+  }
+
+  Widget _buildProfilePictureSection(HomePageController controller) {
+    return _CardSection(
+      icon: Icons.camera_alt_outlined,
+      title: 'Profile Picture',
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: AppColors.gradientStart,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                  image: controller.profileImage != null
+                      ? DecorationImage(
+                          image: FileImage(controller.profileImage!),
+                          fit: BoxFit.cover,
+                        )
+                      // If no local image, check if we're editing and have a profile URL
+                      : (isEditMode && editingCard?.profile != null && editingCard!.profile!.isNotEmpty)
+                          ? DecorationImage(
+                              image: NetworkImage(editingCard!.profile!), // You might want to use a cached network image
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                ),
+                child: controller.profileImage == null && (!isEditMode || editingCard?.profile == null)
+                    ? Icon(Icons.person, size: 40, color: Colors.grey)
+                    : null,
+              ),
+              const SizedBox(width: 20),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => controller.pickImage(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.progressPink,
+                    ),
+                    child: Text("Choose File", style: TextStyle(color: Colors.white)),
+                  ),
+                  if (controller.profileImage != null)
+                     TextButton(onPressed: ()=> controller.removeImage(), child: Text("Remove", style: TextStyle(color: Colors.red)))
+                  else
+                     Text("No file chosen", style: TextStyle(color: Colors.grey)),
+                ],
+              )
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text("(Optional)", style: TextStyle(color: Colors.grey, fontSize: 12)),
+        ],
+      ),
+    );
   }
 
   Widget _buildBasicInformationSection(HomePageController controller) {
@@ -187,16 +266,106 @@ class _CreateNewCardState extends State<CreateNewCard> {
       title: 'Contact',
       content: Column(
         children: [
-          CustomFormTextField(
+           CustomFormTextField(
             title: 'Website',
             hintText: 'Enter your website',
             controller: controller.websiteController,
           ),
           const SizedBox(height: 20),
+          // Email Addresses
+          Text("Email Addresses", style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+           const SizedBox(height: 10),
           CustomFormTextField(
-            title: 'Address',
-            hintText: 'Enter your address',
-            controller: controller.addressController,
+            isImportant: true,
+            title: 'Work Email',
+            hintText: 'john@company.com',
+            controller: controller.emailController,
+          ),
+          const SizedBox(height: 10),
+          CustomFormTextField(
+            title: 'Personal Email',
+            hintText: 'john@gmail.com',
+            controller: controller.personalEmailController,
+          ),
+          const SizedBox(height: 20),
+          // Phone Numbers
+          Text("Phone Numbers", style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+           const SizedBox(height: 10),
+          CustomFormTextField(
+            isImportant: true,
+            title: 'Work Phone',
+            hintText: '+1 ...',
+            controller: controller.phoneController,
+          ),
+           const SizedBox(height: 10),
+          CustomFormTextField(
+             title: 'Personal Phone',
+            hintText: '+1 ...',
+             controller: controller.personalPhoneController,
+          ),
+
+          const SizedBox(height: 20),
+          // Location
+           Text("Location", style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+           const SizedBox(height: 10),
+           Row(
+             children: [
+               Expanded(
+                 child: CustomFormTextField(
+                  title: 'Address Line 1',
+                  hintText: '123 Main St',
+                  controller: controller.addressLine1Controller,
+                           ),
+               ),
+               const SizedBox(width: 10),
+                Expanded(
+                 child: CustomFormTextField(
+                   title: 'Address Line 2',
+                   hintText: 'Apt, Suite',
+                   controller: controller.addressLine2Controller,
+                 ),
+               ),
+             ],
+           ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: CustomFormTextField(
+                  title: 'City',
+                  hintText: 'San Francisco',
+                  controller: controller.cityController,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: CustomFormTextField(
+                  title: 'State/Province',
+                  hintText: 'California',
+                  controller: controller.stateController,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+           Row(
+            children: [
+              Expanded(
+                child: CustomFormTextField(
+                  title: 'Country',
+                  hintText: 'United States',
+                  controller: controller.countryController,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: CustomFormTextField(
+                  title: 'Zip Code',
+                  hintText: '12345',
+                  controller: controller.zipController,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -345,14 +514,38 @@ class _CreateNewCardState extends State<CreateNewCard> {
         children: [
           CustomFormTextField(
             title: 'LinkedIn',
-            hintText: 'Enter your linkedIn',
+            hintText: 'linkedin.com/in/username',
             controller: controller.linkedinController,
           ),
           const SizedBox(height: 20),
           CustomFormTextField(
             title: 'Twitter',
-            hintText: 'Enter your twitter',
+            hintText: '@username',
             controller: controller.twitterController,
+          ),
+          const SizedBox(height: 20),
+          CustomFormTextField(
+            title: 'Instagram',
+            hintText: '@username',
+            controller: controller.instagramController,
+          ),
+          const SizedBox(height: 20),
+          CustomFormTextField(
+            title: 'GitHub',
+            hintText: 'github.com/username',
+            controller: controller.githubController,
+          ),
+          const SizedBox(height: 20),
+           CustomFormTextField(
+            title: 'YouTube',
+            hintText: 'youtube.com/@channel',
+            controller: controller.youtubeController,
+          ),
+          const SizedBox(height: 20),
+          CustomFormTextField(
+            title: 'Facebook',
+            hintText: 'facebook.com/username',
+            controller: controller.facebookController,
           ),
         ],
       ),
@@ -805,6 +998,7 @@ class _CreateNewCardState extends State<CreateNewCard> {
                 child: Column(
                   children: [
                     // All form sections are now built sequentially
+                    _buildProfilePictureSection(controller),
                     _buildBasicInformationSection(controller),
                     Visibility(
                       visible: !isMinimalView,

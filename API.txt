@@ -1,0 +1,568 @@
+Api:https://digi-bend.roloscan.com/api/organization/me
+Response:
+{
+    "user": {
+        "_id": "69809a28401868ebb7845e91",
+        "email": "new.owner@acme.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "organizationName": "Acme Corp",
+        "organizationLogo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+        "organizationId": "69809a28401868ebb7845e92",
+        "organizationRole": "admin",
+        "id": "69809a28401868ebb7845e91"
+    },
+    "organization": {
+        "settings": {
+            "defaultTheme": "professional",
+            "layout": "v1",
+            "adminSettingsPermission": true,
+            "whoCanCreateCards": "all",
+            "adminCardReassignmentPermission": false,
+            "whoCanCreateGroups": "admin",
+            "allowPublicAccess": true,
+            "defaultCardVisibility": "organization"
+        },
+        "_id": "69809a28401868ebb7845e92",
+        "name": "Acme Corp",
+        "domains": [
+            "acme.com"
+        ],
+        "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+    }
+}
+
+
+Api:https://digi-bend.roloscan.com/api/organization/dashboard
+Response:{
+    "users": {
+        "_id": null,
+        "total": 2,
+        "active": 2
+    },
+    "cards": {
+        "total": 1,
+        "active": 1,
+        "inactive": 0,
+        "unassigned": 1,
+        "activeAssigned": 0,
+        "activeUnassigned": 1,
+        "inactiveAssigned": 0,
+        "inactiveUnassigned": 0,
+        "createdCount": 0,
+        "assignedCount": 0,
+        "savedCount": 0
+    },
+    "groups": {
+        "total": 1
+    },
+    "summary": {
+        "totalViews": 0,
+        "totalScans": 0,
+        "totalSaves": 0,
+        "totalShares": 0
+    },
+    "topCards": [
+        {
+            "_id": "6980a535401868ebb7845fc4",
+            "userId": null,
+            "createdBy": "69809fce401868ebb7845ee5",
+            "name": "demo test",
+            "title": "developer",
+            "company": "Tech corp",
+            "isActive": true,
+            "viewCount": 0,
+            "scanCount": 0,
+            "saveCount": 0,
+            "shareCount": 0,
+            "createdAt": "2026-02-02T13:23:01.519Z",
+            "user": null
+        }
+    ],
+    "topPerformingCards": [
+        {
+            "_id": "6980a535401868ebb7845fc4",
+            "userId": null,
+            "createdBy": "69809fce401868ebb7845ee5",
+            "name": "demo test",
+            "title": "developer",
+            "company": "Tech corp",
+            "isActive": true,
+            "viewCount": 0,
+            "scanCount": 0,
+            "saveCount": 0,
+            "shareCount": 0,
+            "createdAt": "2026-02-02T13:23:01.519Z",
+            "user": null
+        }
+    ],
+    "activityTrend": [
+        {
+            "_id": "2026-01-04",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-05",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-06",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-07",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-08",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-09",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-10",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-11",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-12",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-13",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-14",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-15",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-16",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-17",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-18",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-19",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-20",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-21",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-22",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-23",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-24",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-25",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-26",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-27",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-28",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-29",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-30",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-01-31",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-02-01",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-02-02",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        },
+        {
+            "_id": "2026-02-03",
+            "views": 0,
+            "scans": 0,
+            "saves": 0,
+            "shares": 0
+        }
+    ],
+    "recentActivities": [
+        {
+            "_id": "6981897e401868ebb7846089",
+            "user": "new.owner@example.com",
+            "email": "new.owner@example.com",
+            "userId": "69809fce401868ebb7845ee5",
+            "organizationId": "69809a28401868ebb7845e92",
+            "action": "Bulk activated 1 groups",
+            "cardName": null,
+            "type": "info",
+            "createdAt": "2026-02-03T05:37:02.451Z",
+            "updatedAt": "2026-02-03T05:37:02.451Z",
+            "__v": 0
+        },
+        {
+            "_id": "6980a79d401868ebb7846024",
+            "user": "new.owner@example.com",
+            "email": "new.owner@example.com",
+            "userId": "69809fce401868ebb7845ee5",
+            "organizationId": "69809a28401868ebb7845e92",
+            "action": "Created group: Marketing Team",
+            "cardName": null,
+            "type": "success",
+            "createdAt": "2026-02-02T13:33:17.298Z",
+            "updatedAt": "2026-02-02T13:33:17.298Z",
+            "__v": 0
+        },
+        {
+            "_id": "6980a754401868ebb784601e",
+            "user": "new.owner@example.com",
+            "email": "new.owner@example.com",
+            "userId": "69809fce401868ebb7845ee5",
+            "organizationId": "69809a28401868ebb7845e92",
+            "action": "Deleted card \"Jane Smith\"",
+            "cardName": "Jane Smith",
+            "type": "error",
+            "createdAt": "2026-02-02T13:32:04.180Z",
+            "updatedAt": "2026-02-02T13:32:04.180Z",
+            "__v": 0
+        },
+        {
+            "_id": "6980a716401868ebb7846018",
+            "user": "new.owner@example.com",
+            "email": "new.owner@example.com",
+            "userId": "69809fce401868ebb7845ee5",
+            "organizationId": "69809a28401868ebb7845e92",
+            "action": "Reassigned card \"Jane Smith\" to user: new.owner@acme.com",
+            "cardName": null,
+            "type": "info",
+            "createdAt": "2026-02-02T13:31:02.933Z",
+            "updatedAt": "2026-02-02T13:31:02.933Z",
+            "__v": 0
+        },
+        {
+            "_id": "6980a6a5401868ebb784600e",
+            "user": "new.owner@example.com",
+            "email": "new.owner@example.com",
+            "userId": "69809fce401868ebb7845ee5",
+            "organizationId": "69809a28401868ebb7845e92",
+            "action": "Activated card \"Jane Smith\"",
+            "cardName": "Jane Smith",
+            "type": "success",
+            "createdAt": "2026-02-02T13:29:09.647Z",
+            "updatedAt": "2026-02-02T13:29:09.647Z",
+            "__v": 0
+        },
+        {
+            "_id": "6980a694401868ebb7846008",
+            "user": "new.owner@example.com",
+            "email": "new.owner@example.com",
+            "userId": "69809fce401868ebb7845ee5",
+            "organizationId": "69809a28401868ebb7845e92",
+            "action": "Deactivated card \"Jane Smith\"",
+            "cardName": "Jane Smith",
+            "type": "warning",
+            "createdAt": "2026-02-02T13:28:52.620Z",
+            "updatedAt": "2026-02-02T13:28:52.620Z",
+            "__v": 0
+        },
+        {
+            "_id": "6980a661401868ebb7846002",
+            "user": "new.owner@example.com",
+            "email": "new.owner@example.com",
+            "userId": "69809fce401868ebb7845ee5",
+            "organizationId": "69809a28401868ebb7845e92",
+            "action": "Updated card \"Jane Smith\"",
+            "cardName": "Jane Smith",
+            "type": "info",
+            "createdAt": "2026-02-02T13:28:01.915Z",
+            "updatedAt": "2026-02-02T13:28:01.915Z",
+            "__v": 0
+        },
+        {
+            "_id": "6980a650401868ebb7845ffb",
+            "user": "new.owner@example.com",
+            "email": "new.owner@example.com",
+            "userId": "69809fce401868ebb7845ee5",
+            "organizationId": "69809a28401868ebb7845e92",
+            "action": "Updated card \"demo test\"",
+            "cardName": "demo test",
+            "type": "info",
+            "createdAt": "2026-02-02T13:27:44.617Z",
+            "updatedAt": "2026-02-02T13:27:44.617Z",
+            "__v": 0
+        },
+        {
+            "_id": "6980a549401868ebb7845fe0",
+            "user": "new.owner@example.com",
+            "email": "new.owner@example.com",
+            "userId": "69809fce401868ebb7845ee5",
+            "organizationId": "69809a28401868ebb7845e92",
+            "action": "Created card \"demo test\"",
+            "cardName": "demo test",
+            "type": "success",
+            "createdAt": "2026-02-02T13:23:21.322Z",
+            "updatedAt": "2026-02-02T13:23:21.322Z",
+            "__v": 0
+        },
+        {
+            "_id": "6980a535401868ebb7845fc6",
+            "user": "new.owner@example.com",
+            "email": "new.owner@example.com",
+            "userId": "69809fce401868ebb7845ee5",
+            "organizationId": "69809a28401868ebb7845e92",
+            "action": "Created card \"demo test\"",
+            "cardName": "demo test",
+            "type": "success",
+            "createdAt": "2026-02-02T13:23:01.669Z",
+            "updatedAt": "2026-02-02T13:23:01.669Z",
+            "__v": 0
+        }
+    ],
+    "recentGroups": [
+        {
+            "_id": "6980a79d401868ebb7846022",
+            "name": "Global Marketing",
+            "description": "Global Marketing Dept",
+            "ownerId": {
+                "_id": "69809fce401868ebb7845ee5",
+                "email": "new.owner@example.com",
+                "firstName": "John",
+                "lastName": "Doe",
+                "id": "69809fce401868ebb7845ee5"
+            },
+            "isShared": false,
+            "members": [
+                "69809a28401868ebb7845e91"
+            ],
+            "cards": [
+                "6980a535401868ebb7845fc4"
+            ],
+            "createdAt": "2026-02-02T13:33:17.144Z"
+        }
+    ],
+    "savedCards": []
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/settings
+Response:{
+    "settings": {
+        "defaultTheme": "professional",
+        "layout": "v1",
+        "adminSettingsPermission": true,
+        "whoCanCreateCards": "all",
+        "adminCardReassignmentPermission": false,
+        "whoCanCreateGroups": "admin",
+        "allowPublicAccess": true,
+        "defaultCardVisibility": "organization"
+    },
+    "_id": "69809a28401868ebb7845e92",
+    "name": "Acme Corp",
+    "ownerId": {
+        "_id": "69809fce401868ebb7845ee5",
+        "email": "new.owner@example.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "id": "69809fce401868ebb7845ee5"
+    },
+    "domains": [
+        "acme.com"
+    ],
+    "isActive": true,
+    "isDeleted": false,
+    "description": "Innovation for the future",
+    "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/deactivate
+Response:{
+    "message": "Organization deactivated successfully",
+    "organization": {
+        "settings": {
+            "defaultTheme": "professional",
+            "layout": "v1",
+            "adminSettingsPermission": true,
+            "whoCanCreateCards": "all",
+            "adminCardReassignmentPermission": false,
+            "whoCanCreateGroups": "admin",
+            "allowPublicAccess": true,
+            "defaultCardVisibility": "organization"
+        },
+        "_id": "69809a28401868ebb7845e92",
+        "name": "Acme Corp",
+        "slug": "acme-corp-1770035752079",
+        "ownerId": "69809fce401868ebb7845ee5",
+        "domains": [
+            "acme.com"
+        ],
+        "isActive": false,
+        "isDeleted": false,
+        "createdAt": "2026-02-02T12:35:52.080Z",
+        "updatedAt": "2026-02-03T06:10:26.267Z",
+        "__v": 3,
+        "description": "Innovation for the future",
+        "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+        "deactivatedAt": "2026-02-03T06:10:26.266Z"
+    }
+}
+
+Api:https://digi-bend.roloscan.com/api/organization/activate
+Response:{
+    "message": "Organization activated successfully",
+    "organization": {
+        "settings": {
+            "defaultTheme": "professional",
+            "layout": "v1",
+            "adminSettingsPermission": true,
+            "whoCanCreateCards": "all",
+            "adminCardReassignmentPermission": false,
+            "whoCanCreateGroups": "admin",
+            "allowPublicAccess": true,
+            "defaultCardVisibility": "organization"
+        },
+        "_id": "69809a28401868ebb7845e92",
+        "name": "Acme Corp",
+        "slug": "acme-corp-1770035752079",
+        "ownerId": "69809fce401868ebb7845ee5",
+        "domains": [
+            "acme.com"
+        ],
+        "isActive": true,
+        "isDeleted": false,
+        "createdAt": "2026-02-02T12:35:52.080Z",
+        "updatedAt": "2026-02-03T06:11:03.974Z",
+        "__v": 3,
+        "description": "Innovation for the future",
+        "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+    }
+}
+
+Api:https://digi-bend.roloscan.com/api/organization
