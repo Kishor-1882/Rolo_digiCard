@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
 import 'package:rolo_digi_card/models/organization_model.dart';
+import 'package:rolo_digi_card/models/organization_user_model.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
 import 'package:rolo_digi_card/services/end_points.dart';
 
@@ -14,6 +15,7 @@ class OrganizationController extends GetxController {
 
   var isLoading = false.obs;
   var organization = Rxn<OrganizationModel>();
+  var currentUser = Rxn<OrganizationUserModel>();
   var dashboardStats = Rxn<OrgDashboardStats>();
 
   // Text Controllers
@@ -107,6 +109,9 @@ class OrganizationController extends GetxController {
         // Based on API.txt: { "user": ..., "organization": ... }
         if (response.data['organization'] != null) {
           organization.value = OrganizationModel.fromJson(response.data['organization']);
+        }
+        if (response.data['user'] != null) {
+          currentUser.value = OrganizationUserModel.fromJson(response.data['user']);
         }
       }
     } on DioException catch (e) {

@@ -16,7 +16,7 @@ class AnalyticsController extends GetxController {
   var adminData = Rxn<AnalyticsAdminModel>();
   var userData = Rxn<AnalyticsUserCardsModel>();
   var cardsData = Rxn<AnalyticsUserCardsModel>();
-  var geographyData = Rxn<dynamic>(); // Dynamic as structure varies or is simple list/map
+  var geographyData = <GeographyModel>[].obs; 
 
   @override
   void onInit() {
@@ -128,7 +128,8 @@ class AnalyticsController extends GetxController {
       final response = await _dio.get(ApiEndpoints.analyticsGeography);
 
       if (response.statusCode == 200) {
-        geographyData.value = response.data;
+        final List<dynamic> list = response.data is List ? response.data : [];
+        geographyData.value = list.map((e) => GeographyModel.fromJson(e)).toList();
       }
     } on DioException catch (e) {
       log("Get Geography Analytics Error: $e");

@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:gal/gal.dart';
 import 'package:get/get.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
@@ -17,10 +19,11 @@ import 'package:share_plus/share_plus.dart';
 class QRCodeSharePage extends StatelessWidget {
   final CardModel card;
 
-  const QRCodeSharePage({
+   QRCodeSharePage({
     Key? key,
     required this.card,
   }) : super(key: key);
+   final GlobalKey _qrKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -75,12 +78,16 @@ class QRCodeSharePage extends StatelessWidget {
                         _base64ToImage(card.qrCodeUrl),
                         fit: BoxFit.contain,
                       )
-                          : QrImageView(
-                        data: card.publicUrl,
-                        version: QrVersions.auto,
-                        size: 200.0,
-                        backgroundColor: Colors.white,
-                      ),
+                          : RepaintBoundary(
+                                 key: _qrKey,
+
+                            child: QrImageView(
+                                                    data: card.publicUrl,
+                                                    version: QrVersions.auto,
+                                                    size: 200.0,
+                                                    backgroundColor: Colors.white,
+                                                  ),
+                          ),
                     ),
                     const SizedBox(height: 40),
 
@@ -275,18 +282,40 @@ class QRCodeSharePage extends StatelessWidget {
   }
 
   // Download QR Code
-  Future<void> _downloadQRCode() async {
-    print("Enter to Download");
-    // Example implementation:
-    try {
-      final bytes = _base64ToImage(card.qrCodeUrl);
-      final result = await ImageGallerySaver.saveImage(bytes);
-      CommonSnackbar.success('QR Code saved to gallery');
-    } catch (e) {
-      print("Error:$e");
-      CommonSnackbar.error('Failed to save QR Code');
-    }
+Future<void> _downloadQRCode() async {
+  try {
+    // Capture QR code as image
+    final boundary = _qrKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    final image = await boundary.toImage(pixelRatio: 3.0);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final bytes = byteData!.buffer.asUint8List();
+    
+    // Save to temporary file
+    final directory = await getTemporaryDirectory();
+    final filePath = '${directory.path}/qr_${DateTime.now().millisecondsSinceEpoch}.png';
+    final file = File(filePath);
+    await file.writeAsBytes(bytes);
+    
+    // Save to gallery using gal
+    await Gal.putImage(file.path);
+    
+    debugPrint('QR code saved to gallery');
+    
+    // Optional: Show success message
+    // if (mounted) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(content: Text('QR code saved to gallery')),
+    //   );
+    // }
+  } catch (e) {
+    debugPrint('Save QR failed: $e');
+    // if (mounted) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text('Failed to save: $e')),
+    //   );
+    // }
   }
+}
 
   // Share QR Code
   Future<void> _shareQRCode() async {

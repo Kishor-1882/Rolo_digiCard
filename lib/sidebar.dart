@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:rolo_digi_card/views/home_page/home_page.dart';
 import 'package:rolo_digi_card/views/my_cards_page/my_cards.dart';
+import 'package:rolo_digi_card/views/organization/analytics_view.dart';
+import 'package:rolo_digi_card/views/organization/organization_cards_view.dart';
+import 'package:rolo_digi_card/views/organization/organization_dashboard_view.dart';
+import 'package:rolo_digi_card/views/organization/organization_groups_view.dart';
+import 'package:rolo_digi_card/views/organization/organization_users_view.dart';
 import 'package:rolo_digi_card/views/profile_page/profile_page.dart';
 import 'package:rolo_digi_card/views/saved_cards_page/saved_cards.dart';
 
@@ -12,6 +17,7 @@ class SideBar extends StatefulWidget {
 }
 
 class _SideBarState extends State<SideBar> {
+  bool _isOrg = true;
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
@@ -21,10 +27,20 @@ class _SideBarState extends State<SideBar> {
     const ProfilePage(),
   ];
 
+
+  final List<Widget> _orgPages = [
+    OrganizationDashboardView(),
+     OrganizationUsersView(),
+     OrganizationCardsView(),
+     OrganizationGroupsView(),
+     AnalyticsView(),
+  ];
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
+      body: _isOrg ? _orgPages[_currentIndex] : _pages[_currentIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: const Color(0xFF2a2a2a),
@@ -39,7 +55,39 @@ class _SideBarState extends State<SideBar> {
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.only(left: 16,  right:16,bottom: 8),
-            child: Row(
+            child: 
+            _isOrg?
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(
+                  icon: Icons.grid_view_rounded,
+                  label: 'Dashboard',
+                  index: 0,
+                ),
+                _buildNavItem(
+                  icon: Icons.credit_card,
+                  label: 'Users',
+                  index: 1,
+                ),
+                _buildNavItem(
+                  icon: Icons.bookmark_outline,
+                  label: 'Cards',
+                  index: 2,
+                ),
+                _buildNavItem(
+                  icon: Icons.account_circle_outlined,
+                  label: 'Groups',
+                  index: 3,
+                ),
+                 _buildNavItem(
+                  icon: Icons.account_circle_outlined,
+                  label: 'Analytics',
+                  index: 4,
+                ),
+              ],
+            )
+            :Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(
@@ -64,6 +112,7 @@ class _SideBarState extends State<SideBar> {
                 ),
               ],
             ),
+
           ),
         ),
       ),

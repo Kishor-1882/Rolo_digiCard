@@ -1,5 +1,27 @@
-
 // Common Sub-Models
+
+class GeographyModel {
+  final String? countryCode;
+  final String? countryName;
+  final int count;
+  final dynamic percentage;
+
+  GeographyModel({
+    this.countryCode,
+    this.countryName,
+    required this.count,
+    this.percentage,
+  });
+
+  factory GeographyModel.fromJson(Map<String, dynamic> json) {
+    return GeographyModel(
+      countryCode: json['countryCode'] ?? json['code'],
+      countryName: json['countryName'] ?? json['name'],
+      count: json['count'] ?? 0,
+      percentage: json['percentage'] ?? 0,
+    );
+  }
+}
 
 class AnalyticsHealth {
   final int totalUsers;
@@ -111,6 +133,9 @@ class AnalyticsAdminModel {
       topPerformingCards: json['topPerformingCards'] ?? [],
     );
   }
+
+  // Helper for UI if needed
+  List<dynamic> get funnel => []; 
 }
 
 // User / Cards Response (They share structure mainly)

@@ -17,6 +17,10 @@ class AuthController extends GetxController {
   }
 
   Future<void> checkLoginStatus() async {
+
+     Get.offAllNamed("/sidebar");
+    return;
+
     final token = await storage.read(key: 'accessToken');
     log("Token:$token");
     if (token != null && token.isNotEmpty) {

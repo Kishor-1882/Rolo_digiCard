@@ -146,12 +146,14 @@ class OrgDashboardStats {
 
 class OrgRecentActivity {
   final String id;
+  final String? user;
   final String action;
   final String? type; // success, error, info, warning
   final String? createdAt;
 
   OrgRecentActivity({
     required this.id,
+    this.user,
     required this.action,
     this.type,
     this.createdAt,
@@ -160,6 +162,7 @@ class OrgRecentActivity {
   factory OrgRecentActivity.fromJson(Map<String, dynamic> json) {
     return OrgRecentActivity(
       id: json['_id'] ?? '',
+      user: json['user'],
       action: json['action'] ?? '',
       type: json['type'],
       createdAt: json['createdAt'],

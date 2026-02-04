@@ -4,6 +4,11 @@ import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/sidebar.dart';
 import 'package:rolo_digi_card/views/home_page/home_page.dart';
 import 'package:rolo_digi_card/views/login_page/login_page.dart';
+import 'package:rolo_digi_card/views/organization/analytics_view.dart';
+import 'package:rolo_digi_card/views/organization/organization_cards_view.dart';
+import 'package:rolo_digi_card/views/organization/organization_dashboard_view.dart';
+import 'package:rolo_digi_card/views/organization/organization_groups_view.dart';
+import 'package:rolo_digi_card/views/organization/organization_users_view.dart';
 import 'package:rolo_digi_card/views/splash_screen/splash_screen.dart';
 
 import 'views/home_page/create_new_card.dart';
@@ -30,6 +35,11 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: "/splash",
       getPages: [
+        // GetPage(name: "/splash", page: () =>  OrganizationDashboardView()),
+      //  GetPage(name: "/splash", page: () =>  OrganizationUsersView()),
+         // GetPage(name: "/splash", page: () =>  OrganizationCardsView()),
+        //  GetPage(name: "/splash", page: () =>  OrganizationGroupsView()),
+        // GetPage(name: "/splash", page: () =>  AnalyticsView()),
         GetPage(name: "/splash", page: () => const SplashScreen()),
         GetPage(name: "/login", page: () => LoginPage()),
         GetPage(name: "/home", page: () => DashboardPage()),
