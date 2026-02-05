@@ -1,353 +1,380 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/controllers/organization/card_management_controller.dart';
-import 'package:rolo_digi_card/controllers/organization/analytics_controller.dart';
-import 'package:rolo_digi_card/views/organization/org_theme.dart';
+import 'package:rolo_digi_card/utils/color.dart';
 
-class OrganizationCardsView extends StatelessWidget {
-  OrganizationCardsView({Key? key}) : super(key: key);
-
-  final CardManagementController cardController = Get.put(CardManagementController());
-  final AnalyticsController analyticsController = Get.put(AnalyticsController());
+class OrganizationCardsView extends GetView<CardManagementController> {
+  const OrganizationCardsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      cardController.getOrganizationCards();
-      analyticsController.getOverview();
-    });
-
     return Scaffold(
-      backgroundColor: OrgTheme.backgroundColor,
+      backgroundColor: AppColors.darkBackground,
       body: SafeArea(
-        child: Column(
-          children: [
-             Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                   _buildStatsRow(),
-                   const SizedBox(height: 24),
-                   _buildSearchAndFilters(),
-                   const SizedBox(height: 16),
-                   _buildTabs(),
-                   const SizedBox(height: 16),
-                   Obx(() => Text("${cardController.orgCards.length} cards created", style: const TextStyle(color: OrgTheme.textSecondary))),
-                ],
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+              _buildHeader(),
+              const SizedBox(height: 24),
+              _buildStatsGrid(),
+              const SizedBox(height: 24),
+              _buildSearchAndFilter(),
+              const SizedBox(height: 16),
+              const Text(
+                '7 cards found',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14,
+                ),
               ),
-            ),
-            Expanded(
-              child: _buildCardList(),
-            ),
-          ],
+              const SizedBox(height: 16),
+              _buildCardList(),
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: OrgTheme.primaryColor,
-        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 
-  Widget _buildStatsRow() {
-    return Obx(() {
-        final total = cardController.orgCards.length;
-        final active = cardController.orgCards.where((c) => c.isActive ?? false).length;
-        final inactive = total - active;
-
-        return Row(
-            children: [
-                 Expanded(child: _buildStatCard(
-                    icon: Icons.credit_card,
-                    color: Colors.purpleAccent,
-                    value: "$total",
-                    label: "Total Cards"
-                )),
-                const SizedBox(width: 12),
-                Expanded(child: _buildStatCard(
-                    icon: Icons.visibility,
-                    color: OrgTheme.successColor,
-                    value: "$active",
-                    label: "Active"
-                )),
-                // const SizedBox(width: 12),
-                // Expanded(child: _buildStatCard(
-                //     icon: Icons.power_settings_new,
-                //     color: OrgTheme.warningColor,
-                //     value: "$inactive",
-                //     label: "Deactivated"
-                // )),
-            ],
-        );
-    });
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Card Management',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'Manage digital business cards',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.cardBackground,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white10),
+              ),
+              child: IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.qr_code_2, color: Colors.white),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFE91E8E), Color(0xFF8B5CF6)],
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.add, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
-  Widget _buildStatCard({required IconData icon, required Color color, required String value, required String label}) {
-     return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: OrgTheme.cardDecoration,
-          child: Column(
+  Widget _buildStatsGrid() {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      childAspectRatio: 1.8,
+      children: [
+        _buildStatCard('7', 'Total Cards', Icons.credit_card, AppColors.primaryPink),
+        _buildStatCard('4', 'Active', Icons.check_circle_outline, Colors.greenAccent),
+        _buildStatCard('2', 'Inactive', Icons.cancel_outlined, Colors.redAccent),
+        _buildStatCard('1', 'Pending', Icons.access_time, Colors.orangeAccent),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(String value, String label, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-                Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                        color: color.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(icon, color: color, size: 20),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 12),
-                Text(value, style: OrgTheme.cardTitleStyle),
-                const SizedBox(height: 4),
-                Text(label, style: OrgTheme.cardLabelStyle),
+              ),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 12,
+                ),
+              ),
             ],
           ),
-      );
-  }
-
-  Widget _buildSearchAndFilters() {
-      return Column(
-          children: [
-               TextField(
-                decoration: InputDecoration(
-                    hintText: "Search cards...",
-                    hintStyle: const TextStyle(color: OrgTheme.textSecondary),
-                    filled: true,
-                    fillColor: OrgTheme.cardBackgroundColor,
-                    prefixIcon: const Icon(Icons.search, color: OrgTheme.textSecondary),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                    ),
-                ),
-                style: const TextStyle(color: OrgTheme.textPrimary),
-            ),
-            const SizedBox(height: 12),
-            Row(
-                children: [
-                     _buildDropdown("Mode: All Modes"),
-                     const SizedBox(width: 8),
-                     _buildDropdown("Visibility: All"),
-                     const SizedBox(width: 8),
-                     _buildDropdown("Status: All"),
-                ],
-            )
-          ],
-      );
-  }
-
-  Widget _buildDropdown(String text) {
-      return Expanded(
-        child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          Container(
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-                color: OrgTheme.cardBackgroundColor,
-                borderRadius: BorderRadius.circular(20),
+              color: color.withOpacity(0.1),
+              shape: BoxShape.circle,
             ),
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                    Text(text, style: const TextStyle(color: OrgTheme.textSecondary, fontSize: 12), overflow: TextOverflow.ellipsis),
-                    const Icon(Icons.keyboard_arrow_down, color: OrgTheme.textSecondary, size: 16),
-                ],
+            child: Icon(icon, color: color, size: 20),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchAndFilter() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppColors.cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white10),
             ),
+            child: const TextField(
+              style: TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Search cards...',
+                hintStyle: TextStyle(color: Colors.white38),
+                border: InputBorder.none,
+                icon: Icon(Icons.search, color: Colors.white38),
+              ),
+            ),
+          ),
         ),
-      );
-  }
-
-  Widget _buildTabs() {
-      return Row(
-          children: [
-               _buildTabItem("All", isSelected: true),
-               _buildTabItem("Saved"),
-               _buildTabItem("My Cards"),
-               _buildTabItem("Assigned"),
-          ],
-      );
-  }
-
-  Widget _buildTabItem(String text, {bool isSelected = false}) {
-      return Padding(
-        padding: const EdgeInsets.only(right: 16.0),
-        child: isSelected 
-        ? Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-                color: const Color(0xFF6A1B9A), // Dark Purple
-                borderRadius: BorderRadius.circular(20)
+        const SizedBox(width: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white10),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              dropdownColor: AppColors.cardBackground,
+              value: 'All...',
+              items: <String>['All...', 'Active', 'Inactive', 'Pending']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(
+                    value,
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {},
+              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white54),
             ),
-            child: Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        )
-        : Text(text, style: const TextStyle(color: OrgTheme.textSecondary)),
-      );
+          ),
+        ),
+        const SizedBox(width: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white10),
+          ),
+          child: IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.grid_view_sharp, color: Colors.white54, size: 20),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildCardList() {
-      return Obx(() {
-        if(cardController.isLoading.value) return const Center(child: CircularProgressIndicator());
-        
-        final list = cardController.orgCards;
-        if(list.isEmpty) {
-             return ListView(
-                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                 children: [
-                     _buildCardItem(
-                         initial: "K", 
-                         name: "Kishor", 
-                         role: "Developer", 
-                         company: "DigiSailor", 
-                         views: "3", 
-                         scans: "0", 
-                         theme: "Glassmorphic", 
-                         isPublic: true,
-                         color: Colors.deepPurple,
-                     ),
-                     const SizedBox(height: 12),
-                     _buildCardItem(
-                         initial: "J", 
-                         name: "John Doe", 
-                         role: "Product Manager", 
-                         company: "TechCorp", 
-                         views: "156", 
-                         scans: "12", 
-                         theme: "Minimal", 
-                         isPublic: false,
-                         color: Colors.deepPurpleAccent,
-                     ),
-                      const SizedBox(height: 12),
-                     _buildCardItem(
-                         initial: "J", 
-                         name: "Jane Smith", 
-                         role: "Designer", 
-                         company: "DesignStudio", 
-                         views: "0", 
-                         scans: "0", 
-                         theme: "Glassmorphic", 
-                         isPublic: true,
-                         color: Colors.deepPurple,
-                     ),
-                 ],
-             );
-        }
+    final cards = [
+      {
+        'name': 'John\'s Business Card',
+        'id': 'CARD-001',
+        'scans': '234',
+        'views': '1250',
+        'owner': 'John Doe',
+        'status': 'Active',
+        'statusColor': Colors.greenAccent
+      },
+      {
+        'name': 'Marketing Team Card',
+        'id': 'CARD-002',
+        'scans': '189',
+        'views': '890',
+        'owner': 'Sarah M.',
+        'status': 'Active',
+        'statusColor': Colors.greenAccent
+      },
+      {
+        'name': 'Sales Contact Card',
+        'id': 'CARD-003',
+        'scans': '0',
+        'views': '0',
+        'owner': 'Mike R.',
+        'status': 'Pending',
+        'statusColor': Colors.orangeAccent
+      },
+      {
+        'name': 'Support Card',
+        'id': 'CARD-004',
+        'scans': '45',
+        'views': '230',
+        'owner': 'Emma L.',
+        'status': 'Inactive',
+        'statusColor': Colors.redAccent
+      },
+    ];
 
-        return ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            itemCount: list.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-                final card = list[index];
-                return _buildCardItem(
-                    initial: (card.name != null && card.name!.isNotEmpty) ? card.name!.substring(0,1).toUpperCase() : "C",
-                    name: card.name ?? "Unknown",
-                    role: card.title ?? "No Title",
-                    company: card.company ?? "No Company",
-                    views: "${card.viewCount ?? 0}",
-                    scans: "0", // Model field?
-                    theme: "Default",
-                    isPublic: true, // Field?
-                    color: Colors.deepPurple,
-                );
-            },
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: cards.length,
+      itemBuilder: (context, index) {
+        final card = cards[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white10),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFE91E8E), Color(0xFF8B5CF6)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.credit_card, color: Colors.white, size: 28),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          card['name']! as String,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        _buildStatusBadge(card['status']! as String, card['statusColor'] as Color),
+                      ],
+                    ),
+                    Text(
+                      card['id']! as String,
+                      style: const TextStyle(color: Colors.white38, fontSize: 12),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(Icons.qr_code_scanner, color: AppColors.primaryPink, size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${card['scans']} scans',
+                          style: const TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                        const SizedBox(width: 12),
+                        const Icon(Icons.visibility_outlined, color: Colors.blueAccent, size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${card['views']} views',
+                          style: const TextStyle(color: Colors.white70, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Owner: ${card['owner']}',
+                      style: const TextStyle(color: Colors.white38, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.more_vert, color: Colors.white54),
+              ),
+            ],
+          ),
         );
-      });
+      },
+    );
   }
 
-  Widget _buildCardItem({
-      required String initial,
-      required String name,
-      required String role,
-      required String company,
-      required String views,
-      required String scans,
-      required String theme,
-      required bool isPublic,
-      required Color color,
-  }) {
-      return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: OrgTheme.cardDecoration,
-          child: Column(
-              children: [
-                  Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                          Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                  color: color.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(initial, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 18)),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                      Row(
-                                          children: [
-                                              Text(name, style: const TextStyle(color: OrgTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
-                                              const SizedBox(width: 8),
-                                              Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                                  decoration: BoxDecoration(
-                                                      color: isPublic ? OrgTheme.successColor.withOpacity(0.1) : Colors.pink.withOpacity(0.1),
-                                                      borderRadius: BorderRadius.circular(12),
-                                                  ),
-                                                  child: Row(
-                                                      children: [
-                                                          Icon(isPublic ? Icons.language : Icons.lock, size: 10, color: isPublic ? OrgTheme.successColor : Colors.pink),
-                                                          const SizedBox(width: 4),
-                                                          Text(isPublic ? "Public" : "Private", style: TextStyle(color: isPublic ? OrgTheme.successColor : Colors.pink, fontSize: 10)),
-                                                      ],
-                                                  ),
-                                              )
-                                          ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(role, style: const TextStyle(color: OrgTheme.textSecondary, fontSize: 13)),
-                                      Text(company, style: const TextStyle(color: OrgTheme.textSecondary, fontSize: 13)),
-                                  ],
-                              ),
-                          ),
-                          Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.white24),
-                                  borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.qr_code, color: Colors.purpleAccent, size: 20),
-                          ),
-                           const SizedBox(width: 8),
-                          const Icon(Icons.more_vert, color: OrgTheme.textSecondary),
-                      ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                      children: [
-                          Icon(Icons.remove_red_eye_outlined, size: 14, color: OrgTheme.textSecondary),
-                          const SizedBox(width: 4),
-                          Text(views, style: const TextStyle(color: OrgTheme.textSecondary, fontSize: 12)),
-                          const SizedBox(width: 12),
-                          Icon(Icons.qr_code_scanner, size: 14, color: OrgTheme.textSecondary),
-                          const SizedBox(width: 4),
-                          Text(scans, style: const TextStyle(color: OrgTheme.textSecondary, fontSize: 12)),
-                          const Spacer(),
-                          Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                  color: Colors.white10,
-                                  borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(theme, style: const TextStyle(color: OrgTheme.textSecondary, fontSize: 12)),
-                          ),
-                      ],
-                  )
-              ],
+  Widget _buildStatusBadge(String status, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            status == 'Active' ? Icons.check_circle : status == 'Pending' ? Icons.access_time : Icons.cancel,
+            color: color,
+            size: 12,
           ),
-      );
+          const SizedBox(width: 4),
+          Text(
+            status,
+            style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
   }
 }

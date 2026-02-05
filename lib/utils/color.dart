@@ -24,6 +24,7 @@ class AppColors {
   static const Color iconRed = Color(0xFFFF6467);
   static const Color switchBlue = Color(0xFF9810FA);
   static const Color buttonRed = Color(0xFFFB2C36);
+  static const Color statusOrange = Color(0xFFF6A609);
   static const Color buttonBlack = Color(0xFF0A0A0A);
   static const Color selectedBorder = Color(0xFFF6339A);
   static const Color cardColor = Color(0xFF1D1D20);
