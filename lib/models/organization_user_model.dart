@@ -109,5 +109,12 @@ class OrganizationUserModel {
     };
   }
 
-  String get fullName => '$firstName $lastName';
+  String get fullName => '$firstName $lastName'.trim();
+  String get initials {
+    if (firstName.isEmpty && lastName.isEmpty) return 'JD';
+    String res = '';
+    if (firstName.isNotEmpty) res += firstName[0];
+    if (lastName.isNotEmpty) res += lastName[0];
+    return res.toUpperCase();
+  }
 }

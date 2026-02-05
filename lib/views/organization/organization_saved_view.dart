@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rolo_digi_card/controllers/organization/organization_controller.dart';
 import 'package:rolo_digi_card/controllers/organization/saved_items_controller.dart';
+import 'package:rolo_digi_card/models/card_model.dart';
+import 'package:rolo_digi_card/models/organization_user_model.dart';
 import 'package:rolo_digi_card/utils/color.dart';
 
 class OrganizationSavedView extends GetView<SavedItemsController> {
@@ -11,25 +14,31 @@ class OrganizationSavedView extends GetView<SavedItemsController> {
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              _buildHeader(),
-              const SizedBox(height: 24),
-              _buildStatsCard(),
-              const SizedBox(height: 24),
-              _buildSearchBar(),
-              const SizedBox(height: 24),
-              _buildCategoryFilter(),
-              const SizedBox(height: 24),
-              _buildSavedItemsList(),
-              const SizedBox(height: 32),
-            ],
-          ),
-        ),
+        child: Obx(() {
+          final cards = controller.filteredCards;
+          final contacts = controller.filteredContacts;
+          final total = cards.length + contacts.length;
+          
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                _buildHeader(),
+                const SizedBox(height: 24),
+                _buildStatsCard(total),
+                const SizedBox(height: 24),
+                _buildSearchBar(),
+                const SizedBox(height: 24),
+                _buildCategoryFilter(),
+                const SizedBox(height: 24),
+                _buildSavedItemsList(cards, contacts),
+                const SizedBox(height: 32),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
@@ -64,19 +73,22 @@ class OrganizationSavedView extends GetView<SavedItemsController> {
             color: Colors.purple.shade400,
             shape: BoxShape.circle,
           ),
-          child: const Text(
-            'JD',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          child: Obx(() {
+            final initials = Get.find<OrganizationController>().currentUser.value?.initials ?? 'JD';
+            return Text(
+              initials,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            );
+          }),
         ),
       ],
     );
   }
 
-  Widget _buildStatsCard() {
+  Widget _buildStatsCard(int total) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -91,9 +103,9 @@ class OrganizationSavedView extends GetView<SavedItemsController> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                '5',
-                style: TextStyle(
+              Text(
+                total.toString(),
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -140,13 +152,20 @@ class OrganizationSavedView extends GetView<SavedItemsController> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white10),
       ),
-      child: const TextField(
-        style: TextStyle(color: Colors.white),
+      child: TextField(
+        onChanged: (value) => controller.setSearchQuery(value),
+        style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           hintText: 'Search saved items...',
-          hintStyle: TextStyle(color: Colors.white24),
+          hintStyle: const TextStyle(color: Colors.white24),
           border: InputBorder.none,
-          icon: Icon(Icons.search, color: Colors.white24),
+          icon: const Icon(Icons.search, color: Colors.white24),
+          suffixIcon: controller.searchQuery.value.isNotEmpty 
+            ? IconButton(
+                icon: const Icon(Icons.clear, color: Colors.white24, size: 18),
+                onPressed: () => controller.setSearchQuery(''),
+              )
+            : null,
         ),
       ),
     );
@@ -190,56 +209,51 @@ class OrganizationSavedView extends GetView<SavedItemsController> {
     );
   }
 
-  Widget _buildSavedItemsList() {
-    final items = [
-      {
-        'title': 'John\'s Business Card',
+  Widget _buildSavedItemsList(List<CardModel> cards, List<OrganizationUserModel> contacts) {
+    final List<Map<String, dynamic>> allItems = [];
+    
+    // Add cards if filter matches
+    if (controller.selectedCategory.value == 'All' || controller.selectedCategory.value == 'Cards') {
+      allItems.addAll(cards.map((c) => {
+        'title': c.name,
         'type': 'Card',
-        'subtitle': 'Senior Developer at Tech Corp',
-        'time': 'Saved 2 days ago',
+        'subtitle': c.title,
+        'time': 'Member since ${_formatDate(c.createdAt)}',
         'icon': Icons.credit_card,
         'color': Colors.pink
-      },
-      {
-        'title': 'Marketing Team',
-        'type': 'Group',
-        'subtitle': '12 members',
-        'time': 'Saved 1 week ago',
-        'icon': Icons.folder_open,
-        'color': Colors.blueAccent
-      },
-      {
-        'title': 'Sarah Mitchell',
+      }));
+    }
+    
+    // Add contacts if filter matches
+    if (controller.selectedCategory.value == 'All' || controller.selectedCategory.value == 'Contacts') {
+      allItems.addAll(contacts.map((contact) => {
+        'title': contact.fullName,
         'type': 'Contact',
-        'subtitle': 'Product Manager',
-        'time': 'Saved 3 days ago',
+        'subtitle': contact.email,
+        'time': 'Invited: ${contact.invitedAt ?? 'N/A'}',
         'icon': Icons.person_outline,
         'color': Colors.purpleAccent
-      },
-      {
-        'title': 'Premium Card Design',
-        'type': 'Card',
-        'subtitle': 'Custom gradient theme',
-        'time': 'Saved 5 days ago',
-        'icon': Icons.credit_card,
-        'color': Colors.pink
-      },
-      {
-        'title': 'Mike Johnson',
-        'type': 'Contact',
-        'subtitle': 'Sales Director',
-        'time': 'Saved 1 day ago',
-        'icon': Icons.person_outline,
-        'color': Colors.purpleAccent
-      },
-    ];
+      }));
+    }
+
+    if (allItems.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 40),
+          child: Text(
+            'No saved items found',
+            style: TextStyle(color: Colors.white.withOpacity(0.3)),
+          ),
+        ),
+      );
+    }
 
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
+      itemCount: allItems.length,
       itemBuilder: (context, index) {
-        final item = items[index];
+        final item = allItems[index];
         return Container(
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
@@ -270,12 +284,16 @@ class OrganizationSavedView extends GetView<SavedItemsController> {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          item['title'] as String,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            item['title'] as String,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -285,6 +303,8 @@ class OrganizationSavedView extends GetView<SavedItemsController> {
                     const SizedBox(height: 4),
                     Text(
                       item['subtitle'] as String,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(color: Colors.white54, fontSize: 13),
                     ),
                     const SizedBox(height: 4),
@@ -304,6 +324,10 @@ class OrganizationSavedView extends GetView<SavedItemsController> {
         );
       },
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 
   Widget _buildTypeBadge(String type) {

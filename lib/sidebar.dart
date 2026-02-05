@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/controllers/organization/analytics_controller.dart';
 import 'package:rolo_digi_card/controllers/organization/card_management_controller.dart';
@@ -23,17 +24,30 @@ class SideBar extends StatefulWidget {
 }
 
 class _SideBarState extends State<SideBar> {
-  bool _isOrg = true;
+  final FlutterSecureStorage storage = const FlutterSecureStorage();
+  bool _isOrg = false;
   int _currentIndex = 0;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _checkUserType();
     Get.put(OrganizationController());
     Get.put(SavedItemsController());
     Get.put(CardManagementController());
     Get.put(GroupManagementController());
     Get.put(AnalyticsController());
+  }
+
+  Future<void> _checkUserType() async {
+    final userType = await storage.read(key: 'userType');
+    if (mounted) {
+      setState(() {
+        _isOrg = userType == 'organization';
+        _isLoading = false;
+      });
+    }
   }
   
 
@@ -56,6 +70,14 @@ class _SideBarState extends State<SideBar> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF1a1a1a),
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.pink),
+        ),
+      );
+    }
     return Scaffold(
       body: _isOrg ? _orgPages[_currentIndex] : _pages[_currentIndex],
       bottomNavigationBar: Container(

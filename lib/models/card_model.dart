@@ -24,7 +24,6 @@ class ContactModel {
   });
 
   factory ContactModel.fromJson(Map<String, dynamic> json) {
-    print("Test:$json");
     return ContactModel(
       email: json['email'],
       phone: json['phone'],
@@ -209,11 +208,18 @@ class CardModel {
   });
 
   factory CardModel.fromJson(Map<String, dynamic> json) {
+    // Robustly handle userId which can be a String ID or a populated User Object
+    String extractUserId(dynamic val) {
+      if (val is String) return val;
+      if (val is Map) return val['_id'] ?? val['id'] ?? '';
+      return '';
+    }
+
     return CardModel(
-      id: json['_id'],
-      userId: json['userId'] ?? '',
-      name: json['name'],
-      title: json['title'],
+      id: json['_id'] ?? '',
+      userId: extractUserId(json['userId']),
+      name: json['name'] ?? 'Untitled Card',
+      title: json['title'] ?? '',
       linkedinUrl: json['linkedinUrl'],
       twitterUrl: json['twitterUrl'],
       instagramUrl: json['instagramUrl'],
@@ -222,16 +228,16 @@ class CardModel {
       youtubeUrl: json['youtubeUrl'],
       website: json['website'],
       address: json['address'] != null ? AddressModel.fromJson(json['address']) : null,
-      company: json['company'],
-      industry: json['industry'],
+      company: json['company'] ?? '',
+      industry: json['industry'] ?? '',
       profile: json['profile'],
       profileFileName: json['profileFileName'],
       isLinkedinVerified: json['isLinkedinVerified'] ?? false,
       bio: json['bio'] ?? '',
       tags: List<String>.from(json['tags'] ?? []),
-      qrCodeUrl: json['qrCodeUrl'],
-      shortUrl: json['shortUrl'],
-      publicUrl: json['publicUrl'],
+      qrCodeUrl: json['qrCodeUrl'] ?? '',
+      shortUrl: json['shortUrl'] ?? '',
+      publicUrl: json['publicUrl'] ?? '', // API sometimes omits this
       isPublic: json['isPublic'] ?? true,
       isMinimalMode: json['isMinimalMode'] ?? false,
       isBlocked: json['isBlocked'] ?? false,
@@ -241,10 +247,10 @@ class CardModel {
       saveCount: json['saveCount'] ?? 0,
       shareCount: json['shareCount'] ?? 0,
       customLinks: json['customLinks'] ?? [],
-      contact: ContactModel.fromJson(json['contact']),
-      theme: ThemeModel.fromJson(json['theme']),
-      createdAt:json['createdAt']== null ? DateTime.now(): DateTime.parse(json['createdAt']),
-      updatedAt: json['updatedAt']== null ? DateTime.now(): DateTime.parse(json['updatedAt']),
+      contact: ContactModel.fromJson(json['contact'] ?? {}),
+      theme: ThemeModel.fromJson(json['theme'] ?? {}),
+      createdAt: json['createdAt'] == null ? DateTime.now() : DateTime.parse(json['createdAt']),
+      updatedAt: json['updatedAt'] == null ? DateTime.now() : DateTime.parse(json['updatedAt']),
     );
   }
 

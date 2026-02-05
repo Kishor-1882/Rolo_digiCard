@@ -15,6 +15,15 @@ class GroupManagementController extends GetxController {
 
   var isLoading = false.obs;
   var groups = <GroupModel>[].obs;
+  final searchQuery = ''.obs;
+
+  List<GroupModel> get filteredGroups {
+    if (searchQuery.value.isEmpty) return groups;
+    return groups.where((group) => 
+      group.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+      (group.description?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false)
+    ).toList();
+  }
   var currentGroup = Rxn<GroupModel>();
   var groupUsers = <OrganizationUserModel>[].obs;
   var groupCards = <CardModel>[].obs;
@@ -27,6 +36,7 @@ class GroupManagementController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    getGroups();
   }
 
   @override
@@ -34,6 +44,15 @@ class GroupManagementController extends GetxController {
     nameController.dispose();
     descriptionController.dispose();
     super.onClose();
+  }
+
+  // Helper to extract List from dynamic response (Map or List)
+  List<dynamic> _resolveList(dynamic data, String fallbackKey) {
+    if (data is List) return data;
+    if (data is Map<String, dynamic>) {
+      return data[fallbackKey] ?? data['data'] ?? data['docs'] ?? [];
+    }
+    return [];
   }
 
   // Get Groups
@@ -45,8 +64,10 @@ class GroupManagementController extends GetxController {
       final response = await _dio.get(ApiEndpoints.organizationGroups);
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
+        log("Groups Raw Data: ${response.data}");
+        final List<dynamic> data = _resolveList(response.data, 'groups');
         groups.value = data.map((e) => GroupModel.fromJson(e)).toList();
+        log("Parsed Groups: ${groups.length}");
       }
     } on DioException catch (e) {
       log("Get Groups Error: $e");
@@ -98,8 +119,10 @@ class GroupManagementController extends GetxController {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        CommonSnackbar.success('Group created successfully');
+  
         getGroups();
+        Get.back(); // Close dialog
+        CommonSnackbar.success('Group created successfully');
         // Clear form
         nameController.clear();
         descriptionController.clear();
@@ -177,7 +200,7 @@ class GroupManagementController extends GetxController {
       final response = await _dio.get(ApiEndpoints.getGroupUsers(groupId));
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
+        final List<dynamic> data = _resolveList(response.data, 'users');
         groupUsers.value = data.map((e) => OrganizationUserModel.fromJson(e)).toList();
       }
     } on DioException catch (e) {
@@ -197,7 +220,7 @@ class GroupManagementController extends GetxController {
       final response = await _dio.get(ApiEndpoints.getGroupCards(groupId));
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
+        final List<dynamic> data = _resolveList(response.data, 'cards');
         groupCards.value = data.map((e) => CardModel.fromJson(e)).toList();
       }
     } on DioException catch (e) {

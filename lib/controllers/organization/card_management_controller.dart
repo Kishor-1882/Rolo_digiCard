@@ -14,6 +14,26 @@ class CardManagementController extends GetxController {
   var isLoading = false.obs;
   var orgCards = <CardModel>[].obs;
   var cardStats = <String, dynamic>{}.obs; // To store simple stats object
+  final searchQuery = ''.obs;
+  final statusFilter = 'All...'.obs;
+
+  List<CardModel> get filteredCards {
+    return orgCards.where((card) {
+      // Search filter
+      final matchesSearch = card.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          card.id.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+          card.title.toLowerCase().contains(searchQuery.value.toLowerCase());
+
+      // Status filter
+      bool matchesStatus = true;
+      if (statusFilter.value != 'All...') {
+        final status = card.isActive ? 'Active' : (card.isBlocked ? 'Blocked' : 'Inactive');
+        matchesStatus = status == statusFilter.value;
+      }
+
+      return matchesSearch && matchesStatus;
+    }).toList();
+  }
 
   // Form Controllers (For minimal creating/updating, can be expanded)
   final nameController = TextEditingController();
@@ -23,6 +43,8 @@ class CardManagementController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    getOrganizationCards();
+    getCardStats();
   }
 
   @override
@@ -35,6 +57,7 @@ class CardManagementController extends GetxController {
 
   // Get Organization Cards
   Future<void> getOrganizationCards() async {
+    log("Fetching Organization Cards...");
     try {
       isLoading.value = true;
       update();
@@ -44,6 +67,7 @@ class CardManagementController extends GetxController {
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         orgCards.value = data.map((e) => CardModel.fromJson(e)).toList();
+        log("Org Cards Fetched: ${orgCards.length}");
       }
     } on DioException catch (e) {
       log("Get Org Cards Error: $e");

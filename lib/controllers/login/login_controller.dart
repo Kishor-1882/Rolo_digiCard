@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
@@ -61,7 +62,7 @@ class LoginController extends GetxController {
       isLoading.value = true;
       update();
       log("Emailing 1");
-      final response = await DioClient().dio.post(
+      final response = await dioClient.post(
         ApiEndpoints.login,
         data: {
           "email": emailController.text.trim(),
@@ -74,25 +75,32 @@ class LoginController extends GetxController {
         log("Emailing 3");
         final accessToken = response.data["tokens"]["accessToken"];
         final refreshToken = response.data["tokens"]["refreshToken"];
+        final userType = response.data["user"]["userType"];
 
         await storage.write(key: 'accessToken', value: accessToken);
         await storage.write(key: 'refreshToken', value: refreshToken);
+        await storage.write(key: 'userType', value: userType);
 
         DioClient.setToken(accessToken);
 
         isLoggedIn.value = true;
         Get.offAllNamed("/sidebar");
         update();
-      }else {
+      } else {
         log("Emailing 4");
-        CommonSnackbar.error('Invalid Credientials');
-        isLoading.value = true;
+        CommonSnackbar.error('Invalid Credentials');
+        isLoading.value = false;
         update();
       }
-    } catch (e,t) {
-      log("Emailing 5");
-      CommonSnackbar.error('Login failed');
-      isLoading.value = true;
+    } catch (e, t) {
+      log("Emailing 5: $e");
+      String errorMessage = 'Login failed';
+      if (e is DioException && e.response != null) {
+        log("Login Error Response: ${e.response?.data}");
+        errorMessage = e.response?.data['message'] ?? errorMessage;
+      }
+      CommonSnackbar.error(errorMessage);
+      isLoading.value = false;
       update();
     } finally {
       log("Emailing 6");

@@ -21,6 +21,11 @@ class AnalyticsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    getOverview();
+    getAdminAnalytics();
+    getUserAnalytics();
+    getCardsAnalytics();
+    getGeographyAnalytics();
   }
 
   // Get Analytics Overview

@@ -113,6 +113,22 @@ class OrgDashboardStats {
   final List<OrgRecentActivity>? recentActivities;
   final List<dynamic>? recentGroups;
 
+  // KPIs for UI
+  int get totalUsers => users?['total'] ?? users?['totalUsers'] ?? 0;
+  num get userTrend => users?['trend'] ?? users?['percentage'] ?? 0;
+  
+  int get totalCards => cards?['total'] ?? cards?['totalCards'] ?? 0;
+  num get cardTrend => cards?['trend'] ?? 0;
+  
+  int get activeCards => cards?['active'] ?? cards?['activeCards'] ?? 0;
+  num get activeTrend => cards?['activeTrend'] ?? 0;
+  
+  int get totalViews => summary?['totalViews'] ?? summary?['views'] ?? 0;
+  num get viewTrend => summary?['viewTrend'] ?? 0;
+  
+  int get totalScans => summary?['totalScans'] ?? summary?['hits'] ?? 0;
+  num get scanTrend => summary?['scanTrend'] ?? summary?['hitTrend'] ?? 0;
+
   OrgDashboardStats({
     this.users,
     this.cards,

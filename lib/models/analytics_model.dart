@@ -77,7 +77,7 @@ class AnalyticsEngagement {
 
   factory AnalyticsEngagement.fromJson(Map<String, dynamic> json) {
     return AnalyticsEngagement(
-      chartData: json['chartData'] ?? [],
+      chartData: json['chartData'] ?? json['activityTrend'] ?? [],
       combinedStatus: json['combinedStatus'] ?? [],
       funnel: json['funnel'] ?? [],
     );

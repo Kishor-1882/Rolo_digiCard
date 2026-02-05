@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/controllers/organization/group_management_controller.dart';
+import 'package:rolo_digi_card/models/group_model.dart';
 import 'package:rolo_digi_card/utils/color.dart';
 import 'package:rolo_digi_card/views/organization/widgets/create_group_dialog.dart';
 
@@ -12,23 +13,30 @@ class OrganizationGroupsView extends GetView<GroupManagementController> {
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              _buildHeader(),
-              const SizedBox(height: 24),
-              _buildStatsRow(),
-              const SizedBox(height: 24),
-              _buildSearchBar(),
-              const SizedBox(height: 24),
-              _buildGroupList(),
-              const SizedBox(height: 32),
-            ],
-          ),
-        ),
+        child: Obx(() {
+          final groups = controller.filteredGroups;
+          final total = controller.groups.length;
+          final shared = controller.groups.where((g) => g.isShared).length;
+          final private = controller.groups.where((g) => !g.isShared).length;
+          
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                _buildHeader(),
+                const SizedBox(height: 24),
+                _buildStatsRow(total, shared, private),
+                const SizedBox(height: 24),
+                _buildSearchBar(),
+                const SizedBox(height: 24),
+                _buildGroupList(groups),
+                const SizedBox(height: 32),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
@@ -88,18 +96,18 @@ class OrganizationGroupsView extends GetView<GroupManagementController> {
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(int total, int shared, int private) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _buildStatBox('5', 'Total'),
+          _buildStatBox(total.toString(), 'Total'),
           const SizedBox(width: 12),
-          _buildStatBox('4', 'Active'),
+          _buildStatBox(total.toString(), 'Active'), // Assumption: all static ones are active
           const SizedBox(width: 12),
-          _buildStatBox('3', 'Shared'),
+          _buildStatBox(shared.toString(), 'Shared'),
           const SizedBox(width: 12),
-          _buildStatBox('2', 'Private'),
+          _buildStatBox(private.toString(), 'Private'),
         ],
       ),
     );
@@ -145,63 +153,26 @@ class OrganizationGroupsView extends GetView<GroupManagementController> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white10),
       ),
-      child: const TextField(
-        style: TextStyle(color: Colors.white),
+      child: TextField(
+        onChanged: (value) => controller.searchQuery.value = value,
+        style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           hintText: 'Search groups...',
-          hintStyle: TextStyle(color: Colors.white38),
+          hintStyle: const TextStyle(color: Colors.white38),
           border: InputBorder.none,
-          icon: Icon(Icons.search, color: Colors.white38),
+          icon: const Icon(Icons.search, color: Colors.white38),
+          suffixIcon: controller.searchQuery.value.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear, color: Colors.white38, size: 18),
+                onPressed: () => controller.searchQuery.value = '',
+              )
+            : null,
         ),
       ),
     );
   }
 
-  Widget _buildGroupList() {
-    final groups = [
-      {
-        'name': 'Marketing Team',
-        'subtitle': 'All marketing staff cards',
-        'members': '12 members',
-        'badges': [
-          {'label': 'Shared', 'color': Colors.blueAccent},
-        ]
-      },
-      {
-        'name': 'Sales Division',
-        'subtitle': 'Sales team digital cards',
-        'members': '24 members',
-        'badges': [
-          {'label': 'Shared', 'color': Colors.blueAccent},
-        ]
-      },
-      {
-        'name': 'Executive Board',
-        'subtitle': 'C-suite and executives',
-        'members': '5 members',
-        'badges': [
-          {'label': 'Private', 'color': Colors.purpleAccent},
-        ]
-      },
-      {
-        'name': 'Engineering',
-        'subtitle': 'Technical team cards',
-        'members': '35 members',
-        'badges': [
-          {'label': 'Shared', 'color': Colors.blueAccent},
-        ]
-      },
-      {
-        'name': 'HR Department',
-        'subtitle': 'Human resources team',
-        'members': '8 members',
-        'badges': [
-          {'label': 'Private', 'color': Colors.purpleAccent},
-          {'label': 'Inactive', 'color': Colors.redAccent},
-        ]
-      },
-    ];
-
+  Widget _buildGroupList(List<GroupModel> groups) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -235,7 +206,7 @@ class OrganizationGroupsView extends GetView<GroupManagementController> {
                     Row(
                       children: [
                         Text(
-                          group['name'] as String,
+                          group.name,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -243,17 +214,15 @@ class OrganizationGroupsView extends GetView<GroupManagementController> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Wrap(
-                          spacing: 4,
-                          children: (group['badges'] as List).map((badge) {
-                            return _buildBadge(badge['label'] as String, badge['color'] as Color);
-                          }).toList(),
+                        _buildBadge(
+                          group.isShared ? 'Shared' : 'Private',
+                          group.isShared ? Colors.blueAccent : Colors.purpleAccent,
                         ),
                       ],
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      group['subtitle'] as String,
+                      group.description ?? 'No description',
                       style: const TextStyle(color: Colors.white38, fontSize: 12),
                     ),
                     const SizedBox(height: 8),
@@ -262,7 +231,14 @@ class OrganizationGroupsView extends GetView<GroupManagementController> {
                         const Icon(Icons.people_outline, color: Colors.white38, size: 14),
                         const SizedBox(width: 4),
                         Text(
-                          group['members'] as String,
+                          '${group.members.length} members',
+                          style: const TextStyle(color: Colors.white54, fontSize: 12),
+                        ),
+                        const SizedBox(width: 12),
+                        const Icon(Icons.credit_card, color: Colors.white38, size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${group.cards.length} cards',
                           style: const TextStyle(color: Colors.white54, fontSize: 12),
                         ),
                       ],

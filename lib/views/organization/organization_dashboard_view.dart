@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/controllers/organization/organization_controller.dart';
+import 'package:rolo_digi_card/models/organization_model.dart';
 import 'package:rolo_digi_card/utils/color.dart';
 import 'package:rolo_digi_card/views/organization/organization_qr_scanner_view.dart';
+import 'package:rolo_digi_card/views/organization/widgets/line_chart_painter.dart';
 
 class OrganizationDashboardView extends GetView<OrganizationController> {
   const OrganizationDashboardView({super.key});
@@ -12,95 +14,101 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              _buildHeader(),
-              const SizedBox(height: 24),
-              _buildGreeting(),
-              const SizedBox(height: 24),
-              const Text(
-                'Key Metrics',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+        child: Obx(() {
+          final stats = controller.dashboardStats.value;
+          final org = controller.organization.value;
+          
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                _buildHeader(org?.name ?? 'Rolo Digi Cards'),
+                const SizedBox(height: 24),
+                _buildGreeting(),
+                const SizedBox(height: 24),
+                const Text(
+                  'Key Metrics',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              _buildMetricsGrid(),
-              const SizedBox(height: 16),
-              _buildFullWidthMetric(
-                title: 'Total Scans',
-                value: '3,892',
-                trend: '+18% this week',
-                icon: Icons.qr_code_scanner,
-                color: Colors.purple.shade400,
-              ),
-              const SizedBox(height: 24),
-              _buildSectionCard(
-                title: 'Organization Activity',
-                icon: Icons.bar_chart,
-                child: _buildActivityChart(),
-              ),
-              const SizedBox(height: 24),
-              _buildSectionCard(
-                title: 'Card Status Distribution',
-                icon: Icons.credit_card,
-                child: _buildStatusDistribution(),
-              ),
-              const SizedBox(height: 24),
-              _buildSectionCard(
-                title: 'Top Performing Cards',
-                icon: Icons.emoji_events_outlined,
-                child: _buildTopPerformingCards(),
-              ),
-              const SizedBox(height: 24),
-              _buildSectionCard(
-                title: 'Groups Summary',
-                icon: Icons.folder_open,
-                showViewAll: true,
-                child: _buildGroupsSummary(),
-              ),
-              const SizedBox(height: 24),
-              _buildSectionCard(
-                title: 'Recent Activity',
-                icon: Icons.access_time,
-                child: _buildRecentActivity(),
-              ),
-              const SizedBox(height: 24),
-              _buildScannedCards(),
-              const SizedBox(height: 32),
-            ],
-          ),
-        ),
+                const SizedBox(height: 16),
+                _buildMetricsGrid(stats),
+                const SizedBox(height: 16),
+                _buildFullWidthMetric(
+                  title: 'Total Scans',
+                  value: stats != null ? stats.totalScans.toString() : '0',
+                  trend: stats != null ? '${stats.scanTrend >= 0 ? '+' : ''}${stats.scanTrend}% this week' : '0% this week',
+                  icon: Icons.qr_code_scanner,
+                  color: Colors.purple.shade400,
+                  isUp: (stats?.scanTrend ?? 0) >= 0,
+                ),
+                const SizedBox(height: 24),
+                _buildSectionCard(
+                  title: 'Organization Activity',
+                  icon: Icons.bar_chart,
+                  child: _buildActivityChart(stats?.activityTrend),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionCard(
+                  title: 'Card Status Distribution',
+                  icon: Icons.credit_card,
+                  child: _buildStatusDistribution(stats?.cards),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionCard(
+                  title: 'Top Performing Cards',
+                  icon: Icons.emoji_events_outlined,
+                  child: _buildTopPerformingCards(stats?.topPerformingCards),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionCard(
+                  title: 'Groups Summary',
+                  icon: Icons.folder_open,
+                  showViewAll: true,
+                  child: _buildGroupsSummary(stats?.groups, stats?.recentGroups),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionCard(
+                  title: 'Recent Activity',
+                  icon: Icons.access_time,
+                  child: _buildRecentActivity(stats?.recentActivities),
+                ),
+                const SizedBox(height: 24),
+                _buildScannedCards(),
+                const SizedBox(height: 32),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(String orgName) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.menu, color: AppColors.textPrimary),
-            ),
-            const SizedBox(width: 8),
+            // IconButton(
+            //   onPressed: () {},
+            //   icon: const Icon(Icons.menu, color: AppColors.textPrimary),
+            // ),
+            // const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.all(8),
               decoration: const BoxDecoration(
                 color: AppColors.primaryPink,
                 shape: BoxShape.circle,
               ),
-              child: const Text(
-                'R',
-                style: TextStyle(
+              child: Text(
+                orgName.isNotEmpty ? orgName[0].toUpperCase() : 'R',
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -108,9 +116,9 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
               ),
             ),
             const SizedBox(width: 8),
-            const Text(
-              'Rolo Digi Cards',
-              style: TextStyle(
+            Text(
+              orgName,
+              style: const TextStyle(
                 color: AppColors.primaryPink,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -118,17 +126,22 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
             ),
           ],
         ),
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.purple.shade400,
-            shape: BoxShape.circle,
-          ),
-          child: const Text(
-            'JD',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+        GestureDetector(
+          onTap: () {
+            // Profile action
+          },
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.purple.shade400,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              controller.currentUser.value?.initials ?? 'JD',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -142,9 +155,9 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
       children: [
         Row(
           children: [
-            const Text(
-              'Good Morning, Ram',
-              style: TextStyle(
+            Text(
+              'Good Morning, ${controller.currentUser.value?.fullName.split(' ').first ?? 'User'}',
+              style: const TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -168,7 +181,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
     );
   }
 
-  Widget _buildMetricsGrid() {
+  Widget _buildMetricsGrid(OrgDashboardStats? stats) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -179,31 +192,31 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
       children: [
         _buildMetricCard(
           title: 'Total Users',
-          value: '1,248',
-          trend: '12%',
-          isUp: true,
+          value: stats != null ? stats.totalUsers.toString() : '0',
+          trend: stats != null ? '${stats.userTrend}%' : '0%',
+          isUp: (stats?.userTrend ?? 0) >= 0,
           icon: Icons.people_outline,
           isGradient: true,
         ),
         _buildMetricCard(
           title: 'Total Cards',
-          value: '892',
-          trend: '8%',
-          isUp: true,
+          value: stats != null ? stats.totalCards.toString() : '0',
+          trend: stats != null ? '${stats.cardTrend}%' : '0%',
+          isUp: (stats?.cardTrend ?? 0) >= 0,
           icon: Icons.credit_card,
         ),
         _buildMetricCard(
           title: 'Active Cards',
-          value: '756',
-          trend: '3%',
-          isUp: false,
+          value: stats != null ? stats.activeCards.toString() : '0',
+          trend: stats != null ? '${stats.activeTrend}%' : '0%',
+          isUp: (stats?.activeTrend ?? 0) >= 0,
           icon: Icons.show_chart,
         ),
         _buildMetricCard(
           title: 'Total Views',
-          value: '24.5K',
-          trend: '23%',
-          isUp: true,
+          value: stats != null ? (stats.totalViews > 1000 ? '${(stats.totalViews / 1000).toStringAsFixed(1)}K' : stats.totalViews.toString()) : '0',
+          trend: stats != null ? '${stats.viewTrend}%' : '0%',
+          isUp: (stats?.viewTrend ?? 0) >= 0,
           icon: Icons.visibility_outlined,
         ),
       ],
@@ -302,6 +315,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
     required String trend,
     required IconData icon,
     required Color color,
+    required bool isUp,
   }) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -321,35 +335,40 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
             child: Icon(icon, color: color, size: 24),
           ),
           const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const Spacer(),
           Row(
             children: [
-              const Icon(Icons.north_east, color: Colors.greenAccent, size: 16),
+              Icon(
+                isUp ? Icons.north_east : Icons.south_east, 
+                color: isUp ? Colors.greenAccent : Colors.redAccent, 
+                size: 16
+              ),
               const SizedBox(width: 4),
               Text(
                 trend,
-                style: const TextStyle(
-                  color: Colors.greenAccent,
+                style: TextStyle(
+                  color: isUp ? Colors.greenAccent : Colors.redAccent,
                   fontSize: 14,
                 ),
               ),
@@ -420,54 +439,77 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
     );
   }
 
-  Widget _buildActivityChart() {
-    final List<double> values = [0.3, 0.6, 0.4, 0.8, 0.5, 1.0, 0.7];
-    final List<String> days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  Widget _buildActivityChart(List<dynamic>? trendData) {
+    if (trendData == null || trendData.isEmpty) {
+      return const Center(child: Text('No activity data', style: TextStyle(color: Colors.white38)));
+    }
 
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: List.generate(7, (index) {
-            return Column(
-              children: [
-                Container(
-                  width: 40,
-                  height: 100 * values[index],
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFE91E8E), Color(0xFF8B5CF6)],
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                    ),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  days[index],
-                  style: const TextStyle(color: Colors.white54, fontSize: 10),
-                ),
-              ],
-            );
-          }),
+        SizedBox(
+          height: 150,
+          width: double.infinity,
+          child: CustomPaint(
+            painter: LineChartPainter(trendData),
+          ),
+        ),
+        const SizedBox(height: 20),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildChartLegendItem('Saves', const Color(0xFF00C950)),
+              const SizedBox(width: 12),
+              _buildChartLegendItem('Scans', Colors.orange),
+              const SizedBox(width: 12),
+              _buildChartLegendItem('Shares', Colors.blueAccent),
+              const SizedBox(width: 12),
+              _buildChartLegendItem('Views', Colors.purpleAccent),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildStatusDistribution() {
+  Widget _buildChartLegendItem(String label, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white54, fontSize: 10),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusDistribution(Map<String, dynamic>? cardStats) {
+    if (cardStats == null) return Container();
+
+    final int total = cardStats['total'] ?? 0;
+    if (total == 0) return const Center(child: Text('No card data', style: TextStyle(color: Colors.white38)));
+
+    final int assigned = cardStats['assigned'] ?? 0;
+    final int unassigned = cardStats['unassigned'] ?? 0;
+    final int active = cardStats['active'] ?? 0;
+    final int inactive = cardStats['inactive'] ?? 0;
+
     return Column(
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: Row(
             children: [
-              Expanded(flex: 51, child: Container(height: 12, color: const Color(0xFF00C950))),
-              Expanded(flex: 34, child: Container(height: 12, color: const Color(0xFF51A2FF))),
-              Expanded(flex: 10, child: Container(height: 12, color: const Color(0xFFF6A609))),
-              Expanded(flex: 5, child: Container(height: 12, color: const Color(0xFFFB2C36))),
+              Expanded(flex: assigned, child: Container(height: 12, color: const Color(0xFF00C950))),
+              Expanded(flex: unassigned, child: Container(height: 12, color: const Color(0xFF51A2FF))),
+              Expanded(flex: inactive, child: Container(height: 12, color: const Color(0xFFFB2C36))),
             ],
           ),
         ),
@@ -478,10 +520,10 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
           crossAxisCount: 2,
           childAspectRatio: 3,
           children: [
-            _buildStatusItem('Active (Assigned)', '456 (51%)', const Color(0xFF00C950)),
-            _buildStatusItem('Active (Unassigned)', '300 (34%)', const Color(0xFF51A2FF)),
-            _buildStatusItem('Inactive (Assigned)', '89 (10%)', const Color(0xFFF6A609)),
-            _buildStatusItem('Inactive (Unassigned)', '47 (5%)', const Color(0xFFFB2C36)),
+            _buildStatusItem('Assigned Cards', '$assigned (${((assigned/total)*100).toInt()}%)', const Color(0xFF00C950)),
+            _buildStatusItem('Unassigned Cards', '$unassigned (${((unassigned/total)*100).toInt()}%)', const Color(0xFF51A2FF)),
+            _buildStatusItem('Active Cards', '$active', const Color(0xFF00C950).withOpacity(0.6)),
+            _buildStatusItem('Inactive Cards', '$inactive', const Color(0xFFFB2C36)),
           ],
         ),
       ],
@@ -517,15 +559,26 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
     );
   }
 
-  Widget _buildTopPerformingCards() {
-    final cards = [
-      {'rank': '#1', 'name': 'Executive Card', 'scans': '567', 'views': '2340', 'color': Colors.orange},
-      {'rank': '#2', 'name': 'Marketing Card', 'scans': '423', 'views': '1890', 'color': Colors.blueGrey},
-      {'rank': '#3', 'name': 'Sales Premium', 'scans': '356', 'views': '1456', 'color': Colors.brown},
-    ];
+  Widget _buildTopPerformingCards(List<dynamic>? topCards) {
+    if (topCards == null || topCards.isEmpty) {
+      return const Center(child: Text('No performance data', style: TextStyle(color: Colors.white38)));
+    }
 
     return Column(
-      children: cards.map((card) {
+      children: topCards.map((card) {
+        final index = topCards.indexOf(card) + 1;
+        final name = card['name'] ?? 'Untitled Card';
+        final scans = card['scanCount'] ?? card['hits'] ?? 0;
+        final views = card['viewCount'] ?? 0;
+        
+        Color rankColor;
+        switch(index) {
+          case 1: rankColor = Colors.orange; break;
+          case 2: rankColor = Colors.blueGrey; break;
+          case 3: rankColor = Colors.brown; break;
+          default: rankColor = Colors.grey;
+        }
+
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(12),
@@ -540,11 +593,11 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                 height: 36,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: card['color'] as Color,
+                  color: rankColor,
                   shape: BoxShape.circle,
                 ),
                 child: Text(
-                  card['rank'] as String,
+                  '#$index',
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -554,18 +607,18 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      card['name'] as String,
+                      name,
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                     Row(
                       children: [
                         const Icon(Icons.qr_code_scanner, color: Colors.white54, size: 14),
                         const SizedBox(width: 4),
-                        Text(card['scans'] as String, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                        Text(scans.toString(), style: const TextStyle(color: Colors.white54, fontSize: 12)),
                         const SizedBox(width: 12),
                         const Icon(Icons.visibility_outlined, color: Colors.white54, size: 14),
                         const SizedBox(width: 4),
-                        Text(card['views'] as String, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                        Text(views.toString(), style: const TextStyle(color: Colors.white54, fontSize: 12)),
                       ],
                     ),
                   ],
@@ -578,29 +631,33 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
     );
   }
 
-  Widget _buildGroupsSummary() {
+  Widget _buildGroupsSummary(Map<String, dynamic>? groupStats, List<dynamic>? recentGroups) {
+    final total = groupStats?['total'] ?? 0;
+    final shared = groupStats?['shared'] ?? 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Expanded(
-              child: _buildSummaryBox('12', 'Total Groups'),
+              child: _buildSummaryBox(total.toString(), 'Total Groups'),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: _buildSummaryBox('8', 'Shared Groups', icon: Icons.share),
+              child: _buildSummaryBox(shared.toString(), 'Shared Groups', icon: Icons.share),
             ),
           ],
         ),
-        const SizedBox(height: 20),
-        const Text(
-          'Recently Added',
-          style: TextStyle(color: Colors.white54, fontSize: 12),
-        ),
-        const SizedBox(height: 12),
-        _buildGroupItem('Marketing Team', '12 members'),
-        _buildGroupItem('Sales Division', '24 members'),
+        if (recentGroups != null && recentGroups.isNotEmpty) ...[
+          const SizedBox(height: 20),
+          const Text(
+            'Recently Added',
+            style: TextStyle(color: Colors.white54, fontSize: 12),
+          ),
+          const SizedBox(height: 12),
+          ...recentGroups.take(2).map((g) => _buildGroupItem(g['name'] ?? 'Untitled', '${g['members']?.length ?? 0} members')),
+        ],
       ],
     );
   }
@@ -650,16 +707,27 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
     );
   }
 
-  Widget _buildRecentActivity() {
-    final activities = [
-      {'title': 'User activated', 'subtitle': 'John D.', 'time': '2 min ago', 'icon': Icons.person_add, 'color': Colors.green},
-      {'title': 'New user invited', 'subtitle': 'Sarah M.', 'time': '15 min ago', 'icon': Icons.person_add_alt_1, 'color': Colors.blue},
-      {'title': 'Card assigned', 'subtitle': 'Mike R.', 'time': '1 hour ago', 'icon': Icons.credit_card, 'color': Colors.pink},
-      {'title': 'User deactivated', 'subtitle': 'Emma L.', 'time': '3 hours ago', 'icon': Icons.person_remove, 'color': Colors.red},
-    ];
+  Widget _buildRecentActivity(List<OrgRecentActivity>? activities) {
+    if (activities == null || activities.isEmpty) {
+      return const Center(child: Text('No recent activity', style: TextStyle(color: Colors.white38)));
+    }
 
     return Column(
       children: activities.map((activity) {
+        final title = activity.action;
+        final subtitle = activity.user ?? 'System';
+        final time = _formatActivityTime(activity.createdAt);
+        
+        Color color;
+        IconData icon;
+        
+        switch(activity.type) {
+          case 'success': color = Colors.green; icon = Icons.check_circle; break;
+          case 'error': color = Colors.red; icon = Icons.error; break;
+          case 'warning': color = Colors.orange; icon = Icons.warning; break;
+          default: color = Colors.blue; icon = Icons.info;
+        }
+
         return Padding(
           padding: const EdgeInsets.only(bottom: 16.0),
           child: Row(
@@ -667,10 +735,10 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: (activity['color'] as Color).withOpacity(0.1),
+                  color: color.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(activity['icon'] as IconData, color: activity['color'] as Color, size: 20),
+                child: Icon(icon, color: color, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -678,18 +746,18 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      activity['title'] as String,
+                      title,
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                     Text(
-                      activity['subtitle'] as String,
+                      subtitle,
                       style: const TextStyle(color: Colors.white54, fontSize: 12),
                     ),
                   ],
                 ),
               ),
               Text(
-                activity['time'] as String,
+                time,
                 style: const TextStyle(color: Colors.white38, fontSize: 10),
               ),
             ],
@@ -697,6 +765,19 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
         );
       }).toList(),
     );
+  }
+
+  String _formatActivityTime(String? createdAt) {
+    if (createdAt == null) return '';
+    try {
+      final date = DateTime.parse(createdAt);
+      final diff = DateTime.now().difference(date);
+      if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+      if (diff.inHours < 24) return '${diff.inHours}h ago';
+      return '${diff.inDays}d ago';
+    } catch (e) {
+      return '';
+    }
   }
 
   Widget _buildScannedCards() {

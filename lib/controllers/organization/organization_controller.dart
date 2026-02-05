@@ -26,7 +26,8 @@ class OrganizationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // getOrganization(); // Optional: Auto-fetch on init if needed
+    getOrganization();
+    getDashboardStats();
   }
 
   @override

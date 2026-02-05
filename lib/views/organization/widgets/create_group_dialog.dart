@@ -1,18 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rolo_digi_card/utils/color.dart';
+import 'package:rolo_digi_card/controllers/organization/group_management_controller.dart';
 
-class CreateGroupDialog extends StatefulWidget {
+class CreateGroupDialog extends GetView<GroupManagementController> {
   const CreateGroupDialog({super.key});
-
-  @override
-  State<CreateGroupDialog> createState() => _CreateGroupDialogState();
-}
-
-class _CreateGroupDialogState extends State<CreateGroupDialog> {
-  String _visibility = 'Shared'; // 'Shared' or 'Private'
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +29,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                 _buildLabel('Group Name'),
                 const SizedBox(height: 12),
                 _buildTextField(
-                  controller: _nameController,
+                  controller: controller.nameController,
                   hint: 'Enter group name',
                   isNameField: true,
                 ),
@@ -46,26 +37,32 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                 _buildLabel('Description'),
                 const SizedBox(height: 12),
                 _buildTextField(
-                  controller: _descriptionController,
+                  controller: controller.descriptionController,
                   hint: 'Describe this group...',
                   maxLines: 4,
                 ),
                 const SizedBox(height: 32),
                 _buildLabel('Visibility'),
                 const SizedBox(height: 16),
-                _buildVisibilityOption(
-                  id: 'Shared',
-                  title: 'Shared with Organization',
-                  subtitle: 'Visible to all team members',
-                  icon: Icons.public,
-                ),
-                const SizedBox(height: 12),
-                _buildVisibilityOption(
-                  id: 'Private',
-                  title: 'Private Group',
-                  subtitle: 'Only invited members can access',
-                  icon: Icons.lock_outline,
-                ),
+                Obx(() => Column(
+                  children: [
+                    _buildVisibilityOption(
+                      isActive: controller.isShared.value,
+                      title: 'Shared with Organization',
+                      subtitle: 'Visible to all team members',
+                      icon: Icons.public,
+                      onTap: () => controller.isShared.value = true,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildVisibilityOption(
+                      isActive: !controller.isShared.value,
+                      title: 'Private Group',
+                      subtitle: 'Only invited members can access',
+                      icon: Icons.lock_outline,
+                      onTap: () => controller.isShared.value = false,
+                    ),
+                  ],
+                )),
                 const SizedBox(height: 24),
                 _buildInfoBox(),
                 const SizedBox(height: 32),
@@ -143,21 +140,21 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
   }
 
   Widget _buildVisibilityOption({
-    required String id,
+    required bool isActive,
     required String title,
     required String subtitle,
     required IconData icon,
+    required VoidCallback onTap,
   }) {
-    final isSelected = _visibility == id;
     return GestureDetector(
-      onTap: () => setState(() => _visibility = id),
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(isSelected ? 0.08 : 0.04),
+          color: Colors.white.withOpacity(isActive ? 0.08 : 0.04),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Colors.white24 : Colors.transparent,
+            color: isActive ? Colors.white24 : Colors.transparent,
           ),
         ),
         child: Row(
@@ -168,11 +165,11 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? const Color(0xFFD431BD) : Colors.white24,
+                  color: isActive ? const Color(0xFFD431BD) : Colors.white24,
                   width: 2,
                 ),
               ),
-              child: isSelected
+              child: isActive
                   ? Center(
                       child: Container(
                         width: 10,
@@ -217,7 +214,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
   }
 
   Widget _buildInfoBox() {
-    return Container(
+    return Obx(() => Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -225,15 +222,17 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFD431BD).withOpacity(0.3)),
       ),
-      child: const Text(
-        'All organization members will be able to see this group and its cards.',
-        style: TextStyle(
+      child: Text(
+        controller.isShared.value 
+          ? 'All organization members will be able to see this group and its cards.'
+          : 'This group will only be visible to specifically invited members.',
+        style: const TextStyle(
           color: Colors.white70,
           fontSize: 13,
           height: 1.4,
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildActions() {
@@ -263,7 +262,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: Container(
+          child: Obx(() => Container(
             height: 56,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -281,7 +280,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
               ],
             ),
             child: ElevatedButton(
-              onPressed: () => Get.back(),
+              onPressed: controller.isLoading.value ? null : () => controller.createGroup(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 shadowColor: Colors.transparent,
@@ -289,23 +288,29 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.add, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'Create Group',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
+              child: controller.isLoading.value
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    )
+                  : const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.add, color: Colors.white, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'Create',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
             ),
-          ),
+          )),
         ),
       ],
     );

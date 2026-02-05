@@ -55,6 +55,11 @@ class DioClient {
   // ---------------- REQUEST ----------------
   Future<void> _onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
+    // Skip Authorization header for login and register
+    if (options.path == ApiEndpoints.login || options.path == ApiEndpoints.register) {
+      return handler.next(options);
+    }
+
     final token = await _getAccessToken();
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
@@ -65,7 +70,7 @@ class DioClient {
   // ---------------- ERROR ----------------
   Future<void> _onError(
       DioException error, ErrorInterceptorHandler handler) async {
-    if (error.response?.statusCode == 4001) {
+    if (error.response?.statusCode == 401) {
       final requestOptions = error.requestOptions;
 
       // Queue the failed request
@@ -100,6 +105,7 @@ class DioClient {
 
   // ---------------- TOKEN ----------------
   Future<String?> _getAccessToken() async {
+    log("Emailing 12");
     if (_cachedAccessToken != null) return _cachedAccessToken;
 
     const storage = FlutterSecureStorage();
@@ -110,6 +116,7 @@ class DioClient {
 
   // ---------------- REFRESH ----------------
   Future<bool> _refreshToken() async {
+    log("Emailing 17");
     try {
       const storage = FlutterSecureStorage();
       final refreshToken = await storage.read(key: 'refreshToken');

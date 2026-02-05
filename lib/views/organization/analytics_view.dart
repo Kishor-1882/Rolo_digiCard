@@ -2,7 +2,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/controllers/organization/analytics_controller.dart';
+import 'package:rolo_digi_card/models/analytics_model.dart';
 import 'package:rolo_digi_card/utils/color.dart';
+import 'package:rolo_digi_card/views/organization/widgets/line_chart_painter.dart';
 
 class AnalyticsView extends GetView<AnalyticsController> {
   const AnalyticsView({super.key});
@@ -12,49 +14,64 @@ class AnalyticsView extends GetView<AnalyticsController> {
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              _buildHeader(),
-              const SizedBox(height: 24),
-              _buildKPISelection(),
-              const SizedBox(height: 24),
-              _buildKPIsGrid(),
-              const SizedBox(height: 24),
-              _buildSectionCard(
-                title: 'Card Activity',
-                subtitle: 'Last 7 days',
-                icon: Icons.bar_chart,
-                child: _buildActivityChart(),
-              ),
-              const SizedBox(height: 24),
-              _buildSectionCard(
-                title: 'Card Status',
-                subtitle: 'Distribution',
-                icon: Icons.pie_chart_outline,
-                child: _buildStatusDonut(),
-              ),
-              const SizedBox(height: 24),
-              _buildSectionCard(
-                title: 'Conversion Funnel',
-                subtitle: 'User journey',
-                icon: Icons.filter_list,
-                child: _buildConversionFunnel(),
-              ),
-              const SizedBox(height: 24),
-              _buildSectionCard(
-                title: 'Geographic Distribution',
-                subtitle: 'Where your cards are viewed',
-                icon: Icons.public,
-                child: _buildGeographicDistribution(),
-              ),
-              const SizedBox(height: 32),
-            ],
-          ),
-        ),
+        child: Obx(() {
+          if (controller.isLoading.value && controller.overviewData.value == null) {
+            return const Center(child: CircularProgressIndicator(color: AppColors.primaryPink));
+          }
+
+          final overview = controller.overviewData.value;
+          if (overview == null) {
+            return const Center(child: Text('No analytics data available', style: TextStyle(color: Colors.white54)));
+          }
+
+          final health = overview.health;
+          final engagement = overview.engagement;
+          final geo = controller.geographyData;
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                _buildHeader(),
+                const SizedBox(height: 24),
+                _buildKPISelection(),
+                const SizedBox(height: 24),
+                _buildKPIsGrid(health),
+                const SizedBox(height: 24),
+                _buildSectionCard(
+                  title: 'Card Activity',
+                  subtitle: 'Last 30 days',
+                  icon: Icons.bar_chart,
+                  child: _buildActivityChart(engagement.chartData),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionCard(
+                  title: 'Card Status',
+                  subtitle: 'Distribution',
+                  icon: Icons.pie_chart_outline,
+                  child: _buildStatusDonut(engagement.combinedStatus),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionCard(
+                  title: 'Conversion Funnel',
+                  subtitle: 'User journey',
+                  icon: Icons.filter_list,
+                  child: _buildConversionFunnel(engagement.funnel),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionCard(
+                  title: 'Geographic Distribution',
+                  subtitle: 'Where your cards are viewed',
+                  icon: Icons.public,
+                  child: _buildGeographicDistribution(geo),
+                ),
+                const SizedBox(height: 32),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
@@ -87,7 +104,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
     return Container();
   }
 
-  Widget _buildKPIsGrid() {
+  Widget _buildKPIsGrid(AnalyticsHealth health) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -96,10 +113,10 @@ class AnalyticsView extends GetView<AnalyticsController> {
       mainAxisSpacing: 16,
       childAspectRatio: 1.3,
       children: [
-        _buildKPICard('Total Views', '24.5K', '+23%', Icons.visibility, Colors.pink),
-        _buildKPICard('Total Scans', '1,260', '+18%', Icons.qr_code_scanner, Colors.purple),
-        _buildKPICard('Active Users', '1,156', '+12%', Icons.people, Colors.pinkAccent),
-        _buildKPICard('Conversion', '8.9%', '+5%', Icons.trending_up, Colors.deepPurpleAccent),
+        _buildKPICard('Total Views', health.totalViews.toString(), '+23%', Icons.visibility, Colors.pink),
+        _buildKPICard('Total Shares', health.totalShares.toString(), '+18%', Icons.share, Colors.purple),
+        _buildKPICard('Active Cards', '${health.activeCardsPercentage}%', '+12%', Icons.credit_card, Colors.pinkAccent),
+        _buildKPICard('Total Users', health.totalUsers.toString(), '+5%', Icons.people, Colors.deepPurpleAccent),
       ],
     );
   }
@@ -218,25 +235,29 @@ class AnalyticsView extends GetView<AnalyticsController> {
     );
   }
 
-  Widget _buildActivityChart() {
+  Widget _buildActivityChart(List<dynamic> chartData) {
     return Column(
       children: [
         SizedBox(
           height: 200,
           width: double.infinity,
           child: CustomPaint(
-            painter: LineChartPainter(),
+            painter: LineChartPainter(chartData),
           ),
         ),
         const SizedBox(height: 24),
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildChartLegend('Scans', Colors.pink),
-            const SizedBox(width: 24),
-            _buildChartLegend('Views', Colors.purpleAccent),
-          ],
-        ),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildChartLegend('Saves', const Color(0xFF00C950)),
+          const SizedBox(width: 16),
+          _buildChartLegend('Scans', Colors.orange),
+          const SizedBox(width: 16),
+          _buildChartLegend('Shares', Colors.blueAccent),
+          const SizedBox(width: 16),
+          _buildChartLegend('Views', Colors.purpleAccent),
+        ],
+      ),
       ],
     );
   }
@@ -261,25 +282,30 @@ class AnalyticsView extends GetView<AnalyticsController> {
     );
   }
 
-  Widget _buildStatusDonut() {
+  Widget _buildStatusDonut(List<dynamic> combinedStatus) {
+    // combinedStatus structure usually: [{name: Active, count: 756, percentage: 75}, ...]
+    final active = combinedStatus.firstWhere((e) => e['name'] == 'Active', orElse: () => {'count': 0})['count'];
+    final inactive = combinedStatus.firstWhere((e) => e['name'] == 'Inactive', orElse: () => {'count': 0})['count'];
+    final pending = combinedStatus.firstWhere((e) => e['name'] == 'Pending', orElse: () => {'count': 0})['count'];
+
     return Row(
       children: [
         SizedBox(
           width: 150,
           height: 150,
           child: CustomPaint(
-            painter: DonutChartPainter(),
+            painter: DonutChartPainter(combinedStatus),
           ),
         ),
         const SizedBox(width: 40),
         Expanded(
           child: Column(
             children: [
-              _buildStatusRow('Active', '756', const Color(0xFF00C950)),
+              _buildStatusRow('Active', active.toString(), const Color(0xFF00C950)),
               const SizedBox(height: 12),
-              _buildStatusRow('Inactive', '89', const Color(0xFFFB2C36)),
+              _buildStatusRow('Inactive', inactive.toString(), const Color(0xFFFB2C36)),
               const SizedBox(height: 12),
-              _buildStatusRow('Pending', '47', const Color(0xFFF6A609)),
+              _buildStatusRow('Pending', pending.toString(), const Color(0xFFF6A609)),
             ],
           ),
         ),
@@ -309,14 +335,14 @@ class AnalyticsView extends GetView<AnalyticsController> {
     );
   }
 
-  Widget _buildConversionFunnel() {
+  Widget _buildConversionFunnel(List<dynamic> funnel) {
     return Column(
-      children: [
-        _buildFunnelItem('Card Views', '24,500', 1.0, const [Color(0xFFE91E8E), Color(0xFF8B5CF6)]),
-        _buildFunnelItem('Profile Visits', '8,650', 0.35, const [Color(0xFFE91E8E), Color(0xFF8B5CF6)]),
-        _buildFunnelItem('Contact Saved', '2,180', 0.15, const [Color(0xFFE91E8E), Color(0xFF8B5CF6)]),
-        _buildFunnelItem('Follow-up', '890', 0.05, const [Color(0xFFE91E8E), Color(0xFF8B5CF6)]),
-      ],
+      children: funnel.map((item) {
+        final label = item['name'] ?? 'Step';
+        final value = item['count'].toString();
+        final percentage = ((item['percentage'] ?? 0.0) as num).toDouble() / 100.0;
+        return _buildFunnelItem(label, value, percentage, const [Color(0xFFE91E8E), Color(0xFF8B5CF6)]);
+      }).toList(),
     );
   }
 
@@ -369,16 +395,10 @@ class AnalyticsView extends GetView<AnalyticsController> {
     );
   }
 
-  Widget _buildGeographicDistribution() {
-    final regions = [
-      {'name': 'North America', 'value': '42%', 'percent': 0.42},
-      {'name': 'Europe', 'value': '28%', 'percent': 0.28},
-      {'name': 'Asia Pacific', 'value': '18%', 'percent': 0.18},
-      {'name': 'Others', 'value': '12%', 'percent': 0.12},
-    ];
-
+  Widget _buildGeographicDistribution(List<GeographyModel> geo) {
     return Column(
-      children: regions.map((region) {
+      children: geo.map((region) {
+        final percentage = ((region.percentage ?? 0.0) as num).toDouble() / 100.0;
         return Padding(
           padding: const EdgeInsets.only(bottom: 20),
           child: Column(
@@ -387,11 +407,11 @@ class AnalyticsView extends GetView<AnalyticsController> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    region['name'] as String,
+                    region.countryName ?? 'Unknown',
                     style: const TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                   Text(
-                    region['value'] as String,
+                    '${region.percentage}%',
                     style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -411,7 +431,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
                     builder: (context, constraints) {
                       return Container(
                         height: 6,
-                        width: constraints.maxWidth * (region['percent'] as double),
+                        width: constraints.maxWidth * percentage,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [Color(0xFFE91E8E), Color(0xFF8B5CF6)],
@@ -431,116 +451,51 @@ class AnalyticsView extends GetView<AnalyticsController> {
   }
 }
 
-class LineChartPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paintPink = Paint()
-      ..color = Colors.pink
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
-
-    final paintPurple = Paint()
-      ..color = Colors.purpleAccent
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
-
-    final fillPink = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Colors.pink.withOpacity(0.3), Colors.pink.withOpacity(0.0)],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-
-    final fillPurple = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Colors.purpleAccent.withOpacity(0.3), Colors.purpleAccent.withOpacity(0.0)],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-
-    final pathPink = Path();
-    final pathPurple = Path();
-
-    final scanPoints = [0.8, 0.7, 0.9, 0.75, 0.85, 0.6, 0.7];
-    final viewPoints = [0.4, 0.35, 0.5, 0.45, 0.6, 0.3, 0.4];
-
-    final dx = size.width / 6;
-
-    // Pink Path (Scans)
-    pathPink.moveTo(0, size.height * (1 - scanPoints[0]));
-    for (int i = 1; i < scanPoints.length; i++) {
-      pathPink.lineTo(dx * i, size.height * (1 - scanPoints[i]));
-    }
-
-    final fillPathPink = Path.from(pathPink)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-
-    // Purple Path (Views)
-    pathPurple.moveTo(0, size.height * (1 - viewPoints[0]));
-    for (int i = 1; i < viewPoints.length; i++) {
-      pathPurple.lineTo(dx * i, size.height * (1 - viewPoints[i]));
-    }
-
-    final fillPathPurple = Path.from(pathPurple)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-
-    canvas.drawPath(fillPathPink, fillPink);
-    canvas.drawPath(pathPink, paintPink);
-    
-    canvas.drawPath(fillPathPurple, fillPurple);
-    canvas.drawPath(pathPurple, paintPurple);
-
-    // Draw bottom labels
-    final textStyle = const TextStyle(color: Colors.white38, fontSize: 10);
-    final days = ['Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    for (int i = 0; i < days.length; i++) {
-      final textSpan = TextSpan(text: days[i], style: textStyle);
-      final textPainter = TextPainter(text: textSpan, textDirection: TextDirection.ltr)..layout();
-      textPainter.paint(canvas, Offset(dx * (i+1) - textPainter.width/2, size.height + 10));
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
 
 class DonutChartPainter extends CustomPainter {
+  final List<dynamic> combinedStatus;
+  DonutChartPainter(this.combinedStatus);
+
   @override
   void paint(Canvas canvas, Size size) {
+    if (combinedStatus.isEmpty) return;
+
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
     final strokeWidth = 20.0;
 
-    final paintGreen = Paint()
-      ..color = const Color(0xFF00C950)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    final paintOrange = Paint()
-      ..color = const Color(0xFFF6A609)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
-    final paintRed = Paint()
-      ..color = const Color(0xFFFB2C36)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-
     final rect = Rect.fromCircle(center: center, radius: radius - strokeWidth / 2);
+    double startAngle = -pi / 2;
 
-    // Percentages: 75% active, 15% inactive, 10% pending
-    canvas.drawArc(rect, -pi / 2, 2 * pi * 0.75, false, paintGreen);
-    canvas.drawArc(rect, -pi / 2 + 2 * pi * 0.75 + 0.1, 2 * pi * 0.15, false, paintRed);
-    canvas.drawArc(rect, -pi / 2 + 2 * pi * 0.90 + 0.2, 2 * pi * 0.10, false, paintOrange);
+    for (var status in combinedStatus) {
+      final percentage = ((status['percentage'] ?? 0.0) as num).toDouble() / 100.0;
+      if (percentage == 0) continue;
+
+      final paint = Paint()
+        ..color = _getStatusColor(status['name'])
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round;
+
+      final sweepAngle = 2 * pi * percentage;
+      canvas.drawArc(rect, startAngle + 0.05, sweepAngle - 0.1, false, paint);
+      startAngle += sweepAngle;
+    }
+  }
+
+  Color _getStatusColor(String? name) {
+    switch (name) {
+      case 'Active':
+        return const Color(0xFF00C950);
+      case 'Pending':
+        return const Color(0xFFF6A609);
+      case 'Inactive':
+        return const Color(0xFFFB2C36);
+      default:
+        return Colors.grey;
+    }
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
