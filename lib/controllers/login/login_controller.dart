@@ -21,42 +21,34 @@ class LoginController extends GetxController {
   final registerPasswordController = TextEditingController();
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
+  final organizationNameController = TextEditingController();
   final nameController = TextEditingController();
   final isLoading = false.obs;
   final isLoggedIn = false.obs;
-
+  String selectedUserType = 'individual';
 
   Map<String, String> splitFullName(String fullName) {
     if (fullName.trim().isEmpty) {
-      return {
-        'firstName': '',
-        'lastName': '',
-      };
+      return {'firstName': '', 'lastName': ''};
     }
 
     final parts = fullName.trim().split(RegExp(r'\s+'));
 
     final firstName = parts.first;
-    final lastName = parts.length > 1
-        ? parts.sublist(1).join(' ')
-        : '';
+    final lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
 
-    return {
-      'firstName': firstName,
-      'lastName': lastName,
-    };
+    return {'firstName': firstName, 'lastName': lastName};
   }
 
-
   Future<void> login() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     log("Email:${emailController.text} Password ${passwordController.text}");
-    if(emailController.text.isEmpty || passwordController.text.isEmpty){
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       CommonSnackbar.error('Please fill all the form');
-      return ;
+      return;
     }
 
     log("Emailing");
-
 
     try {
       isLoading.value = true;
@@ -70,7 +62,7 @@ class LoginController extends GetxController {
         },
       );
 
-      log("Emailing 2");
+      log("Emailing 2: ${response.data}");
       if (response.statusCode == 200) {
         log("Emailing 3");
         final accessToken = response.data["tokens"]["accessToken"];
@@ -97,7 +89,10 @@ class LoginController extends GetxController {
       String errorMessage = 'Login failed';
       if (e is DioException && e.response != null) {
         log("Login Error Response: ${e.response?.data}");
-        errorMessage = e.response?.data['message'] ?? errorMessage;
+        errorMessage =
+            e.response?.data['message'] ??
+            e.response?.data['error'] ??
+            errorMessage;
       }
       CommonSnackbar.error(errorMessage);
       isLoading.value = false;
@@ -112,11 +107,14 @@ class LoginController extends GetxController {
   }
 
   Future<void> register() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     try {
       if (emailController.text.trim().isEmpty ||
           passwordController.text.trim().isEmpty ||
           firstNameController.text.trim().isEmpty ||
-          lastNameController.text.trim().isEmpty) {
+          lastNameController.text.trim().isEmpty ||
+          (selectedUserType == 'organization' &&
+              organizationNameController.text.trim().isEmpty)) {
         CommonSnackbar.error('All fields are mandatory');
         return;
       }
@@ -127,18 +125,25 @@ class LoginController extends GetxController {
 
       isLoading.value = true;
       update();
-      // final name = splitFullName(nameController.text.trim());
-      final data= {
+
+      final data = {
         "email": emailController.text.trim(),
         "password": passwordController.text.trim(),
         "firstName": firstNameController.text.trim(),
         "lastName": lastNameController.text.trim(),
+        "userType": selectedUserType,
       };
+
+      if (selectedUserType == 'organization') {
+        data["organizationName"] = organizationNameController.text.trim();
+      }
+
       log("Data:${jsonEncode(data)}");
       final response = await DioClient().dio.post(
         ApiEndpoints.register,
         data: data,
       );
+      log("Response register:${response.data}");
 
       if (response.statusCode == 200) {
         CommonSnackbar.success('Account created. Please login.');
@@ -147,10 +152,18 @@ class LoginController extends GetxController {
       isLoginMode = true;
       update();
     } catch (e) {
+      String errorMessage = 'Registration failed';
       log("Error in Reg:$e");
+      if (e is DioException && e.response != null) {
+        log("Login Error Response: ${e.response?.data}");
+        errorMessage =
+            e.response?.data['message'] ??
+            e.response?.data['error'] ??
+            errorMessage;
+      }
       isLoading.value = false;
       update();
-      CommonSnackbar.error('Registration failed');
+      CommonSnackbar.error(errorMessage);
     } finally {
       isLoading.value = false;
     }
@@ -166,4 +179,15 @@ class LoginController extends GetxController {
     Get.offAllNamed("/login");
   }
 
+  void clearFields() {
+    emailController.clear();
+    passwordController.clear();
+    registerEmailController.clear();
+    registerPasswordController.clear();
+    firstNameController.clear();
+    lastNameController.clear();
+    organizationNameController.clear();
+    nameController.clear();
+    update();
+  }
 }

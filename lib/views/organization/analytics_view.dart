@@ -1,10 +1,9 @@
-import 'dart:math';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/controllers/organization/analytics_controller.dart';
 import 'package:rolo_digi_card/models/analytics_model.dart';
 import 'package:rolo_digi_card/utils/color.dart';
-import 'package:rolo_digi_card/views/organization/widgets/line_chart_painter.dart';
 
 class AnalyticsView extends GetView<AnalyticsController> {
   const AnalyticsView({super.key});
@@ -15,13 +14,21 @@ class AnalyticsView extends GetView<AnalyticsController> {
       backgroundColor: AppColors.darkBackground,
       body: SafeArea(
         child: Obx(() {
-          if (controller.isLoading.value && controller.overviewData.value == null) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primaryPink));
+          if (controller.isLoading.value &&
+              controller.overviewData.value == null) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryPink),
+            );
           }
 
           final overview = controller.overviewData.value;
           if (overview == null) {
-            return const Center(child: Text('No analytics data available', style: TextStyle(color: Colors.white54)));
+            return const Center(
+              child: Text(
+                'No analytics data available',
+                style: TextStyle(color: Colors.white54),
+              ),
+            );
           }
 
           final health = overview.health;
@@ -51,7 +58,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
                   title: 'Card Status',
                   subtitle: 'Distribution',
                   icon: Icons.pie_chart_outline,
-                  child: _buildStatusDonut(engagement.combinedStatus),
+                  child: _buildStatusPie(engagement.combinedStatus),
                 ),
                 const SizedBox(height: 24),
                 _buildSectionCard(
@@ -90,10 +97,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
         ),
         Text(
           'Insights & performance metrics',
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
       ],
     );
@@ -113,15 +117,45 @@ class AnalyticsView extends GetView<AnalyticsController> {
       mainAxisSpacing: 16,
       childAspectRatio: 1.3,
       children: [
-        _buildKPICard('Total Views', health.totalViews.toString(), '+23%', Icons.visibility, Colors.pink),
-        _buildKPICard('Total Shares', health.totalShares.toString(), '+18%', Icons.share, Colors.purple),
-        _buildKPICard('Active Cards', '${health.activeCardsPercentage}%', '+12%', Icons.credit_card, Colors.pinkAccent),
-        _buildKPICard('Total Users', health.totalUsers.toString(), '+5%', Icons.people, Colors.deepPurpleAccent),
+        _buildKPICard(
+          'Total Views',
+          health.totalViews.toString(),
+          '+23%',
+          Icons.visibility,
+          Colors.pink,
+        ),
+        _buildKPICard(
+          'Total Shares',
+          health.totalShares.toString(),
+          '+18%',
+          Icons.share,
+          Colors.purple,
+        ),
+        _buildKPICard(
+          'Active Cards',
+          '${health.activeCardsPercentage}%',
+          '+12%',
+          Icons.credit_card,
+          Colors.pinkAccent,
+        ),
+        _buildKPICard(
+          'Total Users',
+          health.totalUsers.toString(),
+          '+5%',
+          Icons.people,
+          Colors.deepPurpleAccent,
+        ),
       ],
     );
   }
 
-  Widget _buildKPICard(String title, String value, String trend, IconData icon, Color color) {
+  Widget _buildKPICard(
+    String title,
+    String value,
+    String trend,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -218,10 +252,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
                   ),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: Colors.white54,
-                      fontSize: 12,
-                    ),
+                    style: const TextStyle(color: Colors.white54, fontSize: 12),
                   ),
                 ],
               ),
@@ -236,28 +267,157 @@ class AnalyticsView extends GetView<AnalyticsController> {
   }
 
   Widget _buildActivityChart(List<dynamic> chartData) {
+    if (chartData.isEmpty) {
+      return const SizedBox(
+        height: 200,
+        child: Center(
+          child: Text(
+            'No activity data',
+            style: TextStyle(color: Colors.white54),
+          ),
+        ),
+      );
+    }
+
     return Column(
       children: [
         SizedBox(
           height: 200,
           width: double.infinity,
-          child: CustomPaint(
-            painter: LineChartPainter(chartData),
+          child: BarChart(
+            BarChartData(
+              alignment: BarChartAlignment.spaceAround,
+              maxY: [
+                10.0,
+                chartData.fold<double>(
+                  0,
+                  (max, e) => [
+                    max,
+                    ((e['created'] ?? 0) as num).toDouble(),
+                    ((e['scanned'] ?? e['hits'] ?? 0) as num).toDouble(),
+                  ].reduce((a, b) => a > b ? a : b),
+                ),
+              ].reduce((a, b) => a > b ? a : b),
+              barTouchData: BarTouchData(
+                touchTooltipData: BarTouchTooltipData(
+                  tooltipBgColor: Colors.blueGrey,
+                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                    final metric = rodIndex == 0 ? 'Created' : 'Scanned';
+                    return BarTooltipItem(
+                      '$metric\n${rod.toY.toInt()}',
+                      const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              titlesData: FlTitlesData(
+                show: true,
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      final index = value.toInt();
+                      if (index >= 0 && index < chartData.length) {
+                        final period =
+                            chartData[index]['period']?.toString() ?? '';
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            period.contains('-')
+                                ? period.split('-').last
+                                : period,
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 10,
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox();
+                    },
+                    reservedSize: 30,
+                  ),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    interval: 1,
+                    getTitlesWidget: (value, meta) {
+                      if (value == 1 || value == 5 || value == 10) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Text(
+                            value.toInt().toString(),
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 10,
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox();
+                    },
+                    reservedSize: 22,
+                  ),
+                ),
+                topTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                rightTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+              ),
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: false,
+                horizontalInterval: 5,
+                getDrawingHorizontalLine: (value) =>
+                    FlLine(color: Colors.white10, strokeWidth: 1),
+              ),
+              borderData: FlBorderData(show: false),
+              barGroups: chartData.asMap().entries.map((entry) {
+                final index = entry.key;
+                final data = entry.value;
+                return BarChartGroupData(
+                  x: index,
+                  barRods: [
+                    BarChartRodData(
+                      toY: ((data['created'] ?? 0) as num).toDouble(),
+                      color: AppColors.primaryPink,
+                      width: 12,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(4),
+                      ),
+                    ),
+                    BarChartRodData(
+                      toY: ((data['scanned'] ?? data['hits'] ?? 0) as num)
+                          .toDouble(),
+                      color: Colors.orange,
+                      width: 12,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(4),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
           ),
         ),
         const SizedBox(height: 24),
         Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildChartLegend('Saves', const Color(0xFF00C950)),
-          const SizedBox(width: 16),
-          _buildChartLegend('Scans', Colors.orange),
-          const SizedBox(width: 16),
-          _buildChartLegend('Shares', Colors.blueAccent),
-          const SizedBox(width: 16),
-          _buildChartLegend('Views', Colors.purpleAccent),
-        ],
-      ),
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          // alignment: WrapAlignment.start,
+          // spacing: 16,
+          // runSpacing: 8,
+          children: [
+            _buildChartLegend('Created', AppColors.primaryPink),
+            _buildChartLegend('Scanned', Colors.orange),
+          ],
+        ),
       ],
     );
   }
@@ -268,10 +428,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
         Container(
           width: 12,
           height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 8),
         Text(
@@ -282,71 +439,157 @@ class AnalyticsView extends GetView<AnalyticsController> {
     );
   }
 
-  Widget _buildStatusDonut(List<dynamic> combinedStatus) {
-    // combinedStatus structure usually: [{name: Active, count: 756, percentage: 75}, ...]
-    final active = combinedStatus.firstWhere((e) => e['name'] == 'Active', orElse: () => {'count': 0})['count'];
-    final inactive = combinedStatus.firstWhere((e) => e['name'] == 'Inactive', orElse: () => {'count': 0})['count'];
-    final pending = combinedStatus.firstWhere((e) => e['name'] == 'Pending', orElse: () => {'count': 0})['count'];
+  List<Map<String, dynamic>> normalizeStatus(List<dynamic> raw) {
+    final total = raw.fold<int>(
+      0,
+      (sum, e) => sum + ((e['value'] ?? 0) as int),
+    );
 
-    return Row(
+    if (total == 0) return [];
+
+    return raw.map((e) {
+      final value = e['value'] ?? 0;
+      return {
+        'name': e['name'],
+        'value': value,
+        'percentage': (value / total) * 100,
+      };
+    }).toList();
+  }
+
+  Widget _buildStatusPie(List<dynamic> combinedStatus) {
+    final statusData = normalizeStatus(combinedStatus);
+
+    // Get a status to display in the center (first non-zero value)
+    final centerStatus = statusData.firstWhere(
+      (e) => (e['value'] ?? 0) > 0,
+      orElse: () => statusData.isNotEmpty
+          ? statusData.first
+          : {'name': 'No Data', 'value': 0},
+    );
+
+    return Column(
       children: [
         SizedBox(
-          width: 150,
-          height: 150,
-          child: CustomPaint(
-            painter: DonutChartPainter(combinedStatus),
-          ),
-        ),
-        const SizedBox(width: 40),
-        Expanded(
-          child: Column(
+          height: 200,
+          child: Stack(
             children: [
-              _buildStatusRow('Active', active.toString(), const Color(0xFF00C950)),
-              const SizedBox(height: 12),
-              _buildStatusRow('Inactive', inactive.toString(), const Color(0xFFFB2C36)),
-              const SizedBox(height: 12),
-              _buildStatusRow('Pending', pending.toString(), const Color(0xFFF6A609)),
+              PieChart(
+                PieChartData(
+                  sectionsSpace: 4,
+                  centerSpaceRadius: 60,
+                  startDegreeOffset: -90,
+                  sections: statusData.map((status) {
+                    return PieChartSectionData(
+                      value: (status['value'] ?? 0).toDouble(),
+                      color: _getStatusColor(status['name']),
+                      radius: 25,
+                      showTitle: false,
+                    );
+                  }).toList(),
+                ),
+              ),
             ],
           ),
         ),
+        const SizedBox(height: 32),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 16,
+          runSpacing: 12,
+          children: statusData.map((e) {
+            return _buildHorizontalLegendItem(
+              e['name'],
+              e['value'].toString(),
+              _getStatusColor(e['name']),
+            );
+          }).toList(),
+        ),
       ],
     );
   }
 
-  Widget _buildStatusRow(String label, String value, Color color) {
+  Widget _buildHorizontalLegendItem(String label, String value, Color color) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Text(
           label,
-          style: const TextStyle(color: Colors.white70, fontSize: 14),
+          style: const TextStyle(color: Colors.white70, fontSize: 13),
         ),
-        const Spacer(),
-        Text(
-          value,
-          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-        ),
+        if (value != '0') ...[
+          const SizedBox(width: 4),
+          Text(
+            ': $value',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
       ],
     );
+  }
+
+  Color _getStatusColor(String? name) {
+    switch (name) {
+      case 'Active & Assigned':
+        return const Color(0xFF00C950);
+      case 'Active & Unassigned':
+        return const Color(0xFFF6A609);
+      case 'Inactive & Assigned':
+        return const Color(0xFF9CA3AF);
+      case 'Inactive & Unassigned':
+        return const Color(0xFFFB2C36);
+      default:
+        return Colors.grey;
+    }
   }
 
   Widget _buildConversionFunnel(List<dynamic> funnel) {
+    // Determine max value for percentage calculation
+    final maxValue = funnel.isNotEmpty
+        ? funnel.fold<double>(
+            0,
+            (max, e) => (e['value'] as num).toDouble() > max
+                ? (e['value'] as num).toDouble()
+                : max,
+          )
+        : 1.0;
+
     return Column(
       children: funnel.map((item) {
-        final label = item['name'] ?? 'Step';
-        final value = item['count'].toString();
-        final percentage = ((item['percentage'] ?? 0.0) as num).toDouble() / 100.0;
-        return _buildFunnelItem(label, value, percentage, const [Color(0xFFE91E8E), Color(0xFF8B5CF6)]);
+        final label = item['label'] ?? 'Step';
+        final value = item['value'].toString();
+        // Calculate percentage relative to max value in funnel, or 1.0 if max is 0
+        final percentage = maxValue > 0
+            ? ((item['value'] ?? 0.0) as num).toDouble() / maxValue
+            : 0.0;
+
+        return _buildFunnelItem(label, value, percentage, const [
+          Color(0xFFE91E8E),
+          Color(0xFF8B5CF6),
+        ]);
       }).toList(),
     );
   }
 
-  Widget _buildFunnelItem(String label, String value, double percentage, List<Color> colors) {
+  Widget _buildFunnelItem(
+    String label,
+    String value,
+    double percentage,
+    List<Color> colors,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
@@ -361,7 +604,11 @@ class AnalyticsView extends GetView<AnalyticsController> {
               ),
               Text(
                 value,
-                style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -398,7 +645,8 @@ class AnalyticsView extends GetView<AnalyticsController> {
   Widget _buildGeographicDistribution(List<GeographyModel> geo) {
     return Column(
       children: geo.map((region) {
-        final percentage = ((region.percentage ?? 0.0) as num).toDouble() / 100.0;
+        final percentage =
+            ((region.percentage ?? 0.0) as num).toDouble() / 100.0;
         return Padding(
           padding: const EdgeInsets.only(bottom: 20),
           child: Column(
@@ -412,7 +660,11 @@ class AnalyticsView extends GetView<AnalyticsController> {
                   ),
                   Text(
                     '${region.percentage}%',
-                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -449,53 +701,4 @@ class AnalyticsView extends GetView<AnalyticsController> {
       }).toList(),
     );
   }
-}
-
-
-class DonutChartPainter extends CustomPainter {
-  final List<dynamic> combinedStatus;
-  DonutChartPainter(this.combinedStatus);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (combinedStatus.isEmpty) return;
-
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
-    final strokeWidth = 20.0;
-
-    final rect = Rect.fromCircle(center: center, radius: radius - strokeWidth / 2);
-    double startAngle = -pi / 2;
-
-    for (var status in combinedStatus) {
-      final percentage = ((status['percentage'] ?? 0.0) as num).toDouble() / 100.0;
-      if (percentage == 0) continue;
-
-      final paint = Paint()
-        ..color = _getStatusColor(status['name'])
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round;
-
-      final sweepAngle = 2 * pi * percentage;
-      canvas.drawArc(rect, startAngle + 0.05, sweepAngle - 0.1, false, paint);
-      startAngle += sweepAngle;
-    }
-  }
-
-  Color _getStatusColor(String? name) {
-    switch (name) {
-      case 'Active':
-        return const Color(0xFF00C950);
-      case 'Pending':
-        return const Color(0xFFF6A609);
-      case 'Inactive':
-        return const Color(0xFFFB2C36);
-      default:
-        return Colors.grey;
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }

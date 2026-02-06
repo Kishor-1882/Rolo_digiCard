@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
+import 'package:rolo_digi_card/controllers/organization/organization_controller.dart';
 import 'package:rolo_digi_card/models/group_model.dart';
 import 'package:rolo_digi_card/models/card_model.dart';
 import 'package:rolo_digi_card/models/organization_user_model.dart';
@@ -11,6 +12,7 @@ import 'package:rolo_digi_card/services/dio_client.dart';
 import 'package:rolo_digi_card/services/end_points.dart';
 
 class GroupManagementController extends GetxController {
+  final organizationController = Get.find<OrganizationController>();
   final Dio _dio = dioClient;
 
   var isLoading = false.obs;
@@ -19,11 +21,20 @@ class GroupManagementController extends GetxController {
 
   List<GroupModel> get filteredGroups {
     if (searchQuery.value.isEmpty) return groups;
-    return groups.where((group) => 
-      group.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-      (group.description?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false)
-    ).toList();
+    return groups
+        .where(
+          (group) =>
+              group.name.toLowerCase().contains(
+                searchQuery.value.toLowerCase(),
+              ) ||
+              (group.description?.toLowerCase().contains(
+                    searchQuery.value.toLowerCase(),
+                  ) ??
+                  false),
+        )
+        .toList();
   }
+
   var currentGroup = Rxn<GroupModel>();
   var groupUsers = <OrganizationUserModel>[].obs;
   var groupCards = <CardModel>[].obs;
@@ -83,7 +94,9 @@ class GroupManagementController extends GetxController {
       isLoading.value = true;
       update();
 
-      final response = await _dio.get(ApiEndpoints.getOrganizationGroup(groupId));
+      final response = await _dio.get(
+        ApiEndpoints.getOrganizationGroup(groupId),
+      );
 
       if (response.statusCode == 200) {
         currentGroup.value = GroupModel.fromJson(response.data);
@@ -117,10 +130,11 @@ class GroupManagementController extends GetxController {
         ApiEndpoints.organizationGroups,
         data: data,
       );
+      log("Create Group Response: ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-  
         getGroups();
+        organizationController.getDashboardStats();
         Get.back(); // Close dialog
         CommonSnackbar.success('Group created successfully');
         // Clear form
@@ -139,7 +153,7 @@ class GroupManagementController extends GetxController {
 
   // Update Group
   Future<void> updateGroup(String groupId) async {
-     try {
+    try {
       isLoading.value = true;
       update();
 
@@ -172,11 +186,13 @@ class GroupManagementController extends GetxController {
 
   // Delete Group
   Future<void> deleteGroup(String groupId) async {
-     try {
+    try {
       isLoading.value = true;
       update();
 
-      final response = await _dio.delete(ApiEndpoints.deleteOrganizationGroup(groupId));
+      final response = await _dio.delete(
+        ApiEndpoints.deleteOrganizationGroup(groupId),
+      );
 
       if (response.statusCode == 200) {
         CommonSnackbar.success('Group deleted successfully');
@@ -201,7 +217,9 @@ class GroupManagementController extends GetxController {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = _resolveList(response.data, 'users');
-        groupUsers.value = data.map((e) => OrganizationUserModel.fromJson(e)).toList();
+        groupUsers.value = data
+            .map((e) => OrganizationUserModel.fromJson(e))
+            .toList();
       }
     } on DioException catch (e) {
       log("Get Group Users Error: $e");
@@ -230,7 +248,7 @@ class GroupManagementController extends GetxController {
       update();
     }
   }
-  
+
   // Add Cards to Group
   Future<void> addGroupCards(String groupId, List<String> cardIds) async {
     try {
@@ -261,7 +279,9 @@ class GroupManagementController extends GetxController {
       isLoading.value = true;
       update();
 
-      final response = await _dio.delete(ApiEndpoints.removeGroupCard(groupId, cardId));
+      final response = await _dio.delete(
+        ApiEndpoints.removeGroupCard(groupId, cardId),
+      );
 
       if (response.statusCode == 200) {
         CommonSnackbar.success('Card removed from group');
@@ -275,19 +295,20 @@ class GroupManagementController extends GetxController {
       update();
     }
   }
-  
+
   // Bulk Group Status Update
-  Future<void> updateBulkGroupStatus(List<String> groupIds, bool isActive) async {
+  Future<void> updateBulkGroupStatus(
+    List<String> groupIds,
+    bool isActive,
+  ) async {
     try {
       isLoading.value = true;
       update();
 
-      final response = await _dio.patch( // Assuming PUT based on logic, matching others
+      final response = await _dio.patch(
+        // Assuming PUT based on logic, matching others
         ApiEndpoints.bulkGroupStatus,
-        data: {
-          'groupIds': groupIds,
-          'isActive': isActive
-        },
+        data: {'groupIds': groupIds, 'isActive': isActive},
       );
 
       if (response.statusCode == 200) {

@@ -17,7 +17,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
         child: Obx(() {
           final stats = controller.dashboardStats.value;
           final org = controller.organization.value;
-          
+
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
@@ -42,7 +42,9 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                 _buildFullWidthMetric(
                   title: 'Total Scans',
                   value: stats != null ? stats.totalScans.toString() : '0',
-                  trend: stats != null ? '${stats.scanTrend >= 0 ? '+' : ''}${stats.scanTrend}% this week' : '0% this week',
+                  trend: stats != null
+                      ? '${stats.scanTrend >= 0 ? '+' : ''}${stats.scanTrend}% this week'
+                      : '0% this week',
                   icon: Icons.qr_code_scanner,
                   color: Colors.purple.shade400,
                   isUp: (stats?.scanTrend ?? 0) >= 0,
@@ -70,7 +72,10 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                   title: 'Groups Summary',
                   icon: Icons.folder_open,
                   showViewAll: true,
-                  child: _buildGroupsSummary(stats?.groups, stats?.recentGroups),
+                  child: _buildGroupsSummary(
+                    stats?.groups,
+                    stats?.recentGroups,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 _buildSectionCard(
@@ -149,6 +154,20 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
     );
   }
 
+  String getGreeting() {
+    final hour = DateTime.now().hour;
+
+    if (hour < 12) {
+      return 'Good Morning';
+    } else if (hour < 17) {
+      return 'Good Afternoon';
+    } else if (hour < 21) {
+      return 'Good Evening';
+    } else {
+      return 'Good Night';
+    }
+  }
+
   Widget _buildGreeting() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +175,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
         Row(
           children: [
             Text(
-              'Good Morning, ${controller.currentUser.value?.fullName.split(' ').first ?? 'User'}',
+              '${getGreeting()}, ${controller.currentUser.value?.fullName.split(' ').first ?? 'User'}',
               style: const TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 24,
@@ -164,18 +183,12 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
               ),
             ),
             const SizedBox(width: 8),
-            const Text(
-              '👋',
-              style: TextStyle(fontSize: 24),
-            ),
+            const Text('👋', style: TextStyle(fontSize: 24)),
           ],
         ),
         const Text(
           'Organization overview',
-          style: TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
       ],
     );
@@ -214,7 +227,11 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
         ),
         _buildMetricCard(
           title: 'Total Views',
-          value: stats != null ? (stats.totalViews > 1000 ? '${(stats.totalViews / 1000).toStringAsFixed(1)}K' : stats.totalViews.toString()) : '0',
+          value: stats != null
+              ? (stats.totalViews > 1000
+                    ? '${(stats.totalViews / 1000).toStringAsFixed(1)}K'
+                    : stats.totalViews.toString())
+              : '0',
           trend: stats != null ? '${stats.viewTrend}%' : '0%',
           isUp: (stats?.viewTrend ?? 0) >= 0,
           icon: Icons.visibility_outlined,
@@ -297,10 +314,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ],
           ),
@@ -349,10 +363,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                 ),
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
                 ),
               ],
             ),
@@ -360,9 +371,9 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
           Row(
             children: [
               Icon(
-                isUp ? Icons.north_east : Icons.south_east, 
-                color: isUp ? Colors.greenAccent : Colors.redAccent, 
-                size: 16
+                isUp ? Icons.north_east : Icons.south_east,
+                color: isUp ? Colors.greenAccent : Colors.redAccent,
+                size: 16,
               ),
               const SizedBox(width: 4),
               Text(
@@ -414,21 +425,26 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                 ],
               ),
               if (showViewAll)
-                Row(
-                  children: [
-                    Text(
-                      'View All',
-                      style: TextStyle(
-                        color: Colors.pink.shade300,
-                        fontSize: 14,
+                InkWell(
+                  onTap: () {
+                    controller.changeIndex(3);
+                  },
+                  child: Row(
+                    children: [
+                      Text(
+                        'View All',
+                        style: TextStyle(
+                          color: Colors.pink.shade300,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    Icon(
-                      Icons.chevron_right,
-                      color: Colors.pink.shade300,
-                      size: 18,
-                    ),
-                  ],
+                      Icon(
+                        Icons.chevron_right,
+                        color: Colors.pink.shade300,
+                        size: 18,
+                      ),
+                    ],
+                  ),
                 ),
             ],
           ),
@@ -441,7 +457,12 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
 
   Widget _buildActivityChart(List<dynamic>? trendData) {
     if (trendData == null || trendData.isEmpty) {
-      return const Center(child: Text('No activity data', style: TextStyle(color: Colors.white38)));
+      return const Center(
+        child: Text(
+          'No activity data',
+          style: TextStyle(color: Colors.white38),
+        ),
+      );
     }
 
     return Column(
@@ -449,9 +470,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
         SizedBox(
           height: 150,
           width: double.infinity,
-          child: CustomPaint(
-            painter: LineChartPainter(trendData),
-          ),
+          child: CustomPaint(painter: LineChartPainter(trendData)),
         ),
         const SizedBox(height: 20),
         SingleChildScrollView(
@@ -494,7 +513,10 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
     if (cardStats == null) return Container();
 
     final int total = cardStats['total'] ?? 0;
-    if (total == 0) return const Center(child: Text('No card data', style: TextStyle(color: Colors.white38)));
+    if (total == 0)
+      return const Center(
+        child: Text('No card data', style: TextStyle(color: Colors.white38)),
+      );
 
     final int assigned = cardStats['assigned'] ?? 0;
     final int unassigned = cardStats['unassigned'] ?? 0;
@@ -507,9 +529,18 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
           borderRadius: BorderRadius.circular(4),
           child: Row(
             children: [
-              Expanded(flex: assigned, child: Container(height: 12, color: const Color(0xFF00C950))),
-              Expanded(flex: unassigned, child: Container(height: 12, color: const Color(0xFF51A2FF))),
-              Expanded(flex: inactive, child: Container(height: 12, color: const Color(0xFFFB2C36))),
+              Expanded(
+                flex: assigned,
+                child: Container(height: 12, color: const Color(0xFF00C950)),
+              ),
+              Expanded(
+                flex: unassigned,
+                child: Container(height: 12, color: const Color(0xFF51A2FF)),
+              ),
+              Expanded(
+                flex: inactive,
+                child: Container(height: 12, color: const Color(0xFFFB2C36)),
+              ),
             ],
           ),
         ),
@@ -520,10 +551,26 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
           crossAxisCount: 2,
           childAspectRatio: 3,
           children: [
-            _buildStatusItem('Assigned Cards', '$assigned (${((assigned/total)*100).toInt()}%)', const Color(0xFF00C950)),
-            _buildStatusItem('Unassigned Cards', '$unassigned (${((unassigned/total)*100).toInt()}%)', const Color(0xFF51A2FF)),
-            _buildStatusItem('Active Cards', '$active', const Color(0xFF00C950).withOpacity(0.6)),
-            _buildStatusItem('Inactive Cards', '$inactive', const Color(0xFFFB2C36)),
+            _buildStatusItem(
+              'Assigned Cards',
+              '$assigned (${((assigned / total) * 100).toInt()}%)',
+              const Color(0xFF00C950),
+            ),
+            _buildStatusItem(
+              'Unassigned Cards',
+              '$unassigned (${((unassigned / total) * 100).toInt()}%)',
+              const Color(0xFF51A2FF),
+            ),
+            _buildStatusItem(
+              'Active Cards',
+              '$active',
+              const Color(0xFF00C950).withOpacity(0.6),
+            ),
+            _buildStatusItem(
+              'Inactive Cards',
+              '$inactive',
+              const Color(0xFFFB2C36),
+            ),
           ],
         ),
       ],
@@ -550,7 +597,11 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
               ),
               Text(
                 value,
-                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -561,7 +612,12 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
 
   Widget _buildTopPerformingCards(List<dynamic>? topCards) {
     if (topCards == null || topCards.isEmpty) {
-      return const Center(child: Text('No performance data', style: TextStyle(color: Colors.white38)));
+      return const Center(
+        child: Text(
+          'No performance data',
+          style: TextStyle(color: Colors.white38),
+        ),
+      );
     }
 
     return Column(
@@ -570,13 +626,20 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
         final name = card['name'] ?? 'Untitled Card';
         final scans = card['scanCount'] ?? card['hits'] ?? 0;
         final views = card['viewCount'] ?? 0;
-        
+
         Color rankColor;
-        switch(index) {
-          case 1: rankColor = Colors.orange; break;
-          case 2: rankColor = Colors.blueGrey; break;
-          case 3: rankColor = Colors.brown; break;
-          default: rankColor = Colors.grey;
+        switch (index) {
+          case 1:
+            rankColor = Colors.orange;
+            break;
+          case 2:
+            rankColor = Colors.blueGrey;
+            break;
+          case 3:
+            rankColor = Colors.brown;
+            break;
+          default:
+            rankColor = Colors.grey;
         }
 
         return Container(
@@ -598,7 +661,10 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                 ),
                 child: Text(
                   '#$index',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -608,17 +674,40 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                   children: [
                     Text(
                       name,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Row(
                       children: [
-                        const Icon(Icons.qr_code_scanner, color: Colors.white54, size: 14),
+                        const Icon(
+                          Icons.qr_code_scanner,
+                          color: Colors.white54,
+                          size: 14,
+                        ),
                         const SizedBox(width: 4),
-                        Text(scans.toString(), style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                        Text(
+                          scans.toString(),
+                          style: const TextStyle(
+                            color: Colors.white54,
+                            fontSize: 12,
+                          ),
+                        ),
                         const SizedBox(width: 12),
-                        const Icon(Icons.visibility_outlined, color: Colors.white54, size: 14),
+                        const Icon(
+                          Icons.visibility_outlined,
+                          color: Colors.white54,
+                          size: 14,
+                        ),
                         const SizedBox(width: 4),
-                        Text(views.toString(), style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                        Text(
+                          views.toString(),
+                          style: const TextStyle(
+                            color: Colors.white54,
+                            fontSize: 12,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -631,7 +720,10 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
     );
   }
 
-  Widget _buildGroupsSummary(Map<String, dynamic>? groupStats, List<dynamic>? recentGroups) {
+  Widget _buildGroupsSummary(
+    Map<String, dynamic>? groupStats,
+    List<dynamic>? recentGroups,
+  ) {
     final total = groupStats?['total'] ?? 0;
     final shared = groupStats?['shared'] ?? 0;
 
@@ -640,12 +732,14 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
       children: [
         Row(
           children: [
-            Expanded(
-              child: _buildSummaryBox(total.toString(), 'Total Groups'),
-            ),
+            Expanded(child: _buildSummaryBox(total.toString(), 'Total Groups')),
             const SizedBox(width: 16),
             Expanded(
-              child: _buildSummaryBox(shared.toString(), 'Shared Groups', icon: Icons.share),
+              child: _buildSummaryBox(
+                shared.toString(),
+                'Shared Groups',
+                icon: Icons.share,
+              ),
             ),
           ],
         ),
@@ -656,7 +750,14 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
             style: TextStyle(color: Colors.white54, fontSize: 12),
           ),
           const SizedBox(height: 12),
-          ...recentGroups.take(2).map((g) => _buildGroupItem(g['name'] ?? 'Untitled', '${g['members']?.length ?? 0} members')),
+          ...recentGroups
+              .take(2)
+              .map(
+                (g) => _buildGroupItem(
+                  g['name'] ?? 'Untitled',
+                  '${g['members']?.length ?? 0} members',
+                ),
+              ),
         ],
       ],
     );
@@ -680,7 +781,11 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
               ],
               Text(
                 value,
-                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -701,7 +806,10 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(name, style: const TextStyle(color: Colors.white, fontSize: 14)),
-          Text(members, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+          Text(
+            members,
+            style: const TextStyle(color: Colors.white54, fontSize: 12),
+          ),
         ],
       ),
     );
@@ -709,7 +817,12 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
 
   Widget _buildRecentActivity(List<OrgRecentActivity>? activities) {
     if (activities == null || activities.isEmpty) {
-      return const Center(child: Text('No recent activity', style: TextStyle(color: Colors.white38)));
+      return const Center(
+        child: Text(
+          'No recent activity',
+          style: TextStyle(color: Colors.white38),
+        ),
+      );
     }
 
     return Column(
@@ -717,15 +830,26 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
         final title = activity.action;
         final subtitle = activity.user ?? 'System';
         final time = _formatActivityTime(activity.createdAt);
-        
+
         Color color;
         IconData icon;
-        
-        switch(activity.type) {
-          case 'success': color = Colors.green; icon = Icons.check_circle; break;
-          case 'error': color = Colors.red; icon = Icons.error; break;
-          case 'warning': color = Colors.orange; icon = Icons.warning; break;
-          default: color = Colors.blue; icon = Icons.info;
+
+        switch (activity.type) {
+          case 'success':
+            color = Colors.green;
+            icon = Icons.check_circle;
+            break;
+          case 'error':
+            color = Colors.red;
+            icon = Icons.error;
+            break;
+          case 'warning':
+            color = Colors.orange;
+            icon = Icons.warning;
+            break;
+          default:
+            color = Colors.blue;
+            icon = Icons.info;
         }
 
         return Padding(
@@ -747,11 +871,18 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                     Text(
                       subtitle,
-                      style: const TextStyle(color: Colors.white54, fontSize: 12),
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -832,10 +963,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
               const SizedBox(height: 8),
               const Text(
                 'Scan a card to see it appear here',
-                style: TextStyle(
-                  color: Colors.white54,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.white54, fontSize: 14),
               ),
               const SizedBox(height: 32),
             ],
@@ -865,7 +993,9 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
               shadowColor: Colors.transparent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
             ),
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,

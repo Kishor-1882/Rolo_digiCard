@@ -26,14 +26,14 @@ class SideBar extends StatefulWidget {
 class _SideBarState extends State<SideBar> {
   final FlutterSecureStorage storage = const FlutterSecureStorage();
   bool _isOrg = false;
-  int _currentIndex = 0;
   bool _isLoading = true;
+  late OrganizationController _orgController;
 
   @override
   void initState() {
     super.initState();
+    _orgController = Get.put(OrganizationController());
     _checkUserType();
-    Get.put(OrganizationController());
     Get.put(SavedItemsController());
     Get.put(CardManagementController());
     Get.put(GroupManagementController());
@@ -49,119 +49,116 @@ class _SideBarState extends State<SideBar> {
       });
     }
   }
-  
 
   final List<Widget> _pages = [
-     DashboardPage(),
+    DashboardPage(),
     const MyCardsPage(),
     const SavedCards(),
     const ProfilePage(),
   ];
 
-
   final List<Widget> _orgPages = [
     OrganizationDashboardView(),
-     OrganizationSavedView(),
-     OrganizationCardsView(),
-     OrganizationGroupsView(),
-     AnalyticsView(),
+    OrganizationSavedView(),
+    OrganizationCardsView(),
+    OrganizationGroupsView(),
+    AnalyticsView(),
   ];
-
 
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Color(0xFF1a1a1a),
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.pink),
-        ),
+        body: Center(child: CircularProgressIndicator(color: Colors.pink)),
       );
     }
-    return Scaffold(
-      body: _isOrg ? _orgPages[_currentIndex] : _pages[_currentIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF2a2a2a),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
+    return Obx(
+      () => Scaffold(
+        body: _isOrg
+            ? _orgPages[_orgController.selectedNavIndex.value]
+            : _pages[_orgController.selectedNavIndex.value],
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF2a2a2a),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
+              child: _isOrg
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Expanded(
+                          child: _buildNavItemOrg(
+                            icon: Icons.grid_view_rounded,
+                            label: 'Dashboard',
+                            index: 0,
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildNavItemOrg(
+                            icon: Icons.bookmark_outline,
+                            label: 'Saved',
+                            index: 1,
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildNavItemOrg(
+                            icon: Icons.credit_card,
+                            label: 'Cards',
+                            index: 2,
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildNavItemOrg(
+                            icon: Icons.group_outlined,
+                            label: 'Groups',
+                            index: 3,
+                          ),
+                        ),
+                        Expanded(
+                          child: _buildNavItemOrg(
+                            icon: Icons.analytics_outlined,
+                            label: 'Analytics',
+                            index: 4,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildNavItem(
+                          icon: Icons.grid_view_rounded,
+                          label: 'Home',
+                          index: 0,
+                        ),
+                        _buildNavItem(
+                          icon: Icons.credit_card,
+                          label: 'My Cards',
+                          index: 1,
+                        ),
+                        _buildNavItem(
+                          icon: Icons.bookmark_outline,
+                          label: 'Saved',
+                          index: 2,
+                        ),
+                        _buildNavItem(
+                          icon: Icons.account_circle_outlined,
+                          label: 'Profile',
+                          index: 3,
+                        ),
+                      ],
+                    ),
             ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16,  right:16,bottom: 8),
-            child: 
-            _isOrg?
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Expanded(
-                  child: _buildNavItemOrg(
-                    icon: Icons.grid_view_rounded,
-                    label: 'Dashboard',
-                    index: 0,
-                  ),
-                ),
-                Expanded(
-                  child: _buildNavItemOrg(
-                    icon: Icons.bookmark_outline,
-                    label: 'Saved',
-                    index: 1,
-                  ),
-                ),
-                Expanded(
-                  child: _buildNavItemOrg(
-                    icon: Icons.credit_card,
-                    label: 'Cards',
-                    index: 2,
-                  ),
-                ),
-                Expanded(
-                  child: _buildNavItemOrg(
-                    icon: Icons.group_outlined,
-                    label: 'Groups',
-                    index: 3,
-                  ),
-                ),
-                Expanded(
-                  child: _buildNavItemOrg(
-                    icon: Icons.analytics_outlined,
-                    label: 'Analytics',
-                    index: 4,
-                  ),
-                ),
-              ],
-            )
-            :Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(
-                  icon: Icons.grid_view_rounded,
-                  label: 'Home',
-                  index: 0,
-                ),
-                _buildNavItem(
-                  icon: Icons.credit_card,
-                  label: 'My Cards',
-                  index: 1,
-                ),
-                _buildNavItem(
-                  icon: Icons.bookmark_outline,
-                  label: 'Saved',
-                  index: 2,
-                ),
-                _buildNavItem(
-                  icon: Icons.account_circle_outlined,
-                  label: 'Profile',
-                  index: 3,
-                ),
-              ],
-            ),
-
           ),
         ),
       ),
@@ -173,12 +170,10 @@ class _SideBarState extends State<SideBar> {
     required String label,
     required int index,
   }) {
-    final isSelected = _currentIndex == index;
+    final isSelected = _orgController.selectedNavIndex.value == index;
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _currentIndex = index;
-        });
+        _orgController.selectedNavIndex.value = index;
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -190,13 +185,10 @@ class _SideBarState extends State<SideBar> {
             decoration: BoxDecoration(
               gradient: isSelected
                   ? LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color(0xFFF6339A),
-                  Color(0xFF9810FA),
-                ],
-              )
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [Color(0xFFF6339A), Color(0xFF9810FA)],
+                    )
                   : null,
               borderRadius: BorderRadius.circular(2),
             ),
@@ -227,7 +219,9 @@ class _SideBarState extends State<SideBar> {
                   style: TextStyle(
                     color: isSelected ? Color(0xFFFB64B6) : Color(0xFF6A7282),
                     fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.w500
+                        : FontWeight.normal,
                   ),
                 ),
               ],
@@ -238,17 +232,15 @@ class _SideBarState extends State<SideBar> {
     );
   }
 
-   Widget _buildNavItemOrg({
+  Widget _buildNavItemOrg({
     required IconData icon,
     required String label,
     required int index,
   }) {
-    final isSelected = _currentIndex == index;
+    final isSelected = _orgController.selectedNavIndex.value == index;
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _currentIndex = index;
-        });
+        _orgController.selectedNavIndex.value = index;
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -260,13 +252,10 @@ class _SideBarState extends State<SideBar> {
             decoration: BoxDecoration(
               gradient: isSelected
                   ? LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color(0xFFF6339A),
-                  Color(0xFF9810FA),
-                ],
-              )
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [Color(0xFFF6339A), Color(0xFF9810FA)],
+                    )
                   : null,
               borderRadius: BorderRadius.circular(2),
             ),
@@ -297,7 +286,9 @@ class _SideBarState extends State<SideBar> {
                   style: TextStyle(
                     color: isSelected ? Color(0xFFFB64B6) : Color(0xFF6A7282),
                     fontSize: 10,
-                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.w500
+                        : FontWeight.normal,
                   ),
                 ),
               ],

@@ -17,11 +17,17 @@ class OrganizationController extends GetxController {
   var organization = Rxn<OrganizationModel>();
   var currentUser = Rxn<OrganizationUserModel>();
   var dashboardStats = Rxn<OrgDashboardStats>();
+  var selectedNavIndex = 0.obs;
+
+  void changeIndex(int index) {
+    selectedNavIndex.value = index;
+  }
 
   // Text Controllers
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
-  final domainController = TextEditingController(); // Assuming single domain input for creation
+  final domainController =
+      TextEditingController(); // Assuming single domain input for creation
 
   @override
   void onInit() {
@@ -53,7 +59,9 @@ class OrganizationController extends GetxController {
         'name': nameController.text.trim(),
         'description': descriptionController.text.trim(),
         // Add domains if required by API, assuming list for now based on model
-        'domains': domainController.text.isNotEmpty ? [domainController.text.trim()] : [],
+        'domains': domainController.text.isNotEmpty
+            ? [domainController.text.trim()]
+            : [],
       };
 
       log("Create Org Data: ${jsonEncode(data)}");
@@ -65,11 +73,13 @@ class OrganizationController extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         log("Create Org Response: ${response.data}");
-        
+
         // Assuming response structure has 'organization' key or is the object itself
         // Adjust based on actual API response for Create
         if (response.data['organization'] != null) {
-          organization.value = OrganizationModel.fromJson(response.data['organization']);
+          organization.value = OrganizationModel.fromJson(
+            response.data['organization'],
+          );
         }
 
         CommonSnackbar.success('Organization created successfully');
@@ -83,7 +93,7 @@ class OrganizationController extends GetxController {
       update();
       String errorMessage = 'Failed to create organization';
       if (e.response != null) {
-         errorMessage = e.response?.data['message'] ?? errorMessage;
+        errorMessage = e.response?.data['message'] ?? errorMessage;
       }
       log("Create Org Error: $e");
       CommonSnackbar.error(errorMessage);
@@ -109,10 +119,14 @@ class OrganizationController extends GetxController {
       if (response.statusCode == 200) {
         // Based on API.txt: { "user": ..., "organization": ... }
         if (response.data['organization'] != null) {
-          organization.value = OrganizationModel.fromJson(response.data['organization']);
+          organization.value = OrganizationModel.fromJson(
+            response.data['organization'],
+          );
         }
         if (response.data['user'] != null) {
-          currentUser.value = OrganizationUserModel.fromJson(response.data['user']);
+          currentUser.value = OrganizationUserModel.fromJson(
+            response.data['user'],
+          );
         }
       }
     } on DioException catch (e) {
@@ -147,13 +161,13 @@ class OrganizationController extends GetxController {
   }
 
   // Update Settings (Assuming PUT or POST based on endpoint, usually PUT for settings)
-  // API.txt shows a response, but we need to know the method. 
+  // API.txt shows a response, but we need to know the method.
   // Assuming POST or PUT to '/api/organization/settings' with body.
-  // For now implementing structure, might need adjustment if it's just GET. 
+  // For now implementing structure, might need adjustment if it's just GET.
   // (API.txt shows "Response" for settings, could be GET settings or response to update)
   // If it's GET:
   Future<void> getSettings() async {
-     try {
+    try {
       isLoading.value = true;
       update();
 
@@ -161,14 +175,16 @@ class OrganizationController extends GetxController {
 
       if (response.statusCode == 200) {
         if (response.data['organization'] != null) {
-           // Update organization in state with new settings if returned
-            if(organization.value != null){
-               // Logic to update just settings or replace org
-               // Since reponse has organization object, we can likely update it
-               organization.value = OrganizationModel.fromJson(response.data['organization']);
-            }
+          // Update organization in state with new settings if returned
+          if (organization.value != null) {
+            // Logic to update just settings or replace org
+            // Since reponse has organization object, we can likely update it
+            organization.value = OrganizationModel.fromJson(
+              response.data['organization'],
+            );
+          }
         } else if (response.data['settings'] != null) {
-           // If direct settings object...
+          // If direct settings object...
         }
       }
     } catch (e) {
@@ -185,14 +201,17 @@ class OrganizationController extends GetxController {
       isLoading.value = true;
       update();
 
-      final response = await _dio.put( // Usually PUT for settings update
+      final response = await _dio.put(
+        // Usually PUT for settings update
         ApiEndpoints.organizationSettings,
         data: settings.toJson(),
       );
 
       if (response.statusCode == 200) {
         if (response.data['organization'] != null) {
-           organization.value = OrganizationModel.fromJson(response.data['organization']);
+          organization.value = OrganizationModel.fromJson(
+            response.data['organization'],
+          );
         }
         CommonSnackbar.success('Settings updated successfully');
       }
@@ -205,24 +224,29 @@ class OrganizationController extends GetxController {
     }
   }
 
-
   // Deactivate Organization
   Future<void> deactivateOrganization() async {
     try {
       isLoading.value = true;
       update();
 
-      final response = await _dio.post(ApiEndpoints.deactivateOrganization); // Assuming POST for action
+      final response = await _dio.post(
+        ApiEndpoints.deactivateOrganization,
+      ); // Assuming POST for action
 
       if (response.statusCode == 200) {
         if (response.data['organization'] != null) {
-          organization.value = OrganizationModel.fromJson(response.data['organization']);
+          organization.value = OrganizationModel.fromJson(
+            response.data['organization'],
+          );
         }
-        CommonSnackbar.success(response.data['message'] ?? 'Organization deactivated');
+        CommonSnackbar.success(
+          response.data['message'] ?? 'Organization deactivated',
+        );
       }
     } on DioException catch (e) {
       log("Deactivate Error: $e");
-       CommonSnackbar.error("Failed to deactivate");
+      CommonSnackbar.error("Failed to deactivate");
     } finally {
       isLoading.value = false;
       update();
@@ -235,13 +259,19 @@ class OrganizationController extends GetxController {
       isLoading.value = true;
       update();
 
-      final response = await _dio.post(ApiEndpoints.activateOrganization); // Assuming POST for action
+      final response = await _dio.post(
+        ApiEndpoints.activateOrganization,
+      ); // Assuming POST for action
 
       if (response.statusCode == 200) {
-         if (response.data['organization'] != null) {
-          organization.value = OrganizationModel.fromJson(response.data['organization']);
+        if (response.data['organization'] != null) {
+          organization.value = OrganizationModel.fromJson(
+            response.data['organization'],
+          );
         }
-        CommonSnackbar.success(response.data['message'] ?? 'Organization activated');
+        CommonSnackbar.success(
+          response.data['message'] ?? 'Organization activated',
+        );
       }
     } on DioException catch (e) {
       log("Activate Error: $e");
@@ -251,7 +281,6 @@ class OrganizationController extends GetxController {
       update();
     }
   }
-
 
   // Add Custom Domain
   Future<void> addCustomDomain(String domain) async {
@@ -266,14 +295,16 @@ class OrganizationController extends GetxController {
 
       if (response.statusCode == 200) {
         if (response.data['organization'] != null) {
-          organization.value = OrganizationModel.fromJson(response.data['organization']);
+          organization.value = OrganizationModel.fromJson(
+            response.data['organization'],
+          );
         }
         CommonSnackbar.success('Domain added successfully');
       }
     } on DioException catch (e) {
       log("Add Domain Error: $e");
       String msg = "Failed to add domain";
-      if(e.response != null) msg = e.response?.data['message'] ?? msg;
+      if (e.response != null) msg = e.response?.data['message'] ?? msg;
       CommonSnackbar.error(msg);
     } finally {
       isLoading.value = false;
@@ -287,11 +318,15 @@ class OrganizationController extends GetxController {
       isLoading.value = true;
       update();
 
-      final response = await _dio.delete(ApiEndpoints.removeCustomDomain(domain));
+      final response = await _dio.delete(
+        ApiEndpoints.removeCustomDomain(domain),
+      );
 
       if (response.statusCode == 200) {
         if (response.data['organization'] != null) {
-          organization.value = OrganizationModel.fromJson(response.data['organization']);
+          organization.value = OrganizationModel.fromJson(
+            response.data['organization'],
+          );
         }
         CommonSnackbar.success('Domain removed successfully');
       }
@@ -316,8 +351,10 @@ class OrganizationController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-         if (response.data['organization'] != null) {
-          organization.value = OrganizationModel.fromJson(response.data['organization']);
+        if (response.data['organization'] != null) {
+          organization.value = OrganizationModel.fromJson(
+            response.data['organization'],
+          );
         }
         CommonSnackbar.success('Ownership transferred successfully');
       }
