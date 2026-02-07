@@ -64,7 +64,7 @@ class HomePageController extends GetxController {
   final Dio _dio = dioClient;
 
   @override
-  void onInit(){
+  void onInit() {
     super.onInit();
     getDashboardAnalytics();
     getRecentCards();
@@ -150,7 +150,9 @@ class HomePageController extends GetxController {
     }
 
     final uri = Uri.tryParse(value.trim());
-    if (uri == null || !uri.hasAbsolutePath || !(uri.isScheme('http') || uri.isScheme('https'))) {
+    if (uri == null ||
+        !uri.hasAbsolutePath ||
+        !(uri.isScheme('http') || uri.isScheme('https'))) {
       return 'Enter a valid URL';
     }
 
@@ -163,7 +165,6 @@ class HomePageController extends GetxController {
         (uri.scheme == 'http' || uri.scheme == 'https') &&
         uri.host.isNotEmpty;
   }
-
 
   // Validate form data
   bool validateForm() {
@@ -209,13 +210,11 @@ class HomePageController extends GetxController {
       return false;
     }
 
-     if (websiteController.text.trim().isNotEmpty &&
+    if (websiteController.text.trim().isNotEmpty &&
         !isValidUrl(websiteController.text.trim())) {
       CommonSnackbar.error('Please enter a valid Website URL');
       return false;
     }
-
-
 
     return true;
   }
@@ -235,10 +234,10 @@ class HomePageController extends GetxController {
 
   Future<void> getDashboardAnalytics() async {
     try {
-      final  response = await dioClient.get(ApiEndpoints.dashboardCardCount);
+      final response = await dioClient.get(ApiEndpoints.dashboardCardCount);
 
       if (response.statusCode == 200) {
-        dashboardAnalytics= DashboardAnalytics.fromJson(response.data);
+        dashboardAnalytics = DashboardAnalytics.fromJson(response.data);
       } else {
         throw Exception('Failed to load dashboard analytics');
       }
@@ -309,17 +308,17 @@ class HomePageController extends GetxController {
       log("Create Card Data:${jsonEncode(cardDataMap)}");
 
       FormData formData;
-       // If image is selected, use FormData and add file
+      // If image is selected, use FormData and add file
       if (profileImage != null) {
         formData = FormData.fromMap({
           ...cardDataMap,
-           // Recursive JSON encoding might be needed for nested objects if backend expects stringified JSON for parts
-           // But Dio FormData supports nested maps in some versions or requires flat keys (e.g. contact[email]).
-           // For safety with complex nested objects in FormData, it is often better to send them as JSON strings if the backend supports it,
-           // OR flatten them. Assuming standard multipart/form-data handling where backend parses 'contact' as object.
-           // However, Flutter Dio FormData usually handles primitives and files. Nested maps might need `jsonEncode` if backend expects it as a string field.
-           // Let's assume backend relies on `body-parser` which might not parse nested keys in multipart automatically without 'dot' notation.
-           // Safest bet for now: Use existing structure but wrap in FormData.
+          // Recursive JSON encoding might be needed for nested objects if backend expects stringified JSON for parts
+          // But Dio FormData supports nested maps in some versions or requires flat keys (e.g. contact[email]).
+          // For safety with complex nested objects in FormData, it is often better to send them as JSON strings if the backend supports it,
+          // OR flatten them. Assuming standard multipart/form-data handling where backend parses 'contact' as object.
+          // However, Flutter Dio FormData usually handles primitives and files. Nested maps might need `jsonEncode` if backend expects it as a string field.
+          // Let's assume backend relies on `body-parser` which might not parse nested keys in multipart automatically without 'dot' notation.
+          // Safest bet for now: Use existing structure but wrap in FormData.
         });
         // Actually, Dio FormData with nested maps is tricky.
         // Let's manually construct it to be safe, or just add the file if present.
@@ -336,12 +335,12 @@ class HomePageController extends GetxController {
         // but I will collect the data in the controller.
         // User asked to "tell me whether i missed anything". I told them. They said "ok".
         // Implementation plan said: "Update createCard... to include this new data".
-        
+
         // Let's just update the JSON payload for now.
       }
-      
+
       // Updating fields in the JSON payload
-      
+
       final response = await _dio.post(
         ApiEndpoints.createCard,
         data: cardDataMap,
@@ -361,7 +360,7 @@ class HomePageController extends GetxController {
         resetForm();
         getRecentCards();
       }
-    } on DioException catch (e,t) {
+    } on DioException catch (e, t) {
       isLoading.value = true;
       update();
       String errorMessage = 'Failed to create card';
@@ -370,7 +369,8 @@ class HomePageController extends GetxController {
         // Server responded with an error
         errorMessage = e.response?.data['message'] ?? errorMessage;
       } else if (e.type == DioExceptionType.connectionTimeout) {
-        errorMessage = 'Connection timeout. Please check your internet connection.';
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
       } else if (e.type == DioExceptionType.receiveTimeout) {
         errorMessage = 'Server took too long to respond.';
       } else if (e.type == DioExceptionType.unknown) {
@@ -441,7 +441,7 @@ class HomePageController extends GetxController {
         cardDataMap['tags'] = skills.toList();
       }
 
-       log("Update Card Data:${jsonEncode(cardDataMap)}");
+      log("Update Card Data:${jsonEncode(cardDataMap)}");
 
       // Make API request using Dio
       final response = await _dio.put(
@@ -470,7 +470,8 @@ class HomePageController extends GetxController {
         // Server responded with an error
         errorMessage = e.response?.data['message'] ?? errorMessage;
       } else if (e.type == DioExceptionType.connectionTimeout) {
-        errorMessage = 'Connection timeout. Please check your internet connection.';
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
       } else if (e.type == DioExceptionType.receiveTimeout) {
         errorMessage = 'Server took too long to respond.';
       } else if (e.type == DioExceptionType.unknown) {
@@ -486,38 +487,30 @@ class HomePageController extends GetxController {
     }
   }
 
-
-  Future<void> getRecentCards({
-    int page = 1,
-    int limit = 10,
-  }) async {
+  Future<void> getRecentCards({int page = 1, int limit = 10}) async {
     try {
-      isLoadingCards.value= true;
-      final response = await DioClient().dio.get(
-        ApiEndpoints.myCard,
-      );
+      isLoadingCards.value = true;
+      final response = await DioClient().dio.get(ApiEndpoints.myCard);
       if (response.statusCode == 200) {
-         cardsResponse = CardsResponseModel.fromJson(response.data);
-         cardsResponse?.cards.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-         isLoadingCards.value= false;
+        cardsResponse = CardsResponseModel.fromJson(response.data);
+        cardsResponse?.cards.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        isLoadingCards.value = false;
       } else {
-        isLoadingCards.value= false;
+        isLoadingCards.value = false;
       }
       update();
     } catch (e) {
-      isLoadingCards.value= false;
+      isLoadingCards.value = false;
       log("Error in CardResponse:$e");
       update();
     }
   }
 
   Future<void> deleteCard(BuildContext context, String cardId) async {
-      isLoading.value = true;
-      update();
+    isLoading.value = true;
+    update();
     try {
-      final response = await dioClient.delete(
-        ApiEndpoints.deleteCard(cardId),
-      );
+      final response = await dioClient.delete(ApiEndpoints.deleteCard(cardId));
       isLoading.value = false;
       update();
       if (response.statusCode == 200 || response.statusCode == 204) {
@@ -526,14 +519,11 @@ class HomePageController extends GetxController {
       } else {
         // Unexpected status code
       }
-      }  catch (e) {
-        isLoading.value = false;
-        update();
-
+    } catch (e) {
+      isLoading.value = false;
+      update();
     }
   }
-
-
 
   // Reset form
   void resetForm() {
@@ -576,7 +566,10 @@ class HomePageController extends GetxController {
 
   // Navigate to view card
   void viewCard(String cardId) {
-    Get.toNamed('/card-detail', arguments: {'cardId': cardId}); // Adjust route name as needed
+    Get.toNamed(
+      '/card-detail',
+      arguments: {'cardId': cardId},
+    ); // Adjust route name as needed
   }
 
   // Add these getter methods in your controller class
@@ -596,5 +589,47 @@ class HomePageController extends GetxController {
   int get totalScans {
     if (cardsResponse?.cards == null) return 0;
     return cardsResponse!.cards.fold(0, (sum, card) => sum + card.scanCount);
+  }
+
+  Map<String, dynamic> buildCardDataMap(Map<String, String> themeColors) {
+    return {
+      'name': nameController.text.trim(),
+      'title': designationController.text.trim(),
+      'company': companyController.text.trim(),
+      'industry': industryController.text.trim(),
+      'contact': {
+        'email': emailController.text.trim(),
+        'phone': phoneController.text.trim(),
+        'mobileNumber': phoneController.text.trim(),
+        'personalEmail': personalEmailController.text.trim(),
+        'personalPhone': personalPhoneController.text.trim(),
+        'hidePersonalEmail': false,
+        'hidePersonalPhone': false,
+      },
+      'address': {
+        'addressLine1': addressLine1Controller.text.trim(),
+        'addressLine2': addressLine2Controller.text.trim(),
+        'city': cityController.text.trim(),
+        'state': stateController.text.trim(),
+        'country': countryController.text.trim(),
+        'zipCode': zipController.text.trim(),
+      },
+      'bio': bioController.text.trim(),
+      'website': websiteController.text.trim(),
+      'linkedinUrl': linkedinController.text.trim(),
+      'twitterUrl': twitterController.text.trim(),
+      'instagramUrl': instagramController.text.trim(),
+      'githubUrl': githubController.text.trim(),
+      'facebookUrl': facebookController.text.trim(),
+      'youtubeUrl': youtubeController.text.trim(),
+      'tags': skills.toList(),
+      'theme': {
+        'cardStyle': themeColors['cardStyle'],
+        'primaryColor': themeColors['primaryColor'],
+        'backgroundColor': themeColors['backgroundColor'],
+        'textColor': themeColors['textColor'],
+      },
+      'isPublic': isPublicCard.value,
+    };
   }
 }

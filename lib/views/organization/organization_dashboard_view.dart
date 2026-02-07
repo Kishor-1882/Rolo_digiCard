@@ -5,6 +5,7 @@ import 'package:rolo_digi_card/models/organization_model.dart';
 import 'package:rolo_digi_card/utils/color.dart';
 import 'package:rolo_digi_card/views/organization/organization_qr_scanner_view.dart';
 import 'package:rolo_digi_card/views/organization/widgets/line_chart_painter.dart';
+import 'package:rolo_digi_card/views/profile_page/profile_page.dart';
 
 class OrganizationDashboardView extends GetView<OrganizationController> {
   const OrganizationDashboardView({super.key});
@@ -81,7 +82,16 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                 _buildSectionCard(
                   title: 'Recent Activity',
                   icon: Icons.access_time,
-                  child: _buildRecentActivity(stats?.recentActivities),
+                  child: SizedBox(
+                    height: 200,
+                    child: Scrollbar(
+                      thickness: 4,
+                      trackVisibility: false,
+                      child: SingleChildScrollView(
+                        child: _buildRecentActivity(stats?.recentActivities),
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 _buildScannedCards(),
@@ -133,6 +143,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
         ),
         GestureDetector(
           onTap: () {
+            Get.to(() => const ProfilePage());
             // Profile action
           },
           child: Container(
@@ -174,16 +185,18 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
       children: [
         Row(
           children: [
-            Text(
-              '${getGreeting()}, ${controller.currentUser.value?.fullName.split(' ').first ?? 'User'}',
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+            Expanded(
+              child: Text(
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                '${getGreeting()}, ${controller.currentUser.value?.fullName.split(' ').first ?? 'User'} 👋',
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            const SizedBox(width: 8),
-            const Text('👋', style: TextStyle(fontSize: 24)),
           ],
         ),
         const Text(
@@ -538,6 +551,10 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                 child: Container(height: 12, color: const Color(0xFF51A2FF)),
               ),
               Expanded(
+                flex: active,
+                child: Container(height: 12, color: const Color(0xFF74EF9F)),
+              ),
+              Expanded(
                 flex: inactive,
                 child: Container(height: 12, color: const Color(0xFFFB2C36)),
               ),
@@ -564,7 +581,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
             _buildStatusItem(
               'Active Cards',
               '$active',
-              const Color(0xFF00C950).withOpacity(0.6),
+              const Color(0xFF74EF9F),
             ),
             _buildStatusItem(
               'Inactive Cards',

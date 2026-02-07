@@ -28,8 +28,8 @@ class ContactModel {
       email: json['email'],
       phone: json['phone'],
       mobileNumber: json['mobileNumber'],
-      personalEmail: json['personalEmail'],
-      personalPhone: json['personalPhone'],
+      personalEmail: json['personalEmail']?.toString(),
+      personalPhone: json['personalPhone']?.toString(),
       hidePersonalEmail: json['hidePersonalEmail'] ?? false,
       hidePersonalPhone: json['hidePersonalPhone'] ?? false,
       isEmailVerified: json['isEmailVerified'] ?? false,
@@ -227,7 +227,9 @@ class CardModel {
       facebookUrl: json['facebookUrl'],
       youtubeUrl: json['youtubeUrl'],
       website: json['website'],
-      address: json['address'] != null ? AddressModel.fromJson(json['address']) : null,
+      address: json['address'] != null
+          ? AddressModel.fromJson(json['address'])
+          : null,
       company: json['company'] ?? '',
       industry: json['industry'] ?? '',
       profile: json['profile'],
@@ -249,8 +251,12 @@ class CardModel {
       customLinks: json['customLinks'] ?? [],
       contact: ContactModel.fromJson(json['contact'] ?? {}),
       theme: ThemeModel.fromJson(json['theme'] ?? {}),
-      createdAt: json['createdAt'] == null ? DateTime.now() : DateTime.parse(json['createdAt']),
-      updatedAt: json['updatedAt'] == null ? DateTime.now() : DateTime.parse(json['updatedAt']),
+      createdAt: json['createdAt'] == null
+          ? DateTime.now()
+          : DateTime.parse(json['createdAt']),
+      updatedAt: json['updatedAt'] == null
+          ? DateTime.now()
+          : DateTime.parse(json['updatedAt']),
     );
   }
 
@@ -319,12 +325,7 @@ class PaginationModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'page': page,
-      'limit': limit,
-      'total': total,
-      'pages': pages,
-    };
+    return {'page': page, 'limit': limit, 'total': total, 'pages': pages};
   }
 }
 
@@ -333,10 +334,7 @@ class CardsResponseModel {
   final List<CardModel> cards;
   final PaginationModel pagination;
 
-  CardsResponseModel({
-    required this.cards,
-    required this.pagination,
-  });
+  CardsResponseModel({required this.cards, required this.pagination});
 
   factory CardsResponseModel.fromJson(Map<String, dynamic> json) {
     return CardsResponseModel(

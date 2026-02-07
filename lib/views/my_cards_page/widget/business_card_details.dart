@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/contact.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
@@ -18,13 +19,11 @@ import 'package:share_plus/share_plus.dart';
 
 class BusinessCardProfilePage extends StatefulWidget {
   final String cardId;
-   BusinessCardProfilePage({
-    Key? key,
-     required this.cardId
-  }) : super(key: key);
+  BusinessCardProfilePage({Key? key, required this.cardId}) : super(key: key);
 
   @override
-  State<BusinessCardProfilePage> createState() => _BusinessCardProfilePageState();
+  State<BusinessCardProfilePage> createState() =>
+      _BusinessCardProfilePageState();
 }
 
 class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
@@ -53,17 +52,26 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
     }
   }
 
-
-  Future<CardModel> getCardDetails() async {
+  Future<CardModel> getCardDetails({bool isOrg = false}) async {
     try {
       final response = await dioClient.get(
-        ApiEndpoints.viewPublicCard(widget.cardId),
+        isOrg
+            ? ApiEndpoints.getOrgCard(widget.cardId)
+            : ApiEndpoints.viewPublicCard(widget.cardId),
       );
+      // log('Response in :${response.data}');
 
-      final cardJson = response.data['card'];
+      final cardJson = isOrg ? response.data : response.data['card'];
       return CardModel.fromJson(cardJson);
-    }
-    catch(e,t){
+    } catch (e, t) {
+      String errorMessage = 'Failed to load card';
+      if (e is DioException) {
+        log('Error in :${e.response?.data}');
+        errorMessage =
+            e.response?.data['message'] ??
+            e.response?.data['error'] ??
+            errorMessage;
+      }
       log("Error in :$e $t");
       throw "dd";
     }
@@ -71,8 +79,13 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
 
   @override
   void initState() {
+    final args = Get.arguments;
+    bool isOrganization = false;
+    if (args != null && args is Map<String, dynamic>) {
+      isOrganization = args['isOrganization'] ?? false;
+    }
     super.initState();
-    cardFuture = getCardDetails();
+    cardFuture = getCardDetails(isOrg: isOrganization);
   }
 
   Color hexToColor(String hex) {
@@ -83,14 +96,11 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
     return Color(int.parse(hex, radix: 16));
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder<CardModel>(
-        future: cardFuture,
+      future: cardFuture,
       builder: (context, snapshot) {
-
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             backgroundColor: Color(0xFFF5F5F5),
@@ -109,7 +119,9 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
         log("Card Json:${card.toJson()}");
 
         return Scaffold(
-          backgroundColor: card.theme.cardStyle=="professional" ? Color(0xFFF9FAFB) : Color(0xFF0A0A0A),
+          backgroundColor: card.theme.cardStyle == "professional"
+              ? Color(0xFFF9FAFB)
+              : Color(0xFF0A0A0A),
           body: SafeArea(
             child: Column(
               children: [
@@ -122,7 +134,13 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      icon: Icon(Icons.arrow_back, color:  card.theme.cardStyle=="professional" ? Colors.black : Colors.white , size: 24),
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: card.theme.cardStyle == "professional"
+                            ? Colors.black
+                            : Colors.white,
+                        size: 24,
+                      ),
                       padding: EdgeInsets.zero,
                       constraints: BoxConstraints(),
                     ),
@@ -139,7 +157,13 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(25),
                           image: DecorationImage(
-                            image: AssetImage(card.theme.cardStyle=='glassmorphic'?'assets/card_background/glass_test.png':card.theme.cardStyle=='dark'  ? 'assets/card_background/black.png' : 'assets/card_background/white.png'), // or NetworkImage(...)
+                            image: AssetImage(
+                              card.theme.cardStyle == 'glassmorphic'
+                                  ? 'assets/card_background/glass_test.png'
+                                  : card.theme.cardStyle == 'dark'
+                                  ? 'assets/card_background/black.png'
+                                  : 'assets/card_background/white.png',
+                            ), // or NetworkImage(...)
                             fit: BoxFit.cover,
                             // colorFilter: ColorFilter.mode(
                             //   Colors.white.withOpacity(0.85), // readability ku
@@ -155,52 +179,57 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                             // Profile avatar
                             card.profile != null && card.profile!.isNotEmpty
                                 ? Container(
-                              width: 90,
-                              height: 90,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                  image: card.profile!.startsWith('http')
-                                      ? NetworkImage(card.profile!)
-                                      : MemoryImage(
-                                    _base64ToImage(card.profile!)!,
-                                  ) as ImageProvider,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            )
+                                    width: 90,
+                                    height: 90,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                        image: card.profile!.startsWith('http')
+                                            ? NetworkImage(card.profile!)
+                                            : MemoryImage(
+                                                    _base64ToImage(
+                                                      card.profile!,
+                                                    )!,
+                                                  )
+                                                  as ImageProvider,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  )
                                 : Container(
-                              width: 90,
-                              height: 90,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  colors: [
-                                    Color(0xFF615FFF),
-                                    Color(0xFF9810FA),
-                                  ],
-                                ),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  _getInitials(card.name),
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.w500,
+                                    width: 90,
+                                    height: 90,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.centerLeft,
+                                        end: Alignment.centerRight,
+                                        colors: [
+                                          Color(0xFF615FFF),
+                                          Color(0xFF9810FA),
+                                        ],
+                                      ),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        _getInitials(card.name),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 36,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ),
                             const SizedBox(height: 16),
 
                             // Name
                             Text(
                               card.name,
                               style: TextStyle(
-                                color:card.theme.cardStyle=='professional' ? Color(0xFF101828) : Colors.white,
+                                color: card.theme.cardStyle == 'professional'
+                                    ? Color(0xFF101828)
+                                    : Colors.white,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -211,7 +240,9 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                             Text(
                               card.title,
                               style: TextStyle(
-                                color: card.theme.cardStyle=='professional' ? AppColors.lightText : Colors.white,
+                                color: card.theme.cardStyle == 'professional'
+                                    ? AppColors.lightText
+                                    : Colors.white,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w400,
                               ),
@@ -222,7 +253,9 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                             Text(
                               card.company,
                               style: TextStyle(
-                                color: card.theme.cardStyle=='professional' ? AppColors.lightText : Colors.white,
+                                color: card.theme.cardStyle == 'professional'
+                                    ? AppColors.lightText
+                                    : Colors.white,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w400,
                               ),
@@ -233,7 +266,9 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                             Text(
                               card.industry,
                               style: TextStyle(
-                                color: card.theme.cardStyle=='professional' ? Color(0xFF888888) : Colors.white,
+                                color: card.theme.cardStyle == 'professional'
+                                    ? Color(0xFF888888)
+                                    : Colors.white,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w400,
                               ),
@@ -252,7 +287,10 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                                   card.bio,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color:card.theme.cardStyle=='professional' ? Color(0xFF364153) : Colors.black,
+                                    color:
+                                        card.theme.cardStyle == 'professional'
+                                        ? Color(0xFF364153)
+                                        : Colors.black,
                                     fontSize: 13,
                                     fontWeight: FontWeight.w400,
                                     height: 1.5,
@@ -268,7 +306,7 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                                 Icons.email_outlined,
                                 card.contact.email!,
                                 Color(0xFF6C5CE7),
-                                card
+                                card,
                               ),
                             if (card.contact.email != null &&
                                 card.contact.email!.isNotEmpty)
@@ -280,7 +318,7 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                                 Icons.phone_outlined,
                                 card.contact.phone!,
                                 Color(0xFF6C5CE7),
-                                card
+                                card,
                               ),
                             if (card.contact.phone != null &&
                                 card.contact.phone!.isNotEmpty)
@@ -292,7 +330,7 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                                 Icons.smartphone_outlined,
                                 card.contact.mobileNumber!,
                                 Color(0xFF6C5CE7),
-                                card
+                                card,
                               ),
                             if (card.contact.mobileNumber != null &&
                                 card.contact.mobileNumber!.isNotEmpty)
@@ -303,7 +341,7 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                               Icons.language,
                               card.publicUrl,
                               Color(0xFF6C5CE7),
-                              card
+                              card,
                             ),
                             const SizedBox(height: 20),
 
@@ -314,7 +352,10 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                                 child: Text(
                                   'Skills',
                                   style: TextStyle(
-                                    color: card.theme.cardStyle=='professional' ? Colors.black : Colors.white,
+                                    color:
+                                        card.theme.cardStyle == 'professional'
+                                        ? Colors.black
+                                        : Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w400,
                                   ),
@@ -335,13 +376,21 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                                         vertical: 6,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: card.theme.cardStyle=='professional' ? Color(0xFF2A2A2A) : Colors.white,
+                                        color:
+                                            card.theme.cardStyle ==
+                                                'professional'
+                                            ? Color(0xFF2A2A2A)
+                                            : Colors.white,
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: Text(
                                         skill,
                                         style: TextStyle(
-                                          color:card.theme.cardStyle=='professional' ? Colors.white : Colors.black,
+                                          color:
+                                              card.theme.cardStyle ==
+                                                  'professional'
+                                              ? Colors.white
+                                              : Colors.black,
                                           fontSize: 11,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -360,7 +409,10 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                                 child: Text(
                                   'Connect',
                                   style: TextStyle(
-                                    color: card.theme.cardStyle=='professional' ?  Colors.black : Colors.white,
+                                    color:
+                                        card.theme.cardStyle == 'professional'
+                                        ? Colors.black
+                                        : Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -373,13 +425,17 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                                 children: [
                                   ...card.customLinks.take(4).map((link) {
                                     return Padding(
-                                      padding: const EdgeInsets.only(right: 12.0),
+                                      padding: const EdgeInsets.only(
+                                        right: 12.0,
+                                      ),
                                       child: Container(
                                         width: 44,
                                         height: 44,
                                         decoration: BoxDecoration(
                                           color: Color(0xFFF3F4F6),
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
                                           border: Border.all(
                                             color: Color(0xFFE0E0E0),
                                             width: 1,
@@ -411,17 +467,20 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                                     ),
                                     child: ElevatedButton(
                                       onPressed: () {
-                                        saveContactToPhone(card:card);
+                                        saveContactToPhone(card: card);
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.transparent,
                                         shadowColor: Colors.transparent,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(25),
+                                          borderRadius: BorderRadius.circular(
+                                            25,
+                                          ),
                                         ),
                                       ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.file_download_outlined,
@@ -456,8 +515,10 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                                         shareContact(card);
                                       },
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.share,
@@ -470,7 +531,7 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                                             style: TextStyle(
                                               color: AppColors.textPrimary,
                                             ),
-                                          )
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -484,7 +545,9 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                             Text(
                               'Powered by Rolo Digi Card',
                               style: TextStyle(
-                                color: card.theme.cardStyle=='professional' ?  Color(0xFFAAAAAA) : Colors.white,
+                                color: card.theme.cardStyle == 'professional'
+                                    ? Color(0xFFAAAAAA)
+                                    : Colors.white,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w400,
                               ),
@@ -500,24 +563,27 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
             ),
           ),
         );
-      }
+      },
     );
   }
 
-  Widget _buildContactItem(IconData icon, String text, Color iconColor,CardModel card) {
+  Widget _buildContactItem(
+    IconData icon,
+    String text,
+    Color iconColor,
+    CardModel card,
+  ) {
     return Row(
       children: [
-        Icon(
-          icon,
-          color: iconColor,
-          size: 22,
-        ),
+        Icon(icon, color: iconColor, size: 22),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
             text,
             style: TextStyle(
-              color: card.theme.cardStyle=='professional' ? Color(0xFF555555) : Colors.white,
+              color: card.theme.cardStyle == 'professional'
+                  ? Color(0xFF555555)
+                  : Colors.white,
               fontSize: 14,
               fontWeight: FontWeight.w400,
             ),
@@ -543,10 +609,7 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
     await ContactsService.addContact(contact);
     */
   }
-  Future<void> saveContactToPhone({
-    required CardModel card,
-
-  }) async {
+  Future<void> saveContactToPhone({required CardModel card}) async {
     // Ask permission
     final permission = await Permission.contacts.request();
     if (!permission.isGranted) {
@@ -555,19 +618,18 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
 
     final contact = Contact(
       name: Name(first: card.name),
-      phones: card.contact.phone != null && (card.contact.phone?.isNotEmpty ?? false)
+      phones:
+          card.contact.phone != null &&
+              (card.contact.phone?.isNotEmpty ?? false)
           ? [Phone(card.contact.phone ?? '')]
           : [],
-      emails: card.contact.email != null && (card.contact.email?.isNotEmpty ?? false)
+      emails:
+          card.contact.email != null &&
+              (card.contact.email?.isNotEmpty ?? false)
           ? [Email(card.contact.email ?? '')]
           : [],
       organizations: card.company != null && card.company.isNotEmpty
-          ? [
-        Organization(
-          company: card.company,
-          title: card.title ?? '',
-        )
-      ]
+          ? [Organization(company: card.company, title: card.title ?? '')]
           : [],
       // websites: card.contact. != null && card.website.isNotEmpty
       //     ? [Website(card.website)]
@@ -589,7 +651,8 @@ TITLE:${card.title ?? ''}
 TEL;TYPE=CELL:${card.contact.phone ?? ''}
 EMAIL:${card.contact.email ?? ''}
 END:VCARD
-'''.trim();
+'''
+        .trim();
   }
 
   Future<void> shareContact(CardModel card) async {
@@ -601,13 +664,10 @@ END:VCARD
     final file = File(filePath);
     await file.writeAsString(vcfContent);
 
-    await Share.shareXFiles(
-      [XFile(filePath)],
-      text: 'Contact details for ${card.name}',
-    );
+    await Share.shareXFiles([
+      XFile(filePath),
+    ], text: 'Contact details for ${card.name}');
   }
-
-
 }
 
 // Updated navigation call:

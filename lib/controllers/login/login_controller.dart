@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
+import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
 import 'package:rolo_digi_card/services/end_points.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -72,6 +73,8 @@ class LoginController extends GetxController {
         await storage.write(key: 'accessToken', value: accessToken);
         await storage.write(key: 'refreshToken', value: refreshToken);
         await storage.write(key: 'userType', value: userType);
+
+        Get.find<AuthController>().userType.value = userType;
 
         DioClient.setToken(accessToken);
 

@@ -1,8 +1,8 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
+import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
 import 'package:rolo_digi_card/controllers/organization/organization_controller.dart';
 import 'package:rolo_digi_card/models/group_model.dart';
@@ -47,7 +47,14 @@ class GroupManagementController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    getGroups();
+    final authController = Get.find<AuthController>();
+    if (authController.userType.value == 'organization') {
+      getGroups();
+    } else {
+      log(
+        "Skipping GroupManagementController API calls - User is not an organization",
+      );
+    }
   }
 
   @override
@@ -75,7 +82,7 @@ class GroupManagementController extends GetxController {
       final response = await _dio.get(ApiEndpoints.organizationGroups);
 
       if (response.statusCode == 200) {
-        log("Groups Raw Data: ${response.data}");
+        // log("Groups Raw Data: ${response.data}");
         final List<dynamic> data = _resolveList(response.data, 'groups');
         groups.value = data.map((e) => GroupModel.fromJson(e)).toList();
         log("Parsed Groups: ${groups.length}");

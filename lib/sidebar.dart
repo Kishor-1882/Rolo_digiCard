@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/controllers/organization/analytics_controller.dart';
 import 'package:rolo_digi_card/controllers/organization/card_management_controller.dart';
 import 'package:rolo_digi_card/controllers/organization/group_management_controller.dart';
@@ -24,30 +24,18 @@ class SideBar extends StatefulWidget {
 }
 
 class _SideBarState extends State<SideBar> {
-  final FlutterSecureStorage storage = const FlutterSecureStorage();
-  bool _isOrg = false;
-  bool _isLoading = true;
   late OrganizationController _orgController;
+  late AuthController _authController;
 
   @override
   void initState() {
     super.initState();
+    _authController = Get.find<AuthController>();
     _orgController = Get.put(OrganizationController());
-    _checkUserType();
     Get.put(SavedItemsController());
     Get.put(CardManagementController());
     Get.put(GroupManagementController());
     Get.put(AnalyticsController());
-  }
-
-  Future<void> _checkUserType() async {
-    final userType = await storage.read(key: 'userType');
-    if (mounted) {
-      setState(() {
-        _isOrg = userType == 'organization';
-        _isLoading = false;
-      });
-    }
   }
 
   final List<Widget> _pages = [
@@ -67,15 +55,10 @@ class _SideBarState extends State<SideBar> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF1a1a1a),
-        body: Center(child: CircularProgressIndicator(color: Colors.pink)),
-      );
-    }
-    return Obx(
-      () => Scaffold(
-        body: _isOrg
+    return Obx(() {
+      final isOrg = _authController.userType.value == 'organization';
+      return Scaffold(
+        body: isOrg
             ? _orgPages[_orgController.selectedNavIndex.value]
             : _pages[_orgController.selectedNavIndex.value],
         bottomNavigationBar: Container(
@@ -92,7 +75,7 @@ class _SideBarState extends State<SideBar> {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-              child: _isOrg
+              child: isOrg
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -161,8 +144,8 @@ class _SideBarState extends State<SideBar> {
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildNavItem({
@@ -178,13 +161,12 @@ class _SideBarState extends State<SideBar> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Gradient indicator at the top (only for selected item)
           Container(
             width: 60,
             height: 5,
             decoration: BoxDecoration(
               gradient: isSelected
-                  ? LinearGradient(
+                  ? const LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                       colors: [Color(0xFFF6339A), Color(0xFF9810FA)],
@@ -217,7 +199,9 @@ class _SideBarState extends State<SideBar> {
                 Text(
                   label,
                   style: TextStyle(
-                    color: isSelected ? Color(0xFFFB64B6) : Color(0xFF6A7282),
+                    color: isSelected
+                        ? const Color(0xFFFB64B6)
+                        : const Color(0xFF6A7282),
                     fontSize: 12,
                     fontWeight: isSelected
                         ? FontWeight.w500
@@ -245,13 +229,12 @@ class _SideBarState extends State<SideBar> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Gradient indicator at the top (only for selected item)
           Container(
             width: 45,
             height: 5,
             decoration: BoxDecoration(
               gradient: isSelected
-                  ? LinearGradient(
+                  ? const LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                       colors: [Color(0xFFF6339A), Color(0xFF9810FA)],
@@ -284,7 +267,9 @@ class _SideBarState extends State<SideBar> {
                 Text(
                   label,
                   style: TextStyle(
-                    color: isSelected ? Color(0xFFFB64B6) : Color(0xFF6A7282),
+                    color: isSelected
+                        ? const Color(0xFFFB64B6)
+                        : const Color(0xFF6A7282),
                     fontSize: 10,
                     fontWeight: isSelected
                         ? FontWeight.w500

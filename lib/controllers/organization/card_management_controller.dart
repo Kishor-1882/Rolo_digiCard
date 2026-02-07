@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
+import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/models/card_model.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
 import 'package:rolo_digi_card/services/end_points.dart';
@@ -20,14 +21,17 @@ class CardManagementController extends GetxController {
   List<CardModel> get filteredCards {
     return orgCards.where((card) {
       // Search filter
-      final matchesSearch = card.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+      final matchesSearch =
+          card.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
           card.id.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
           card.title.toLowerCase().contains(searchQuery.value.toLowerCase());
 
       // Status filter
       bool matchesStatus = true;
       if (statusFilter.value != 'All...') {
-        final status = card.isActive ? 'Active' : (card.isBlocked ? 'Blocked' : 'Inactive');
+        final status = card.isActive
+            ? 'Active'
+            : (card.isBlocked ? 'Blocked' : 'Inactive');
         matchesStatus = status == statusFilter.value;
       }
 
@@ -43,8 +47,15 @@ class CardManagementController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    getOrganizationCards();
-    getCardStats();
+    final authController = Get.find<AuthController>();
+    if (authController.userType.value == 'organization') {
+      getOrganizationCards();
+      getCardStats();
+    } else {
+      log(
+        "Skipping CardManagementController API calls - User is not an organization",
+      );
+    }
   }
 
   @override
@@ -139,7 +150,10 @@ class CardManagementController extends GetxController {
       log("Create Org Card Error: $e");
       String errorMessage = 'Failed to create card';
       if (e.response != null) {
-        errorMessage = e.response?.data['message'] ?? errorMessage;
+        errorMessage =
+            e.response?.data['message'] ??
+            e.response?.data['error'] ??
+            errorMessage;
       }
       CommonSnackbar.error(errorMessage);
     } finally {
@@ -149,12 +163,15 @@ class CardManagementController extends GetxController {
   }
 
   // Update Org Card
-  Future<void> updateOrgCard(String cardId, Map<String, dynamic> cardData) async {
+  Future<void> updateOrgCard(
+    String cardId,
+    Map<String, dynamic> cardData,
+  ) async {
     try {
       isLoading.value = true;
       update();
 
-      final response = await _dio.patch(
+      final response = await _dio.put(
         ApiEndpoints.updateOrgCard(cardId),
         data: cardData,
       );
@@ -164,8 +181,15 @@ class CardManagementController extends GetxController {
         getOrganizationCards();
       }
     } on DioException catch (e) {
+      String errorMessage = 'Failed to update card';
+      if (e.response != null) {
+        errorMessage =
+            e.response?.data['message'] ??
+            e.response?.data['error'] ??
+            errorMessage;
+      }
       log("Update Org Card Error: $e");
-      CommonSnackbar.error("Failed to update card");
+      CommonSnackbar.error(errorMessage);
     } finally {
       isLoading.value = false;
       update();
@@ -184,6 +208,7 @@ class CardManagementController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        getCardStats();
         CommonSnackbar.success('Card status updated');
         // Update local list without refresh if possible, or just refresh
         final index = orgCards.indexWhere((c) => c.id == cardId);
@@ -192,8 +217,15 @@ class CardManagementController extends GetxController {
         }
       }
     } on DioException catch (e) {
+      String errorMessage = 'Failed to update status';
+      if (e.response != null) {
+        errorMessage =
+            e.response?.data['message'] ??
+            e.response?.data['error'] ??
+            errorMessage;
+      }
       log("Update Status Error: $e");
-      CommonSnackbar.error("Failed to update status");
+      CommonSnackbar.error(errorMessage);
     } finally {
       isLoading.value = false;
       update();
@@ -206,7 +238,8 @@ class CardManagementController extends GetxController {
       isLoading.value = true;
       update();
 
-      final response = await _dio.patch( // Assuming PUT or POST, API.txt doesn't explicitly specify but reassign is usually an action or update
+      final response = await _dio.patch(
+        // Assuming PUT or POST, API.txt doesn't explicitly specify but reassign is usually an action or update
         ApiEndpoints.reassignOrgCard(cardId),
         data: {'userId': userId},
       );
@@ -216,8 +249,15 @@ class CardManagementController extends GetxController {
         getOrganizationCards();
       }
     } on DioException catch (e) {
+      String errorMessage = 'Failed to reassign card';
+      if (e.response != null) {
+        errorMessage =
+            e.response?.data['message'] ??
+            e.response?.data['error'] ??
+            errorMessage;
+      }
       log("Reassign Error: $e");
-      CommonSnackbar.error("Failed to reassign card");
+      CommonSnackbar.error(errorMessage);
     } finally {
       isLoading.value = false;
       update();
@@ -237,8 +277,15 @@ class CardManagementController extends GetxController {
         orgCards.removeWhere((c) => c.id == cardId);
       }
     } on DioException catch (e) {
+      String errorMessage = 'Failed to delete card';
+      if (e.response != null) {
+        errorMessage =
+            e.response?.data['message'] ??
+            e.response?.data['error'] ??
+            errorMessage;
+      }
       log("Delete Card Error: $e");
-      CommonSnackbar.error("Failed to delete card");
+      CommonSnackbar.error(errorMessage);
     } finally {
       isLoading.value = false;
       update();

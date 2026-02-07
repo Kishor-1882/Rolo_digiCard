@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:rolo_digi_card/common/common_textfield.dart';
 import 'package:rolo_digi_card/common/custom_textfield.dart';
 import 'package:rolo_digi_card/controllers/home/home_page_controller.dart';
+import 'package:rolo_digi_card/controllers/organization/card_management_controller.dart';
 import 'package:rolo_digi_card/models/card_model.dart';
 // Assuming AppColors is available and contains the necessary colors
 // like AppColors.gradientStart, AppColors.textPrimary, etc.
@@ -31,7 +32,9 @@ class _CardSection extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.gradientStart.withOpacity(0.9), // Slightly different background
+        color: AppColors.gradientStart.withOpacity(
+          0.9,
+        ), // Slightly different background
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -39,7 +42,11 @@ class _CardSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: AppColors.progressPink, size: 20), // Using AppColors.progressPink for the icon color
+              Icon(
+                icon,
+                color: AppColors.progressPink,
+                size: 20,
+              ), // Using AppColors.progressPink for the icon color
               const SizedBox(width: 10),
               Text(
                 title,
@@ -53,7 +60,7 @@ class _CardSection extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Divider(
-            color:AppColors.textPrimary.withOpacity(0.10),     // line color
+            color: AppColors.textPrimary.withOpacity(0.10), // line color
           ),
           const SizedBox(height: 10),
           content,
@@ -62,7 +69,6 @@ class _CardSection extends StatelessWidget {
     );
   }
 }
-
 
 // --- CreateNewCard State/Widget ---
 
@@ -81,19 +87,21 @@ class _CreateNewCardState extends State<CreateNewCard> {
   bool isMinimalView = false; // New state for the minimal switch in the AppBar
   List<String> skills = [];
   bool isEditMode = false;
+  bool isOrganization = false;
   CardModel? editingCard;
 
-  void initState(){
+  void initState() {
     homePageController.showSuccess.value = false;
     final args = Get.arguments;
     if (args != null && args is Map<String, dynamic>) {
       isEditMode = args['isEdit'] ?? false;
+      isOrganization = args['isOrganization'] ?? false;
       editingCard = args['card'] as CardModel?;
 
       if (isEditMode && editingCard != null) {
         _populateFieldsForEdit();
       }
-    }else{
+    } else {
       homePageController.resetForm();
     }
   }
@@ -110,34 +118,43 @@ class _CreateNewCardState extends State<CreateNewCard> {
     homePageController.phoneController.text = editingCard!.contact.phone ?? '';
     homePageController.emailController.text = editingCard!.contact.email ?? '';
     homePageController.websiteController.text = editingCard!.website ?? '';
-    
+
     // New Fields
-    homePageController.personalEmailController.text = editingCard!.contact.personalEmail ?? '';
-    homePageController.personalPhoneController.text = editingCard!.contact.personalPhone ?? '';
-    
+    homePageController.personalEmailController.text =
+        editingCard!.contact.personalEmail ?? '';
+    homePageController.personalPhoneController.text =
+        editingCard!.contact.personalPhone ?? '';
+
     if (editingCard!.address != null) {
-      homePageController.addressLine1Controller.text = editingCard!.address!.addressLine1 ?? '';
-      homePageController.addressLine2Controller.text = editingCard!.address!.addressLine2 ?? '';
+      homePageController.addressLine1Controller.text =
+          editingCard!.address!.addressLine1 ?? '';
+      homePageController.addressLine2Controller.text =
+          editingCard!.address!.addressLine2 ?? '';
       homePageController.cityController.text = editingCard!.address!.city ?? '';
-      homePageController.stateController.text = editingCard!.address!.state ?? '';
-      homePageController.countryController.text = editingCard!.address!.country ?? '';
-      homePageController.zipController.text = editingCard!.address!.zipCode ?? '';
+      homePageController.stateController.text =
+          editingCard!.address!.state ?? '';
+      homePageController.countryController.text =
+          editingCard!.address!.country ?? '';
+      homePageController.zipController.text =
+          editingCard!.address!.zipCode ?? '';
     }
 
     homePageController.industryController.text = editingCard!.industry ?? '';
     // homePageController.departmentController.text = editingCard!.department ?? '';
     homePageController.bioController.text = editingCard!.bio ?? '';
-    
+
     // Socials
     homePageController.linkedinController.text = editingCard!.linkedinUrl ?? '';
     homePageController.twitterController.text = editingCard!.twitterUrl ?? '';
-    homePageController.instagramController.text = editingCard!.instagramUrl ?? '';
+    homePageController.instagramController.text =
+        editingCard!.instagramUrl ?? '';
     homePageController.githubController.text = editingCard!.githubUrl ?? '';
     homePageController.facebookController.text = editingCard!.facebookUrl ?? '';
     homePageController.youtubeController.text = editingCard!.youtubeUrl ?? '';
 
     // Set theme
-    homePageController.selectedTheme.value = editingCard!.theme.cardStyle.capitalize ?? 'Light';
+    homePageController.selectedTheme.value =
+        editingCard!.theme.cardStyle.capitalize ?? 'Light';
 
     // Set public/private
     homePageController.isPublicCard.value = editingCard!.isPublic;
@@ -179,14 +196,20 @@ class _CreateNewCardState extends State<CreateNewCard> {
                           fit: BoxFit.cover,
                         )
                       // If no local image, check if we're editing and have a profile URL
-                      : (isEditMode && editingCard?.profile != null && editingCard!.profile!.isNotEmpty)
-                          ? DecorationImage(
-                              image: NetworkImage(editingCard!.profile!), // You might want to use a cached network image
-                              fit: BoxFit.cover,
-                            )
-                          : null,
+                      : (isEditMode &&
+                            editingCard?.profile != null &&
+                            editingCard!.profile!.isNotEmpty)
+                      ? DecorationImage(
+                          image: NetworkImage(
+                            editingCard!.profile!,
+                          ), // You might want to use a cached network image
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                child: controller.profileImage == null && (!isEditMode || editingCard?.profile == null)
+                child:
+                    controller.profileImage == null &&
+                        (!isEditMode || editingCard?.profile == null)
                     ? Icon(Icons.person, size: 40, color: Colors.grey)
                     : null,
               ),
@@ -199,18 +222,33 @@ class _CreateNewCardState extends State<CreateNewCard> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.progressPink,
                     ),
-                    child: Text("Choose File", style: TextStyle(color: Colors.white)),
+                    child: Text(
+                      "Choose File",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                   if (controller.profileImage != null)
-                     TextButton(onPressed: ()=> controller.removeImage(), child: Text("Remove", style: TextStyle(color: Colors.red)))
+                    TextButton(
+                      onPressed: () => controller.removeImage(),
+                      child: Text(
+                        "Remove",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    )
                   else
-                     Text("No file chosen", style: TextStyle(color: Colors.grey)),
+                    Text(
+                      "No file chosen",
+                      style: TextStyle(color: Colors.grey),
+                    ),
                 ],
-              )
+              ),
             ],
           ),
           const SizedBox(height: 10),
-          Text("(Optional)", style: TextStyle(color: Colors.grey, fontSize: 12)),
+          Text(
+            "(Optional)",
+            style: TextStyle(color: Colors.grey, fontSize: 12),
+          ),
         ],
       ),
     );
@@ -255,7 +293,8 @@ class _CreateNewCardState extends State<CreateNewCard> {
             title: 'Email',
             hintText: 'Enter your email',
             controller: controller.emailController,
-          )        ],
+          ),
+        ],
       ),
     );
   }
@@ -266,15 +305,21 @@ class _CreateNewCardState extends State<CreateNewCard> {
       title: 'Contact',
       content: Column(
         children: [
-           CustomFormTextField(
+          CustomFormTextField(
             title: 'Website',
             hintText: 'Enter your website',
             controller: controller.websiteController,
           ),
           const SizedBox(height: 20),
           // Email Addresses
-          Text("Email Addresses", style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
-           const SizedBox(height: 10),
+          Text(
+            "Email Addresses",
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
           CustomFormTextField(
             isImportant: true,
             title: 'Work Email',
@@ -289,44 +334,56 @@ class _CreateNewCardState extends State<CreateNewCard> {
           ),
           const SizedBox(height: 20),
           // Phone Numbers
-          Text("Phone Numbers", style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
-           const SizedBox(height: 10),
+          Text(
+            "Phone Numbers",
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
           CustomFormTextField(
             isImportant: true,
             title: 'Work Phone',
             hintText: '+1 ...',
             controller: controller.phoneController,
           ),
-           const SizedBox(height: 10),
+          const SizedBox(height: 10),
           CustomFormTextField(
-             title: 'Personal Phone',
+            title: 'Personal Phone',
             hintText: '+1 ...',
-             controller: controller.personalPhoneController,
+            controller: controller.personalPhoneController,
           ),
 
           const SizedBox(height: 20),
           // Location
-           Text("Location", style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
-           const SizedBox(height: 10),
-           Row(
-             children: [
-               Expanded(
-                 child: CustomFormTextField(
+          Text(
+            "Location",
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: CustomFormTextField(
                   title: 'Address Line 1',
                   hintText: '123 Main St',
                   controller: controller.addressLine1Controller,
-                           ),
-               ),
-               const SizedBox(width: 10),
-                Expanded(
-                 child: CustomFormTextField(
-                   title: 'Address Line 2',
-                   hintText: 'Apt, Suite',
-                   controller: controller.addressLine2Controller,
-                 ),
-               ),
-             ],
-           ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: CustomFormTextField(
+                  title: 'Address Line 2',
+                  hintText: 'Apt, Suite',
+                  controller: controller.addressLine2Controller,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -348,7 +405,7 @@ class _CreateNewCardState extends State<CreateNewCard> {
             ],
           ),
           const SizedBox(height: 10),
-           Row(
+          Row(
             children: [
               Expanded(
                 child: CustomFormTextField(
@@ -424,7 +481,7 @@ class _CreateNewCardState extends State<CreateNewCard> {
                       child: TextFormField(
                         controller: controller.skillController,
                         style: const TextStyle(
-                          color:AppColors.textPrimary,
+                          color: AppColors.textPrimary,
                           fontSize: 14,
                         ),
                         decoration: InputDecoration(
@@ -456,9 +513,9 @@ class _CreateNewCardState extends State<CreateNewCard> {
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: ElevatedButton(
-                      onPressed: (){
+                      onPressed: () {
                         controller.addSkill();
-                        },
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,
@@ -488,7 +545,11 @@ class _CreateNewCardState extends State<CreateNewCard> {
                         skill,
                         style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
-                      deleteIcon: Icon(Icons.close, size: 16, color: Colors.white),
+                      deleteIcon: Icon(
+                        Icons.close,
+                        size: 16,
+                        color: Colors.white,
+                      ),
                       onDeleted: () {
                         setState(() {
                           controller.skills.remove(skill);
@@ -536,7 +597,7 @@ class _CreateNewCardState extends State<CreateNewCard> {
             controller: controller.githubController,
           ),
           const SizedBox(height: 20),
-           CustomFormTextField(
+          CustomFormTextField(
             title: 'YouTube',
             hintText: 'youtube.com/@channel',
             controller: controller.youtubeController,
@@ -552,7 +613,11 @@ class _CreateNewCardState extends State<CreateNewCard> {
     );
   }
 
-  Widget _buildThemeOption(HomePageController controller,String theme, String description) {
+  Widget _buildThemeOption(
+    HomePageController controller,
+    String theme,
+    String description,
+  ) {
     bool isSelected = controller.selectedTheme.value == theme;
     return GestureDetector(
       onTap: () {
@@ -566,7 +631,9 @@ class _CreateNewCardState extends State<CreateNewCard> {
           color: AppColors.gradientStart.withOpacity(0.50),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.selectedBorder : AppColors.textPrimary.withOpacity(0.10), // Highlight color
+            color: isSelected
+                ? AppColors.selectedBorder
+                : AppColors.textPrimary.withOpacity(0.10), // Highlight color
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -587,10 +654,7 @@ class _CreateNewCardState extends State<CreateNewCard> {
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                   ),
                 ],
               ),
@@ -599,10 +663,12 @@ class _CreateNewCardState extends State<CreateNewCard> {
               Container(
                 padding: EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [
-                    AppColors.selectedBorder, // Pink
-                    AppColors.switchBlue, // Blue
-                  ]),
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.selectedBorder, // Pink
+                      AppColors.switchBlue, // Blue
+                    ],
+                  ),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -633,11 +699,15 @@ class _CreateNewCardState extends State<CreateNewCard> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildThemeOption(controller,'Light', 'Clean and professional'),
+          _buildThemeOption(controller, 'Light', 'Clean and professional'),
           const SizedBox(height: 12),
-          _buildThemeOption(controller,'Dark', 'Modern and sleek'),
+          _buildThemeOption(controller, 'Dark', 'Modern and sleek'),
           const SizedBox(height: 12),
-          _buildThemeOption(controller,'Glassmorphic', 'Elegant with blur effects'),
+          _buildThemeOption(
+            controller,
+            'Glassmorphic',
+            'Elegant with blur effects',
+          ),
         ],
       ),
     );
@@ -683,7 +753,9 @@ class _CreateNewCardState extends State<CreateNewCard> {
               color: AppColors.gradientStart.withOpacity(0.50),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color:  AppColors.textPrimary.withOpacity(0.10), // Highlight color
+                color: AppColors.textPrimary.withOpacity(
+                  0.10,
+                ), // Highlight color
                 width: 1,
               ),
             ),
@@ -723,7 +795,8 @@ class _CreateNewCardState extends State<CreateNewCard> {
                         controller.isPublicCard.value = value;
                       });
                     },
-                    activeColor: AppColors.progressPink, // Active color for the switch
+                    activeColor:
+                        AppColors.progressPink, // Active color for the switch
                     inactiveThumbColor: Colors.grey.shade600,
                     inactiveTrackColor: Colors.grey.shade800,
                   ),
@@ -761,11 +834,11 @@ class _CreateNewCardState extends State<CreateNewCard> {
     return Center(
       child: Container(
         decoration: BoxDecoration(
-            color: AppColors.cardColor,
-            borderRadius: BorderRadius.circular(15)
+          color: AppColors.cardColor,
+          borderRadius: BorderRadius.circular(15),
         ),
-        height: MediaQuery.of(context).size.height *0.70,
-        width: MediaQuery.of(context).size.width *0.90,
+        height: MediaQuery.of(context).size.height * 0.70,
+        width: MediaQuery.of(context).size.width * 0.90,
 
         child: Stack(
           children: [
@@ -773,9 +846,9 @@ class _CreateNewCardState extends State<CreateNewCard> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                    width: 100,
-                    height: 100,
-                    child: Image.asset('assets/create_page/verified.png')
+                  width: 100,
+                  height: 100,
+                  child: Image.asset('assets/create_page/verified.png'),
                 ),
                 const SizedBox(height: 32),
                 Text(
@@ -796,7 +869,9 @@ class _CreateNewCardState extends State<CreateNewCard> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  isEditMode ? 'Card updated\nsuccessfully.' : 'Card creation\nsuccessful.',
+                  isEditMode
+                      ? 'Card updated\nsuccessfully.'
+                      : 'Card creation\nsuccessful.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 36,
@@ -819,10 +894,7 @@ class _CreateNewCardState extends State<CreateNewCard> {
                       ? 'Your card has been successfully\nupdated in your My Cards section.'
                       : 'Your card has been successfully\nadded to your My Cards section.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 15,
-                  ),
+                  style: TextStyle(color: AppColors.textPrimary, fontSize: 15),
                 ),
                 const SizedBox(height: 20),
                 Row(
@@ -840,10 +912,13 @@ class _CreateNewCardState extends State<CreateNewCard> {
                         ),
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      padding: const EdgeInsets.all(2), // this becomes the border thickness
+                      padding: const EdgeInsets.all(
+                        2,
+                      ), // this becomes the border thickness
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.black, // background of button (can be transparent)
+                          color: Colors
+                              .black, // background of button (can be transparent)
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: OutlinedButton(
@@ -855,7 +930,10 @@ class _CreateNewCardState extends State<CreateNewCard> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 16,
+                            ),
                             backgroundColor: Colors.transparent,
                           ),
                           child: const Text(
@@ -885,18 +963,21 @@ class _CreateNewCardState extends State<CreateNewCard> {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
-                          if(controller.shortUrl!=null) {
+                          if (controller.shortUrl != null) {
                             Get.to(
-                                  () =>
-                                  BusinessCardProfilePage(
-                                    cardId: controller.shortUrl ?? '',),
+                              () => BusinessCardProfilePage(
+                                cardId: controller.shortUrl ?? '',
+                              ),
                             );
                           }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -925,11 +1006,7 @@ class _CreateNewCardState extends State<CreateNewCard> {
                   // Add your close action here
                   Navigator.pop(context);
                 },
-                icon: Icon(
-                  Icons.close,
-                  color: AppColors.textPrimary,
-                  size: 24,
-                ),
+                icon: Icon(Icons.close, color: AppColors.textPrimary, size: 24),
               ),
             ),
           ],
@@ -947,9 +1024,14 @@ class _CreateNewCardState extends State<CreateNewCard> {
         // Transparent AppBar to blend with the background
         backgroundColor: Colors.transparent,
         elevation: 0,
-        automaticallyImplyLeading: false, // Don't show the back button by default
+        automaticallyImplyLeading:
+            false, // Don't show the back button by default
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: AppColors.textPrimary, size: 20),
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: AppColors.textPrimary,
+            size: 20,
+          ),
           onPressed: () => Get.back(),
         ),
         title: Text(
@@ -989,71 +1071,109 @@ class _CreateNewCardState extends State<CreateNewCard> {
       body: GetBuilder<HomePageController>(
         builder: (controller) {
           return SafeArea(
-            child: controller.isLoading.value?  Center(child: CircularProgressIndicator(),) :controller.showSuccess.value
+            child: controller.isLoading.value
+                ? Center(child: CircularProgressIndicator())
+                : controller.showSuccess.value
                 ? buildSuccessScreen(controller)
                 : SingleChildScrollView(
-              // Wrap the main content in a SingleChildScrollView
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    // All form sections are now built sequentially
-                    _buildProfilePictureSection(controller),
-                    _buildBasicInformationSection(controller),
-                    Visibility(
-                      visible: !isMinimalView,
-                        child: _buildContactSection(controller)),
-                    Visibility( visible: !isMinimalView,child: _buildProfessionalSection(controller)),
-                    Visibility( visible: !isMinimalView,child: _buildSocialLinksSection(controller)),
-                    Visibility( visible: !isMinimalView,child: _buildCustomizeYourCardSection(controller)),
-                    Visibility(visible: !isMinimalView,child: _buildCardVisibilitySection(controller)),
-
-
-                    // Single Save Card button at the bottom
-                    Container(
-                      width: double.infinity,
-                      height: 36,
-                      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                      decoration: BoxDecoration(
-                       color: AppColors.progressPink,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          if (isEditMode) {
-                            controller.updateCard(editingCard!.id);
-                          } else {
-                            controller.createCard();
-                          }
-                          // Logic for saving the card
-                          // setState(() {
-                          //   showSuccess = true; // For demonstration, show success immediately
-                          // });
-                        },
-                        icon: Icon(Icons.check, color: AppColors.buttonBlack, size: 20),
-                        label: Text(
-                          'Save Card',
-                          style: TextStyle(
-                            color: AppColors.buttonBlack,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                    // Wrap the main content in a SingleChildScrollView
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        children: [
+                          // All form sections are now built sequentially
+                          _buildProfilePictureSection(controller),
+                          _buildBasicInformationSection(controller),
+                          Visibility(
+                            visible: !isMinimalView,
+                            child: _buildContactSection(controller),
                           ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+                          Visibility(
+                            visible: !isMinimalView,
+                            child: _buildProfessionalSection(controller),
                           ),
-                        ),
+                          Visibility(
+                            visible: !isMinimalView,
+                            child: _buildSocialLinksSection(controller),
+                          ),
+                          Visibility(
+                            visible: !isMinimalView,
+                            child: _buildCustomizeYourCardSection(controller),
+                          ),
+                          Visibility(
+                            visible: !isMinimalView,
+                            child: _buildCardVisibilitySection(controller),
+                          ),
+
+                          // Single Save Card button at the bottom
+                          Container(
+                            width: double.infinity,
+                            height: 36,
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 20,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.progressPink,
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                if (isOrganization) {
+                                  final orgController =
+                                      Get.isRegistered<
+                                        CardManagementController
+                                      >()
+                                      ? Get.find<CardManagementController>()
+                                      : Get.put(CardManagementController());
+                                  final cardDataMap = controller
+                                      .buildCardDataMap(
+                                        controller.getThemeColors(),
+                                      );
+                                  if (isEditMode) {
+                                    orgController.updateOrgCard(
+                                      editingCard!.id,
+                                      cardDataMap,
+                                    );
+                                  } else {
+                                    orgController.createOrgCard(cardDataMap);
+                                  }
+                                } else {
+                                  if (isEditMode) {
+                                    controller.updateCard(editingCard!.id);
+                                  } else {
+                                    controller.createCard();
+                                  }
+                                }
+                              },
+                              icon: Icon(
+                                Icons.check,
+                                color: AppColors.buttonBlack,
+                                size: 20,
+                              ),
+                              label: Text(
+                                'Save Card',
+                                style: TextStyle(
+                                  color: AppColors.buttonBlack,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
+                  ),
           );
-        }
+        },
       ),
     );
   }

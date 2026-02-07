@@ -5,20 +5,26 @@ import 'package:get/get.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
 class AuthController extends GetxController {
   final FlutterSecureStorage storage = const FlutterSecureStorage();
   var isLoggedIn = false.obs;
+  var userType = 'individual'.obs;
 
   @override
   void onInit() {
     super.onInit();
+    checkLoginStatus();
   }
 
   Future<void> checkLoginStatus() async {
     final token = await storage.read(key: 'accessToken');
-    log("Token check: $token");
+    final type = await storage.read(key: 'userType');
+    log("Token check: $token, UserType: $type");
+
+    if (type != null) {
+      userType.value = type;
+    }
+
     if (token != null && token.isNotEmpty) {
       isLoggedIn.value = true;
       Get.offAllNamed("/sidebar");
@@ -27,7 +33,6 @@ class AuthController extends GetxController {
       Get.offAllNamed("/login");
     }
   }
-
 
   Future<bool> logout() async {
     try {
@@ -72,4 +77,3 @@ class AuthController extends GetxController {
     }
   }
 }
-

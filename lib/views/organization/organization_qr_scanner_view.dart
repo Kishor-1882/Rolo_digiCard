@@ -99,21 +99,27 @@ class OrganizationQRScannerView extends StatelessWidget {
               icon: Icons.camera_alt_outlined,
               title: 'Enable Camera',
               subtitle: 'Scan QR codes in real-time',
-              onTap: () {},
+              onTap: () {
+                Get.toNamed('/scan-card');
+              },
             ),
             const SizedBox(height: 16),
             _buildActionCard(
               icon: Icons.file_upload_outlined,
               title: 'Upload Image',
               subtitle: 'Extract QR from photo',
-              onTap: () {},
+              onTap: () {
+                print('kishor gay');
+              },
             ),
             const SizedBox(height: 16),
             _buildActionCard(
               icon: Icons.keyboard_alt_outlined,
               title: 'Manual Entry',
               subtitle: 'Enter card ID manually',
-              onTap: () {},
+              onTap: () {
+                Get.toNamed('/create-card');
+              },
             ),
             const SizedBox(height: 48),
           ],
@@ -171,10 +177,7 @@ class OrganizationQRScannerView extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right,
-              color: Colors.white.withOpacity(0.3),
-            ),
+            Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.3)),
           ],
         ),
       ),

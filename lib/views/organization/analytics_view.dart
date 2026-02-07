@@ -493,17 +493,58 @@ class AnalyticsView extends GetView<AnalyticsController> {
           ),
         ),
         const SizedBox(height: 32),
-        Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 16,
-          runSpacing: 12,
-          children: statusData.map((e) {
-            return _buildHorizontalLegendItem(
-              e['name'],
-              e['value'].toString(),
-              _getStatusColor(e['name']),
-            );
-          }).toList(),
+        Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: statusData.length > 0
+                      ? _buildHorizontalLegendItem(
+                          statusData[0]['name'],
+                          '10',
+                          // statusData[0]['value'].toString(),
+                          _getStatusColor(statusData[0]['name']),
+                        )
+                      : const SizedBox(),
+                ),
+                Expanded(
+                  child: statusData.length > 1
+                      ? _buildHorizontalLegendItem(
+                          statusData[1]['name'],
+                          '10',
+                          // statusData[1]['value'].toString(),
+                          _getStatusColor(statusData[1]['name']),
+                        )
+                      : const SizedBox(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: statusData.length > 2
+                      ? _buildHorizontalLegendItem(
+                          statusData[2]['name'],
+                          '10',
+                          // statusData[2]['value'].toString(),
+                          _getStatusColor(statusData[2]['name']),
+                        )
+                      : const SizedBox(),
+                ),
+                Expanded(
+                  child: statusData.length > 3
+                      ? _buildHorizontalLegendItem(
+                          statusData[3]['name'],
+                          '10',
+                          // statusData[3]['value'].toString(),
+                          _getStatusColor(statusData[3]['name']),
+                        )
+                      : const SizedBox(),
+                ),
+              ],
+            ),
+          ],
         ),
       ],
     );
@@ -511,7 +552,6 @@ class AnalyticsView extends GetView<AnalyticsController> {
 
   Widget _buildHorizontalLegendItem(String label, String value, Color color) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 12,
@@ -522,21 +562,29 @@ class AnalyticsView extends GetView<AnalyticsController> {
           ),
         ),
         const SizedBox(width: 8),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white70, fontSize: 13),
-        ),
-        if (value != '0') ...[
-          const SizedBox(width: 4),
-          Text(
-            ': $value',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: label,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+                if (value != '0')
+                  TextSpan(
+                    text: ': $value',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              ],
             ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
-        ],
+        ),
       ],
     );
   }

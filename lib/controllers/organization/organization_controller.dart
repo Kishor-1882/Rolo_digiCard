@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
+import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/models/organization_model.dart';
 import 'package:rolo_digi_card/models/organization_user_model.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
@@ -32,8 +33,15 @@ class OrganizationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    getOrganization();
-    getDashboardStats();
+    final authController = Get.find<AuthController>();
+    if (authController.userType.value == 'organization') {
+      getOrganization();
+      getDashboardStats();
+    } else {
+      log(
+        "Skipping OrganizationController API calls - User is not an organization",
+      );
+    }
   }
 
   @override

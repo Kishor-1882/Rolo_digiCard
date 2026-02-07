@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
+import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/models/analytics_model.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
 import 'package:rolo_digi_card/services/end_points.dart';
@@ -21,11 +22,18 @@ class AnalyticsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    getOverview();
-    getAdminAnalytics();
-    getUserAnalytics();
-    getCardsAnalytics();
-    getGeographyAnalytics();
+    final authController = Get.find<AuthController>();
+    if (authController.userType.value == 'organization') {
+      getOverview();
+      getAdminAnalytics();
+      getUserAnalytics();
+      getCardsAnalytics();
+      getGeographyAnalytics();
+    } else {
+      log(
+        "Skipping AnalyticsController API calls - User is not an organization",
+      );
+    }
   }
 
   // Get Analytics Overview
@@ -35,7 +43,7 @@ class AnalyticsController extends GetxController {
       update();
 
       final response = await _dio.get(ApiEndpoints.analyticsOverview);
-      log('Get Overview response: ${response.data}');
+      // log('Get Overview response: ${response.data}');
 
       if (response.statusCode == 200) {
         overviewData.value = AnalyticsOverviewModel.fromJson(response.data);
