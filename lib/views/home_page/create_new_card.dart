@@ -964,11 +964,11 @@ class _CreateNewCardState extends State<CreateNewCard> {
                       child: ElevatedButton(
                         onPressed: () {
                           if (controller.shortUrl != null) {
-                            Get.to(
-                              () => BusinessCardProfilePage(
-                                cardId: controller.shortUrl ?? '',
-                              ),
-                            );
+                            // Get.to(
+                            //   () => BusinessCardProfilePage(
+                            //     // cardId: controller.shortUrl ?? '',
+                            //   ),
+                            // );
                           }
                         },
                         style: ElevatedButton.styleFrom(

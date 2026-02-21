@@ -170,9 +170,9 @@ class SavedCards extends StatelessWidget {
         switch (value) {
           case 'view':
           // Handle view action
-            Get.to(
-                  () => BusinessCardProfilePage(cardId: card.card.shortUrl,),
-            );
+            // Get.to(
+            //       () => BusinessCardProfilePage(card: card.card,),
+            // );
             break;
           case 'delete':
           // Handle delete action

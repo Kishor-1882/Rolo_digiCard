@@ -34,6 +34,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
           final health = overview.health;
           final engagement = overview.engagement;
           final geo = controller.geographyData;
+          final userData = controller.userData;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -45,7 +46,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
                 const SizedBox(height: 24),
                 _buildKPISelection(),
                 const SizedBox(height: 24),
-                _buildKPIsGrid(health),
+                _buildKPIsGrid(userData.value),
                 const SizedBox(height: 24),
                 _buildSectionCard(
                   title: 'Card Activity',
@@ -108,7 +109,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
     return Container();
   }
 
-  Widget _buildKPIsGrid(AnalyticsHealth health) {
+  Widget _buildKPIsGrid(AnalyticsUserCardsModel? userData) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -119,32 +120,33 @@ class AnalyticsView extends GetView<AnalyticsController> {
       children: [
         _buildKPICard(
           'Total Views',
-          health.totalViews.toString(),
+          userData?.kpi["views"].toString() ?? '0',
           '+23%',
           Icons.visibility,
           Colors.pink,
         ),
         _buildKPICard(
           'Total Shares',
-          health.totalShares.toString(),
+          userData?.kpi["shares"].toString() ?? '0',
           '+18%',
           Icons.share,
           Colors.purple,
         ),
         _buildKPICard(
+          'Total Cards',
+          userData?.kpi["totalCards"].toString() ?? '0',
+          '+5%',
+          Icons.card_membership,
+          Colors.deepPurpleAccent,
+        ),
+        _buildKPICard(
           'Active Cards',
-          '${health.activeCardsPercentage}%',
+          userData?.kpi["activeCards"].toString() ?? '0',
           '+12%',
           Icons.credit_card,
           Colors.pinkAccent,
         ),
-        _buildKPICard(
-          'Total Users',
-          health.totalUsers.toString(),
-          '+5%',
-          Icons.people,
-          Colors.deepPurpleAccent,
-        ),
+  
       ],
     );
   }

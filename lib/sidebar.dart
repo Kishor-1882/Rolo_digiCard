@@ -13,6 +13,7 @@ import 'package:rolo_digi_card/views/organization/organization_cards_view.dart';
 import 'package:rolo_digi_card/views/organization/organization_dashboard_view.dart';
 import 'package:rolo_digi_card/views/organization/organization_groups_view.dart';
 import 'package:rolo_digi_card/views/organization/organization_saved_view.dart';
+import 'package:rolo_digi_card/views/organization/organization_user_management.dart';
 import 'package:rolo_digi_card/views/profile_page/profile_page.dart';
 import 'package:rolo_digi_card/views/saved_cards_page/saved_cards.dart';
 
@@ -47,7 +48,8 @@ class _SideBarState extends State<SideBar> {
 
   final List<Widget> _orgPages = [
     OrganizationDashboardView(),
-    OrganizationSavedView(),
+    // OrganizationSavedView(),
+    OrganizationUserManagement(),
     OrganizationCardsView(),
     OrganizationGroupsView(),
     AnalyticsView(),
@@ -88,8 +90,8 @@ class _SideBarState extends State<SideBar> {
                         ),
                         Expanded(
                           child: _buildNavItemOrg(
-                            icon: Icons.bookmark_outline,
-                            label: 'Saved',
+                            icon: Icons.account_circle_outlined,
+                            label: 'Users',
                             index: 1,
                           ),
                         ),

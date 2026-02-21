@@ -18,8 +18,8 @@ import 'dart:typed_data';
 import 'package:share_plus/share_plus.dart';
 
 class BusinessCardProfilePage extends StatefulWidget {
-  final String cardId;
-  BusinessCardProfilePage({Key? key, required this.cardId}) : super(key: key);
+  final CardModel card;
+  BusinessCardProfilePage({Key? key, required this.card}) : super(key: key);
 
   @override
   State<BusinessCardProfilePage> createState() =>
@@ -52,30 +52,30 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
     }
   }
 
-  Future<CardModel> getCardDetails({bool isOrg = false}) async {
-    try {
-      final response = await dioClient.get(
-        isOrg
-            ? ApiEndpoints.getOrgCard(widget.cardId)
-            : ApiEndpoints.viewPublicCard(widget.cardId),
-      );
-      // log('Response in :${response.data}');
+  // Future<CardModel> getCardDetails({bool isOrg = false}) async {
+  //   try {
+  //     final response = await dioClient.get(
+  //       isOrg
+  //           ? ApiEndpoints.getOrgCard(widget.cardId)
+  //           : ApiEndpoints.viewPublicCard(widget.cardId),
+  //     );
+  //     // log('Response in :${response.data}');
 
-      final cardJson = isOrg ? response.data : response.data['card'];
-      return CardModel.fromJson(cardJson);
-    } catch (e, t) {
-      String errorMessage = 'Failed to load card';
-      if (e is DioException) {
-        log('Error in :${e.response?.data}');
-        errorMessage =
-            e.response?.data['message'] ??
-            e.response?.data['error'] ??
-            errorMessage;
-      }
-      log("Error in :$e $t");
-      throw "dd";
-    }
-  }
+  //     final cardJson = isOrg ? response.data : response.data['card'];
+  //     return CardModel.fromJson(cardJson);
+  //   } catch (e, t) {
+  //     String errorMessage = 'Failed to load card';
+  //     if (e is DioException) {
+  //       log('Error in :${e.response?.data}');
+  //       errorMessage =
+  //           e.response?.data['message'] ??
+  //           e.response?.data['error'] ??
+  //           errorMessage;
+  //     }
+  //     log("Error in :$e $t");
+  //     throw "dd";
+  //   }
+  // }
 
   @override
   void initState() {
@@ -85,7 +85,7 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
       isOrganization = args['isOrganization'] ?? false;
     }
     super.initState();
-    cardFuture = getCardDetails(isOrg: isOrganization);
+    // cardFuture = getCardDetails(isOrg: isOrganization);
   }
 
   Color hexToColor(String hex) {
@@ -98,25 +98,26 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<CardModel>(
-      future: cardFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
-            backgroundColor: Color(0xFFF5F5F5),
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
+    // return FutureBuilder<CardModel>(
+    //   future: cardFuture,
+    //   builder: (context, snapshot) {
+          final card = widget.card;
+        // if (snapshot.connectionState == ConnectionState.waiting) {
+        //   return Scaffold(
+        //     backgroundColor: Color(0xFFF5F5F5),
+        //     body: Center(child: CircularProgressIndicator()),
+        //   );
+        // }
 
-        if (snapshot.hasError) {
-          return Scaffold(
-            backgroundColor: Color(0xFFF5F5F5),
-            body: Center(child: Text('Error loading card')),
-          );
-        }
+        // if (snapshot.hasError) {
+        //   return Scaffold(
+        //     backgroundColor: Color(0xFFF5F5F5),
+        //     body: Center(child: Text('Error loading card')),
+        //   );
+        // }
 
-        final card = snapshot.data!;
-        log("Card Json:${card.toJson()}");
+        // final card = snapshot.data!;
+        // log("Card Json:${card.toJson()}");
 
         return Scaffold(
           backgroundColor: card.theme.cardStyle == "professional"
@@ -563,8 +564,8 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
             ),
           ),
         );
-      },
-    );
+    //   },
+    // );
   }
 
   Widget _buildContactItem(

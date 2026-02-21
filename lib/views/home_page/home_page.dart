@@ -182,12 +182,6 @@ class DashboardPage extends StatelessWidget {
                               iconColor: AppColors.primaryPink,
                             ),
                             StatCard(
-                              title: 'Total Saves',
-                              value: controller.totalSaves.toString(),
-                              icon: Icons.bookmark,
-                              iconColor: AppColors.primaryPink,
-                            ),
-                            StatCard(
                               title: 'QR Scans',
                               value: controller.totalScans.toString(),
                               icon: Icons.qr_code_scanner,
@@ -592,7 +586,7 @@ class DashboardPage extends StatelessWidget {
            case 'view':
            // Handle view action
              Get.to(
-                   () => BusinessCardProfilePage(cardId: card.shortUrl,),
+                   () => BusinessCardProfilePage(card: card,),
              );
              break;
            case 'edit':

@@ -180,7 +180,7 @@ class QRCodeSharePage extends StatelessWidget {
                         child: InkWell(
                           onTap: () {
                             Get.to(
-                                  () => BusinessCardProfilePage(cardId: card.shortUrl,),
+                                  () => BusinessCardProfilePage(card: card,),
                             );
                           },
                           borderRadius: BorderRadius.circular(20),

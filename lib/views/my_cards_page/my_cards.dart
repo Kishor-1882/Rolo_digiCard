@@ -205,7 +205,7 @@ class MyCardsPage extends StatelessWidget {
           case 'view':
             // Handle view action
             Get.to(
-                  () => BusinessCardProfilePage(cardId: card.shortUrl,),
+                  () => BusinessCardProfilePage(card: card,),
             );
             break;
           case 'edit':

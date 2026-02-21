@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 class OrganizationSettings {
   final String defaultTheme;
   final String layout;
@@ -142,6 +144,7 @@ class OrgDashboardStats {
   });
 
   factory OrgDashboardStats.fromJson(Map<String, dynamic> json) {
+    log("Parsing dashboard stats: $json");
     return OrgDashboardStats(
       users: json['users'],
       cards: json['cards'],

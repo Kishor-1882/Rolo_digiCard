@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
 import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/models/card_model.dart';
+import 'package:rolo_digi_card/models/org_model.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
 import 'package:rolo_digi_card/services/end_points.dart';
 
@@ -13,12 +14,12 @@ class CardManagementController extends GetxController {
   final Dio _dio = dioClient;
 
   var isLoading = false.obs;
-  var orgCards = <CardModel>[].obs;
+  var orgCards = <OrgCard>[].obs;
   var cardStats = <String, dynamic>{}.obs; // To store simple stats object
   final searchQuery = ''.obs;
   final statusFilter = 'All...'.obs;
 
-  List<CardModel> get filteredCards {
+  List<OrgCard> get filteredCards {
     return orgCards.where((card) {
       // Search filter
       final matchesSearch =
@@ -73,11 +74,11 @@ class CardManagementController extends GetxController {
       isLoading.value = true;
       update();
 
-      final response = await _dio.get(ApiEndpoints.organizationCards);
+      final response = await _dio.get(ApiEndpoints.organizationCards,queryParameters: {"scope":"organization"});
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
-        orgCards.value = data.map((e) => CardModel.fromJson(e)).toList();
+        orgCards.value = data.map((e) => OrgCard.fromJson(e)).toList();
         log("Org Cards Fetched: ${orgCards.length}");
       }
     } on DioException catch (e) {

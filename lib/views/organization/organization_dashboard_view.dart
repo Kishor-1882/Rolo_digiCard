@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/controllers/organization/organization_controller.dart';
@@ -12,13 +14,17 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
 
   @override
   Widget build(BuildContext context) {
+        final selectedFilter = DateFilterOption.last30Days.obs;
+
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: SafeArea(
         child: Obx(() {
           final stats = controller.dashboardStats.value;
           final org = controller.organization.value;
+          final totalScans = stats?.summary?['totalScans'] ?? 0;
 
+          log("Dashboard Build:${stats?.summary}");
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
@@ -29,22 +35,41 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                 const SizedBox(height: 24),
                 _buildGreeting(),
                 const SizedBox(height: 24),
-                const Text(
-                  'Key Metrics',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Key Metrics',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Obx(() => _DateFilterButton(
+                      selected: selectedFilter.value,
+                      onChanged: (value) {
+                       selectedFilter.value = value;
+
+                       final range = value.dateRange;
+                        controller.getDashboardStats(
+                          startDate: range['startDate'],
+                          endDate:   range['endDate'],
+               );
+                      },
+                    )),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 _buildMetricsGrid(stats),
                 const SizedBox(height: 16),
                 _buildFullWidthMetric(
                   title: 'Total Scans',
-                  value: stats != null ? stats.totalScans.toString() : '0',
+                  value: totalScans > 1000
+                      ? '${(totalScans / 1000).toStringAsFixed(1)}K'
+                      : totalScans.toString(),
                   trend: stats != null
-                      ? '${stats.scanTrend >= 0 ? '+' : ''}${stats.scanTrend}% this week'
+                      ? '${totalScans >= 0 ? '+' : ''}${totalScans}% this week'
                       : '0% this week',
                   icon: Icons.qr_code_scanner,
                   color: Colors.purple.shade400,
@@ -208,6 +233,8 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
   }
 
   Widget _buildMetricsGrid(OrgDashboardStats? stats) {
+    final totalViews = stats?.summary?['totalViews'] ?? 0;
+
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -240,12 +267,10 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
         ),
         _buildMetricCard(
           title: 'Total Views',
-          value: stats != null
-              ? (stats.totalViews > 1000
-                    ? '${(stats.totalViews / 1000).toStringAsFixed(1)}K'
-                    : stats.totalViews.toString())
-              : '0',
-          trend: stats != null ? '${stats.viewTrend}%' : '0%',
+         value: totalViews > 1000
+    ? '${(totalViews / 1000).toStringAsFixed(1)}K'
+    : totalViews.toString(),
+          trend: stats != null ? '${totalViews}%' : '0%',
           isUp: (stats?.viewTrend ?? 0) >= 0,
           icon: Icons.visibility_outlined,
         ),
@@ -628,6 +653,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
   }
 
   Widget _buildTopPerformingCards(List<dynamic>? topCards) {
+    log("Top performing cards: $topCards");
     if (topCards == null || topCards.isEmpty) {
       return const Center(
         child: Text(
@@ -741,8 +767,11 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
     Map<String, dynamic>? groupStats,
     List<dynamic>? recentGroups,
   ) {
+    log("Group stats: $groupStats");
     final total = groupStats?['total'] ?? 0;
-    final shared = groupStats?['shared'] ?? 0;
+    // final shared = groupStats?['shared'] ?? 0;
+   final shared = recentGroups?.where((group) => group['isShared'] == true).length ?? 0;
+
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -768,7 +797,6 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
           ),
           const SizedBox(height: 12),
           ...recentGroups
-              .take(2)
               .map(
                 (g) => _buildGroupItem(
                   g['name'] ?? 'Untitled',
@@ -1033,5 +1061,230 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
         ),
       ],
     );
+  }
+}
+
+
+class _DateFilterButton extends StatelessWidget {
+  final DateFilterOption selected;
+  final ValueChanged<DateFilterOption> onChanged;
+
+  const _DateFilterButton({
+    required this.selected,
+    required this.onChanged,
+  });
+
+  static const _bgColor      = Color(0xFF1E1E2E);
+  static const _borderColor  = Color(0xFF2E2E45);
+  static const _accentColor  = Color(0xFF7C5CFC);
+  static const _selectedBg   = Color(0xFF2A2A3E);
+  static const _textColor    = Color(0xFFE8E8F0);
+  static const _mutedColor   = Color(0xFF9090A8);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => _showMenu(context),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: _bgColor,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: _borderColor),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.calendar_today_rounded, color: _accentColor, size: 14),
+            const SizedBox(width: 6),
+            Text(
+              selected.label,
+              style: const TextStyle(
+                color: _textColor,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Icon(Icons.keyboard_arrow_down_rounded, color: _mutedColor, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showMenu(BuildContext context) async {
+    // Find the button's position on screen
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(
+          button.size.bottomRight(Offset.zero),
+          ancestor: overlay,
+        ),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    final result = await showMenu<DateFilterOption>(
+      context: context,
+      position: position,
+      color: const Color(0xFF1A1A28),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Color(0xFF2E2E45)),
+      ),
+      elevation: 12,
+      items: DateFilterOption.values.map((option) {
+        final isSelected = option == selected;
+        return PopupMenuItem<DateFilterOption>(
+          value: option,
+          padding: EdgeInsets.zero,
+          child: Container(
+            width: double.infinity,
+            color: isSelected ? _selectedBg : Colors.transparent,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  option.label,
+                  style: TextStyle(
+                    color: isSelected ? _accentColor : _textColor,
+                    fontSize: 14,
+                    fontWeight:
+                        isSelected ? FontWeight.w700 : FontWeight.w400,
+                  ),
+                ),
+                if (isSelected)
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: _accentColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+
+    if (result != null) onChanged(result);
+  }
+}
+
+enum DateFilterOption {
+  today,
+  yesterday,
+  thisWeek,
+  lastWeek,
+  thisMonth,
+  lastMonth,
+  last30Days,
+  thisYear,
+  lastYear,
+  custom,
+}
+
+extension DateFilterOptionLabel on DateFilterOption {
+  String get label {
+    switch (this) {
+      case DateFilterOption.today:      return 'Today';
+      case DateFilterOption.yesterday:  return 'Yesterday';
+      case DateFilterOption.thisWeek:   return 'This Week';
+      case DateFilterOption.lastWeek:   return 'Last Week';
+      case DateFilterOption.thisMonth:  return 'This Month';
+      case DateFilterOption.lastMonth:  return 'Last Month';
+      case DateFilterOption.last30Days: return 'Last 30 Days';
+      case DateFilterOption.thisYear:   return 'This Year';
+      case DateFilterOption.lastYear:   return 'Last Year';
+      case DateFilterOption.custom:     return 'Custom';
+    }
+  }
+
+   /// Logic mirrors your API: day boundaries are at 18:30 UTC (midnight IST).
+  Map<String, String> get dateRange {
+    final now = DateTime.now().toUtc();
+
+    // IST midnight = 18:30 UTC previous day
+    // "Start of today" in IST means 18:30 UTC of the previous calendar day.
+    DateTime todayStart = DateTime.utc(now.year, now.month, now.day - 1, 18, 30, 0, 0);
+    // If current UTC time is already past 18:30, today's IST start is today at 18:30 UTC
+    if (now.hour > 18 || (now.hour == 18 && now.minute >= 30)) {
+      todayStart = DateTime.utc(now.year, now.month, now.day, 18, 30, 0, 0);
+    }
+    final todayEnd = todayStart.add(const Duration(days: 1)).subtract(const Duration(milliseconds: 1));
+
+    DateTime start;
+    DateTime end;
+
+    switch (this) {
+      case DateFilterOption.today:
+        start = todayStart;
+        end   = todayEnd;
+        break;
+
+      case DateFilterOption.yesterday:
+        start = todayStart.subtract(const Duration(days: 1));
+        end   = todayStart.subtract(const Duration(milliseconds: 1));
+        break;
+
+      case DateFilterOption.thisWeek:
+        // Week starts Monday IST
+        final daysFromMonday = now.weekday - 1; // Monday = 1
+        start = todayStart.subtract(Duration(days: daysFromMonday));
+        end   = todayEnd;
+        break;
+
+      case DateFilterOption.lastWeek:
+        final daysFromMonday = now.weekday - 1;
+        end   = todayStart.subtract(Duration(days: daysFromMonday)).subtract(const Duration(milliseconds: 1));
+        start = end.subtract(const Duration(days: 6)).copyWith(hour: 18, minute: 30, second: 0, millisecond: 0);
+        break;
+
+      case DateFilterOption.thisMonth:
+        // Start of current month in IST = last day of previous month at 18:30 UTC
+        start = DateTime.utc(now.year, now.month, 1).subtract(const Duration(hours: 5, minutes: 30));
+        end   = todayEnd;
+        break;
+
+      case DateFilterOption.lastMonth:
+        final firstOfThisMonth = DateTime.utc(now.year, now.month, 1).subtract(const Duration(hours: 5, minutes: 30));
+        end   = firstOfThisMonth.subtract(const Duration(milliseconds: 1));
+        start = DateTime.utc(now.year, now.month - 1, 1).subtract(const Duration(hours: 5, minutes: 30));
+        break;
+
+      case DateFilterOption.last30Days:
+        start = todayStart.subtract(const Duration(days: 30));
+        end   = todayEnd;
+        break;
+
+      case DateFilterOption.thisYear:
+        start = DateTime.utc(now.year, 1, 1).subtract(const Duration(hours: 5, minutes: 30));
+        end   = todayEnd;
+        break;
+
+      case DateFilterOption.lastYear:
+        start = DateTime.utc(now.year - 1, 1, 1).subtract(const Duration(hours: 5, minutes: 30));
+        end   = DateTime.utc(now.year, 1, 1).subtract(const Duration(hours: 5, minutes: 30, milliseconds: 1));
+        break;
+
+      case DateFilterOption.custom:
+        // Return empty — caller handles custom date picker
+        return {'startDate': '', 'endDate': ''};
+    }
+
+    log('Start: $start, End: $end');
+    log('Start Iso: ${start.toIso8601String()}, End Iso: ${end.toIso8601String()}');
+    return {
+      'startDate': start.toIso8601String(),
+      'endDate':   end.toIso8601String(),
+    };
   }
 }

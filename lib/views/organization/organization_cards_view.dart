@@ -6,9 +6,13 @@ import 'package:rolo_digi_card/common/snack_bar.dart';
 import 'package:rolo_digi_card/common/common_textfield.dart';
 import 'package:rolo_digi_card/controllers/organization/card_management_controller.dart';
 import 'package:rolo_digi_card/models/card_model.dart';
+import 'package:rolo_digi_card/models/org_model.dart';
 import 'package:rolo_digi_card/utils/color.dart';
 import 'package:rolo_digi_card/views/home_page/create_new_card.dart';
 import 'package:rolo_digi_card/views/my_cards_page/widget/business_card_details.dart';
+import 'package:rolo_digi_card/views/organization/widgets/card_details.dart';
+import 'package:rolo_digi_card/views/organization/widgets/card_details_card_model.dart';
+import 'package:rolo_digi_card/views/organization/widgets/create_group_dialog.dart';
 
 class OrganizationCardsView extends GetView<CardManagementController> {
   const OrganizationCardsView({super.key});
@@ -54,140 +58,139 @@ class OrganizationCardsView extends GetView<CardManagementController> {
 
   Widget _buildHeader() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Card Management',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              'Manage digital business cards',
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-            ),
-          ],
+        GestureDetector(
+          onTap: () => Get.back(),
+          child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
         ),
-        Row(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.cardBackground,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white10),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Card Management',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Manage your card groups',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                  ),
+                ],
               ),
-              child: IconButton(
-                onPressed: () {
-                  Get.toNamed('/scan-card');
-                },
-                icon: const Icon(Icons.qr_code_2, color: Colors.white),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Container(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFE91E8E), Color(0xFF8B5CF6)],
+              Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFE91E8E), Color(0xFF8B5CF6)],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                borderRadius: BorderRadius.circular(12),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Get.dialog(
+                      const CreateGroupDialog(),
+                      barrierDismissible: true,
+                    );
+                  },
+                  icon: const Icon(Icons.add, color: Colors.white, size: 18),
+                  label: const Text(
+                    'New Group', // Kept as New Group to match screenshot, though functionality is create card
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  ),
+                ),
               ),
-              child: IconButton(
-                onPressed: () {
-                  Get.toNamed('/create-card');
-                },
-                icon: const Icon(Icons.add, color: Colors.white),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
   }
 
   Widget _buildStatsGrid(Map<String, dynamic> stats) {
-    log("Stats: $stats");
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.8,
+    // Replaced GridView with Row/Expanded to prevent overflow
+    return Row(
       children: [
-        _buildStatCard(
-          stats['total']?.toString() ?? '0',
-          'Total Cards',
-          Icons.credit_card,
-          AppColors.primaryPink,
+        Expanded(
+          child: _buildStatBox(
+            stats['total']?.toString() ?? '0',
+            'Total Cards',
+            Icons.credit_card,
+          ),
         ),
-        _buildStatCard(
-          stats['active']?.toString() ?? '0',
-          'Active',
-          Icons.check_circle_outline,
-          Colors.greenAccent,
+        const SizedBox(width: 8),
+        Expanded(
+          child: _buildStatBox(
+            stats['active']?.toString() ?? '0',
+            'Active',
+            Icons.check_circle_outline,
+          ),
         ),
-        _buildStatCard(
-          stats['disabled']?.toString() ?? '0',
-          'Inactive',
-          Icons.cancel_outlined,
-          Colors.redAccent,
-        ),
-        _buildStatCard(
-          stats['totalViews']?.toString() ?? '0',
-          'Views',
-          Icons.access_time,
-          Colors.orangeAccent,
+        const SizedBox(width: 8),
+        Expanded(
+          child: _buildStatBox(
+            stats['totalViews']?.toString() ?? '0',
+            'Total Views',
+            Icons.visibility_outlined,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildStatCard(
-    String value,
-    String label,
-    IconData icon,
-    Color color,
-  ) {
+  Widget _buildStatBox(String value, String label, IconData icon) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      // Fixed height to prevent layout jumps
+      height: 100,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: const Color(0xFF1E1E2C),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFF2B2B36),
+            const Color(0xFF1E1E2C),
+          ],
+        ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                label,
-                style: const TextStyle(color: Colors.white54, fontSize: 12),
-              ),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
+          Icon(icon, color: Colors.white54, size: 20),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
-            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 10,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -199,11 +202,11 @@ class OrganizationCardsView extends GetView<CardManagementController> {
       children: [
         Expanded(
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.cardBackground,
+              color: const Color(0xFF1E1E2C),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white10),
+              border: Border.all(color: Colors.white.withOpacity(0.05)),
             ),
             child: TextField(
               onChanged: (value) => controller.searchQuery.value = value,
@@ -231,55 +234,35 @@ class OrganizationCardsView extends GetView<CardManagementController> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: AppColors.cardBackground,
+            color: const Color(0xFF1E1E2C),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white10),
+            border: Border.all(color: Colors.white.withOpacity(0.05)),
           ),
           child: DropdownButtonHideUnderline(
             child: Obx(
               () => DropdownButton<String>(
-                dropdownColor: AppColors.cardBackground,
-                value: controller.statusFilter.value,
-                items: <String>['All...', 'Active', 'Inactive', 'Blocked']
+                dropdownColor: const Color(0xFF1E1E2C),
+                value: controller.statusFilter.value == 'All...' ? 'All' : controller.statusFilter.value,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                items: <String>['All', 'Active', 'Inactive', 'Blocked']
                     .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
-                        child: Text(
-                          value,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
-                        ),
+                        child: Text(value),
                       );
                     })
                     .toList(),
                 onChanged: (String? newValue) {
                   if (newValue != null) {
-                    controller.statusFilter.value = newValue;
+                    controller.statusFilter.value = newValue == 'All' ? 'All...' : newValue;
                   }
                 },
                 icon: const Icon(
                   Icons.keyboard_arrow_down,
                   color: Colors.white54,
+                  size: 18
                 ),
               ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white10),
-          ),
-          child: IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.grid_view_sharp,
-              color: Colors.white54,
-              size: 20,
             ),
           ),
         ),
@@ -287,7 +270,7 @@ class OrganizationCardsView extends GetView<CardManagementController> {
     );
   }
 
-  Widget _buildCardList(List<CardModel> cards) {
+  Widget _buildCardList(List<OrgCard> cards) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -305,28 +288,46 @@ class OrganizationCardsView extends GetView<CardManagementController> {
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white10),
+             color: const Color(0xFF1E1E2C),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFFE91E8E).withOpacity(0.3)),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFE91E8E).withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Row(
             children: [
               Container(
-                width: 50,
-                height: 50,
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFE91E8E), Color(0xFF8B5CF6)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFF2B2B36),
+                  borderRadius: BorderRadius.circular(16), // Fixed: Removed conflicts with Shape decoration if any existed in passed data, mostly just safe standard box
+                  image: card.profile != null
+                      ? DecorationImage(
+                          image: NetworkImage(card.profile!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                child: const Icon(
-                  Icons.credit_card,
-                  color: Colors.white,
-                  size: 28,
-                ),
+                child: card.profile == null
+                    ? Center(
+                        child: Text(
+                          card.company.isNotEmpty
+                              ? card.company[0].toUpperCase()
+                              : 'C',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                          ),
+                        ),
+                      )
+                    : null,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -336,81 +337,127 @@ class OrganizationCardsView extends GetView<CardManagementController> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          card.name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            card.name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        _buildStatusBadge(statusLabel, statusColor),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: statusColor.withOpacity(0.5),
+                            ),
+                          ),
+                          child: Text(
+                            statusLabel,
+                            style: TextStyle(
+                              color: statusColor,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                         PopupMenuButton<String>(
+                          icon: const Icon(Icons.more_vert, color: Colors.white54),
+                          color: const Color(0xFF2B2B36),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          onSelected: (value) {
+                            if (value == 'delete') {
+                              _showDeleteDialog(context, card);
+                            } else if (value == 'view') {
+                              // View details
+                              // Navigate to card detail view if available
+                              // Using existing or placeholder for now
+                               Get.to(() => CardDetailPage(
+                                 card: card,
+                                // isOwner: true, 
+                               ));
+                            }
+                          },
+                          itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                             PopupMenuItem<String>(
+                              value: 'view',
+                              child: Row(
+                                children: const [
+                                  Icon(Icons.visibility_outlined, color: Colors.white, size: 20),
+                                  SizedBox(width: 12),
+                                  Text('View Details', style: TextStyle(color: Colors.white)),
+                                ],
+                              ),
+                            ),
+                             PopupMenuItem<String>(
+                              value: 'delete',
+                              child: Row(
+                                children: const [
+                                  Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                                  SizedBox(width: 12),
+                                  Text('Delete', style: TextStyle(color: Colors.redAccent)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
+                    const SizedBox(height: 4),
                     Text(
-                      card.id,
+                      '${card.title} @ ${card.company}',
                       style: const TextStyle(
-                        color: Colors.white38,
+                        color: Colors.white70,
                         fontSize: 12,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(
-                          Icons.qr_code_scanner,
-                          color: AppColors.primaryPink,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${card.scanCount} scans',
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Icon(
+                        Icon(
                           Icons.visibility_outlined,
-                          color: Colors.blueAccent,
+                          color: Colors.white38,
                           size: 14,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           '${card.viewCount} views',
                           style: const TextStyle(
-                            color: Colors.white70,
+                            color: Colors.white38,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                         Icon(
+                          Icons.history,
+                          color: Colors.white38,
+                          size: 14,
+                        ),
+                         const SizedBox(width: 4),
+                        Text(
+                          'Updated 2 days ago', // Placeholder
+                          style: const TextStyle(
+                            color: Colors.white38,
                             fontSize: 12,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Owner: ${card.userId}', // We don't have ownerName in model, but userId is there
-                      style: const TextStyle(
-                        color: Colors.white38,
-                        fontSize: 12,
-                      ),
-                    ),
                   ],
                 ),
               ),
-              GestureDetector(
-                onTapDown: (details) {
-                  _showPopupMenu(
-                    context,
-                    details.globalPosition,
-                    card,
-                    controller,
-                  );
-                },
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(Icons.more_vert, color: Colors.white54),
-                ),
-              ),
             ],
           ),
         );
@@ -418,401 +465,31 @@ class OrganizationCardsView extends GetView<CardManagementController> {
     );
   }
 
-  Widget _buildStatusBadge(String status, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            status == 'Active'
-                ? Icons.check_circle
-                : status == 'Pending'
-                ? Icons.access_time
-                : Icons.cancel,
-            color: color,
-            size: 12,
+  void _showDeleteDialog(BuildContext context, OrgCard card) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E2C),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Delete Card', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Are you sure you want to delete "${card.company}"? This action cannot be undone.',
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
           ),
-          const SizedBox(width: 4),
-          Text(
-            status,
-            style: TextStyle(
-              color: color,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
+          TextButton(
+            onPressed: () {
+              controller.deleteOrgCard(card.id);
+              Navigator.pop(context);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
-    );
-  }
-
-  void _showPopupMenu(
-    BuildContext context,
-    Offset offset,
-    CardModel card,
-    CardManagementController controller,
-  ) async {
-    await showMenu<String>(
-      context: context,
-      position: RelativeRect.fromLTRB(
-        offset.dx,
-        offset.dy,
-        offset.dx,
-        offset.dy,
-      ),
-      color: const Color(0xFF27272A),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFF858585), width: 1),
-      ),
-      constraints: const BoxConstraints(
-        minWidth: 70, // Set minimum width
-        maxWidth: 130, // Set maximum width
-      ),
-      items: [
-        PopupMenuItem<String>(
-          height: 30,
-          value: 'view',
-          child: Row(
-            children: [
-              Icon(
-                Icons.visibility_outlined,
-                color: Colors.white.withOpacity(0.9),
-                size: 16,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'View',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-        PopupMenuItem<String>(
-          enabled: false,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          height: 8,
-          child: const Divider(
-            color: Color(0xFF858585),
-            thickness: 1,
-            height: 1,
-          ),
-        ),
-        PopupMenuItem<String>(
-          height: 30,
-          value: 'edit',
-          child: Row(
-            children: [
-              Icon(
-                Icons.edit_outlined,
-                color: Colors.white.withOpacity(0.9),
-                size: 16,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'Edit',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-        PopupMenuItem<String>(
-          enabled: false,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          height: 8,
-          child: const Divider(
-            color: Color(0xFF858585),
-            thickness: 1,
-            height: 1,
-          ),
-        ),
-        PopupMenuItem<String>(
-          height: 30,
-          value: 'toggle_status',
-          child: Row(
-            children: [
-              Icon(
-                card.isActive
-                    ? Icons.toggle_on_outlined
-                    : Icons.toggle_off_outlined,
-                color: Colors.white.withOpacity(0.9),
-                size: 16,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                card.isActive ? 'Deactivate' : 'Activate',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-        PopupMenuItem<String>(
-          enabled: false,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          height: 8,
-          child: const Divider(
-            color: Color(0xFF858585),
-            thickness: 1,
-            height: 1,
-          ),
-        ),
-        PopupMenuItem<String>(
-          height: 30,
-          value: 'reassign',
-          child: Row(
-            children: [
-              Icon(
-                Icons.person_add_alt_1_outlined,
-                color: Colors.white.withOpacity(0.9),
-                size: 16,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'Assign',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-        PopupMenuItem<String>(
-          enabled: false,
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          height: 8,
-          child: const Divider(
-            color: Color(0xFF858585),
-            thickness: 1,
-            height: 1,
-          ),
-        ),
-        PopupMenuItem<String>(
-          height: 30,
-          value: 'delete',
-          child: Row(
-            children: [
-              Icon(
-                Icons.delete_outline,
-                color: Colors.white.withOpacity(0.9),
-                size: 16,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'Delete',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.9),
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ).then((value) {
-      if (value != null) {
-        switch (value) {
-          case 'view':
-            Get.to(
-              () => BusinessCardProfilePage(cardId: card.id),
-              arguments: {'isOrganization': true},
-            );
-            break;
-          case 'edit':
-            Get.to(
-              () => const CreateNewCard(),
-              arguments: {'isEdit': true, 'card': card, 'isOrganization': true},
-            );
-            break;
-          case 'toggle_status':
-            controller.updateCardStatus(card.id, !card.isActive);
-            break;
-          case 'reassign':
-            _showReassignDialog(controller, context, card.id);
-            break;
-          case 'delete':
-            _showDeleteDialog(controller, context, card.id);
-            break;
-        }
-      }
-    });
-  }
-
-  Future<void> _showDeleteDialog(
-    CardManagementController controller,
-    BuildContext context,
-    String cardId,
-  ) async {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: AppColors.cardBackground,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Colors.white10),
-          ),
-          title: Row(
-            children: const [
-              Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
-              SizedBox(width: 12),
-              Text(
-                'Delete Card',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          content: const Text(
-            'Are you sure you want to delete this card? This action cannot be undone.',
-            style: TextStyle(color: Colors.white70, fontSize: 16),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: Colors.grey[400], fontSize: 16),
-              ),
-            ),
-            Obx(
-              () => ElevatedButton(
-                onPressed: controller.isLoading.value
-                    ? null
-                    : () {
-                        Navigator.of(context).pop();
-                        controller.deleteOrgCard(cardId);
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: controller.isLoading.value
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                      )
-                    : const Text('Delete', style: TextStyle(fontSize: 16)),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _showReassignDialog(
-    CardManagementController controller,
-    BuildContext context,
-    String cardId,
-  ) async {
-    final userIdController = TextEditingController();
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: AppColors.cardBackground,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: Colors.white10),
-          ),
-          title: const Text(
-            'Reassign Card',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Enter the User ID to whom you want to reassign this card.',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-              ),
-              const SizedBox(height: 16),
-              CustomTextField(
-                controller: userIdController,
-                hintText: 'User ID',
-                icon: Icons.person_outline,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: Colors.grey[400], fontSize: 16),
-              ),
-            ),
-            Obx(
-              () => ElevatedButton(
-                onPressed: controller.isLoading.value
-                    ? null
-                    : () {
-                        if (userIdController.text.trim().isEmpty) {
-                          CommonSnackbar.error('Please enter a User ID');
-                          return;
-                        }
-                        Navigator.of(context).pop();
-                        controller.reassignCard(
-                          cardId,
-                          userIdController.text.trim(),
-                        );
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.progressPink,
-                  foregroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: controller.isLoading.value
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.black,
-                          ),
-                        ),
-                      )
-                    : const Text('Reassign', style: TextStyle(fontSize: 16)),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

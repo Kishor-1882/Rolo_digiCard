@@ -50,6 +50,8 @@ class ApiEndpoints {
   // User Management
   static const String organizationUsers = "/api/organization/users";
   static String getOrgUser(String userId) => "/api/organization/users/$userId"; 
+  static String addOrgUser(String orgId) => "/api/organization/groups/$orgId/users"; 
+  
   static const String inviteUser = "/api/organization/users/invite";
   static String resendInvite(String userId) => "/api/organization/users/$userId/invite/resend";
   static String deleteUser(String userId) => "/api/organization/users/$userId";
@@ -72,11 +74,15 @@ class ApiEndpoints {
   static String deleteOrgCard(String cardId) => "/api/organization/cards/$cardId";
 
   // Group Management
-  static const String organizationGroups = "/api/organization/groups";
+  // static const String organizationGroups = "/api/organization/groups";
+  static String organizationGroups(String type) => "/api/organization/groups?groupType=$type";
+
   static String getOrganizationGroup(String groupId) => "/api/organization/groups/$groupId";
   static String updateOrganizationGroup(String groupId) => "/api/organization/groups/$groupId";
   static String deleteOrganizationGroup(String groupId) => "/api/organization/groups/$groupId";
   static String getGroupUsers(String groupId) => "/api/organization/groups/$groupId/users";
+  static String addGroupUsers(String groupId) => "/api/organization/groups/$groupId/users";
+  static String removeGroupUser(String groupId, String userId) => "/api/organization/groups/$groupId/users/$userId";
   static String getGroupCards(String groupId) => "/api/organization/groups/$groupId/cards";
   static String addGroupCards(String groupId) => "/api/organization/groups/$groupId/cards"; // POST based on text file logic, wait check usage
   // The endpoint listed is .../cards but with body, likely POST to add

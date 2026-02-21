@@ -36,8 +36,8 @@ class MyApp extends StatelessWidget {
       initialRoute: "/splash",
       getPages: [
         // GetPage(name: "/splash", page: () =>  OrganizationDashboardView()),
-      //  GetPage(name: "/splash", page: () =>  OrganizationSavedView()),
-         // GetPage(name: "/splash", page: () =>  OrganizationCardsView()),
+        //  GetPage(name: "/splash", page: () =>  OrganizationSavedView()),
+        // GetPage(name: "/splash", page: () =>  OrganizationCardsView()),
         //  GetPage(name: "/splash", page: () =>  OrganizationGroupsView()),
         // GetPage(name: "/splash", page: () =>  AnalyticsView()),
         GetPage(name: "/splash", page: () => const SplashScreen()),

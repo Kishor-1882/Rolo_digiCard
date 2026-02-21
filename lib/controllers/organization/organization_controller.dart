@@ -10,6 +10,7 @@ import 'package:rolo_digi_card/models/organization_model.dart';
 import 'package:rolo_digi_card/models/organization_user_model.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
 import 'package:rolo_digi_card/services/end_points.dart';
+import 'package:rolo_digi_card/views/organization/organization_dashboard_view.dart';
 
 class OrganizationController extends GetxController {
   final Dio _dio = dioClient;
@@ -148,13 +149,23 @@ class OrganizationController extends GetxController {
   }
 
   // Get Organization Dashboard
-  Future<void> getDashboardStats() async {
+  Future<void> getDashboardStats({String? startDate, String? endDate}) async {
     try {
       isLoading.value = true;
       update();
 
-      final response = await _dio.get(ApiEndpoints.organizationDashboard);
+       final range = DateFilterOption.last30Days.dateRange;
+    final queryParams = {
+      'startDate': startDate ?? range['startDate'],
+      'endDate':   endDate   ?? range['endDate'],
+    };
 
+      final response = await _dio.get(
+        ApiEndpoints.organizationDashboard,
+        queryParameters: queryParams,
+      );
+
+      log("Response:${response.realUri}");
       if (response.statusCode == 200) {
         dashboardStats.value = OrgDashboardStats.fromJson(response.data);
       }

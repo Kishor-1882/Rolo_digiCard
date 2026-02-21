@@ -1,0 +1,111 @@
+List Of Users:(GET)
+Url:https://digi-bend.roloscan.com/api/organization/users
+Response:[
+    {
+        "_id": "6992c07f2f594796ff24c619",
+        "email": "testorg5@gmail.com",
+        "firstName": "Test",
+        "lastName": "Org5",
+        "location": "",
+        "city": "",
+        "state": "",
+        "country": "",
+        "isEmailVerified": false,
+        "emailVerificationToken": "df80daba112dd4bd4c0492ae643ad0c6c923342a6c3fdfb0a6cc7402d79d03c7",
+        "emailVerificationExpires": "2026-02-17T07:00:15.458Z",
+        "platformRole": "user",
+        "userType": "organization",
+        "organizationName": "Digisailor",
+        "organizationLogo": "",
+        "userState": "active",
+        "isActive": true,
+        "isBlocked": false,
+        "twoFactorEnabled": false,
+        "permissions": [],
+        "organizationId": "6992c07f2f594796ff24c61a",
+        "organizationRole": "owner",
+        "createdAt": "2026-02-16T07:00:15.629Z",
+        "updatedAt": "2026-02-17T05:12:40.821Z",
+        "__v": 0,
+        "lastLogin": "2026-02-17T05:12:40.821Z",
+        "cardCount": 0
+    }
+]
+
+Invite Users:(POST)
+Url:https://digi-bend.roloscan.com/api/organization/users/invite
+Body:{
+    "email": "employee@acme.com",
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "role": "user",
+    "permissions": [
+        "card:read",
+        "card:create"
+    ]
+}
+Response:{
+    "message": "User invited successfully",
+    "user": {
+        "id": "6993fb2fe6c9bf6f16a551e7",
+        "email": "employee2@acme.com",
+        "firstName": "Jane",
+        "lastName": "Smith",
+        "role": "user",
+        "invitedAt": "2026-02-17T05:22:55.278Z"
+    }
+}
+
+
+Resend Invitation:(POST)
+Url:https://digi-bend.roloscan.com/api/organization/users/6980a0f8401868ebb7845f07/invite/resend
+Body:
+Response:
+
+
+
+Get Users:(GET)
+Url:https://digi-bend.roloscan.com/api/organization/users/6980a0f8401868ebb7845f07
+Body:
+Response:
+
+
+
+Update Users Status:(PATCH)
+Url:https://digi-bend.roloscan.com/api/organization/users/6980a0f8401868ebb7845f07/status
+Body:{
+    "isActive": true
+}
+Response:
+
+
+Update Permission:(PATCH)
+Url:https://digi-bend.roloscan.com/api/organization/users/6980a0f8401868ebb7845f07/permissions
+Body:{
+    "permissions": [
+        "card:read",
+        "card:create",
+        "card:update"
+    ]
+}
+Response:
+
+
+Update Role:(PATCH)
+Url:https://digi-bend.roloscan.com/api/organization/users/6980a0f8401868ebb7845f07/permissions
+Body:{
+    "role": "admin",
+    "permissions": [
+        "user:create",
+        "user:read",
+        "card:read",
+        "card:create"
+    ]
+}
+Response:
+
+
+Remove Users:(DELETE)
+Url:https://digi-bend.roloscan.com/api/organization/users/6980a0f8401868ebb7845f07
+Body:
+Response:

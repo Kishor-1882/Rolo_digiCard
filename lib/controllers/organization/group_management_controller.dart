@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
 import 'package:rolo_digi_card/controllers/organization/organization_controller.dart';
+import 'package:rolo_digi_card/models/check_card_model.dart';
 import 'package:rolo_digi_card/models/group_model.dart';
 import 'package:rolo_digi_card/models/card_model.dart';
 import 'package:rolo_digi_card/models/organization_user_model.dart';
@@ -18,6 +19,9 @@ class GroupManagementController extends GetxController {
   var isLoading = false.obs;
   var groups = <GroupModel>[].obs;
   final searchQuery = ''.obs;
+  final RxString errorMessage = ''.obs;
+  final Rx<GroupModel?> selectedGroup = Rx<GroupModel?>(null);
+  var cardsList = <CheckCardModel>[].obs;
 
   List<GroupModel> get filteredGroups {
     if (searchQuery.value.isEmpty) return groups;
@@ -44,12 +48,16 @@ class GroupManagementController extends GetxController {
   final descriptionController = TextEditingController();
   var isShared = false.obs;
 
+  // Group Type
+  var groupType = 'user'.obs;
+
   @override
   void onInit() {
     super.onInit();
     final authController = Get.find<AuthController>();
     if (authController.userType.value == 'organization') {
       getGroups();
+      fetchOrganizationCards();
     } else {
       log(
         "Skipping GroupManagementController API calls - User is not an organization",
@@ -57,10 +65,15 @@ class GroupManagementController extends GetxController {
     }
   }
 
+  void setGroupType(String type) {
+    groupType.value = type;
+    getGroups();
+  }
+
   @override
   void onClose() {
-    nameController.dispose();
-    descriptionController.dispose();
+    // nameController.dispose();
+    // descriptionController.dispose();
     super.onClose();
   }
 
@@ -75,17 +88,18 @@ class GroupManagementController extends GetxController {
 
   // Get Groups
   Future<void> getGroups() async {
+    log("kanchi");
     try {
       isLoading.value = true;
       update();
 
-      final response = await _dio.get(ApiEndpoints.organizationGroups);
+      final response = await _dio.get(ApiEndpoints.organizationGroups(groupType.value));
 
       if (response.statusCode == 200) {
         // log("Groups Raw Data: ${response.data}");
         final List<dynamic> data = _resolveList(response.data, 'groups');
         groups.value = data.map((e) => GroupModel.fromJson(e)).toList();
-        log("Parsed Groups: ${groups.length}");
+        log("Parsed Groups (${groupType.value}): ${groups.length}");
       }
     } on DioException catch (e) {
       log("Get Groups Error: $e");
@@ -130,11 +144,12 @@ class GroupManagementController extends GetxController {
       final Map<String, dynamic> data = {
         'name': nameController.text.trim(),
         'description': descriptionController.text.trim(),
+        'groupType': groupType.value,
         'isShared': isShared.value,
       };
 
       final response = await _dio.post(
-        ApiEndpoints.organizationGroups,
+        ApiEndpoints.organizationGroups(groupType.value),
         data: data,
       );
       log("Create Group Response: ${response.data}");
@@ -330,4 +345,155 @@ class GroupManagementController extends GetxController {
       update();
     }
   }
+  // Add Users to Group
+  Future<void> addMembersToGroup(String groupId, List<String> userIds) async {
+    try {
+      isLoading.value = true;
+      update();
+
+      final response = await _dio.post(
+        ApiEndpoints.addGroupUsers(groupId),
+        data: {'userIds': userIds},
+      );
+
+      if (response.statusCode == 200) {
+        Get.back();
+        CommonSnackbar.success('Members added to group');
+        getGroupUsers(groupId);
+        getGroups();
+      }
+    } on DioException catch (e) {
+      log("Add Group Members Error: $e");
+      CommonSnackbar.error("Failed to add members to group");
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
+
+  // Remove User from Group
+  Future<void> removeMemberFromGroup(String groupId, String userId) async {
+    try {
+      isLoading.value = true;
+      update();
+
+      final response = await _dio.delete(
+        ApiEndpoints.removeGroupUser(groupId, userId),
+      );
+
+      if (response.statusCode == 200) {
+        CommonSnackbar.success('Member removed from group');
+        getGroupUsers(groupId);
+        getGroups();
+      }
+    } on DioException catch (e) {
+      log("Remove Group Member Error: $e");
+      CommonSnackbar.error("Failed to remove member from group");
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
+
+  Future<void> getGroupById(String groupId) async {
+    log("Dummy S");
+  try {
+    isLoading.value = true;
+    errorMessage.value = '';
+
+    final response = await dioClient.get(
+      '/api/organization/groups/$groupId',
+    );
+
+log("Response Status: ${response.statusCode}");
+    if (response.statusCode == 200) {
+    log("Dummy K");
+    try{
+      final groupData = GroupModel.fromJson(response.data);
+      selectedGroup.value = groupData;
+      log("Dummy :#${selectedGroup.value?.name}");
+    }
+    catch(e,t){
+      log("Error parsing group details: $e $t");
+      errorMessage.value = 'Failed to parse group details';
+    }
+    } else {
+      errorMessage.value = 'Failed to fetch group details';
+    }
+  } on DioException catch (e) {
+    log("Error fetching group details: $e");
+    Get.snackbar(
+      'Error',
+      errorMessage.value,
+      snackPosition: SnackPosition.BOTTOM,
+    );
+    return null;
+  } catch (e) {
+    errorMessage.value = 'An unexpected error occurred: $e';
+    return null;
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+Future<void> fetchOrganizationCards() async {
+  try {
+    isLoading.value = true;
+    final response = await dioClient.get('/api/organization/cards');
+    if (response.statusCode == 200) {
+       final data = response.data;
+
+      List<dynamic> cardsData;
+
+      if (data is List) {
+        // API returns direct list
+        cardsData = data;
+      } else if (data is Map<String, dynamic>) {
+        // API returns wrapped object
+        cardsData =
+            data['cards'] ?? data['data'] ?? data['docs'] ?? [];
+      } else {
+        cardsData = [];
+      }
+
+      cardsList.value =
+          cardsData.map((e) => CheckCardModel.fromJson(e)).toList();
+
+      log("Fetch Cards: ${cardsList.length}");
+    }
+  } on DioException catch (e) {
+    log('fetchOrganizationCards error: $e');
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+Future<List<dynamic>> fetchCardGroups() async {
+  try {
+    final response = await dioClient.get(
+      '/api/organization/groups',
+      queryParameters: {'groupType': 'card'},
+    );
+    // Dio returns Response<dynamic>; actual body is in response.data
+    final body = response.data as Map<String, dynamic>;
+    return body['groups'] as List<dynamic>? ?? [];
+  } catch (e) {
+    log('fetchCardGroups error: $e');
+    rethrow;
+  }
+}
+
+Future<void> linkCardGroups(String groupId, List<String> linkedGroupIds) async {
+  try {
+    // Dio uses 'data:' not 'body:'
+    await dioClient.post(
+      '/api/organization/groups/$groupId/link',
+      data: {'linkedGroupIds': linkedGroupIds},
+    );
+  } catch (e) {
+    log('linkCardGroups error: $e');
+    rethrow;
+  }
+}
+
 }
