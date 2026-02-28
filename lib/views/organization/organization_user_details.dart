@@ -185,6 +185,7 @@ class _OrgUserDetailPageState extends State<OrgUserDetailPage>
             borderRadius: BorderRadius.circular(10),
           ),
           indicatorSize: TabBarIndicatorSize.tab,
+          dividerColor: Colors.transparent,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white38,
           labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
@@ -737,24 +738,32 @@ class _CardListTile extends StatelessWidget {
                     ),
                   ],
                   const SizedBox(height: 8),
+               
                   Row(
-                    children: [
-                      _StatChip(
-                          icon: Icons.remove_red_eye_outlined,
-                          value: card.viewCount,
-                          label: 'views'),
-                      const SizedBox(width: 12),
-                      _StatChip(
-                          icon: Icons.qr_code_scanner,
-                          value: card.scanCount,
-                          label: 'scans'),
-                      const SizedBox(width: 12),
-                      _StatChip(
-                          icon: Icons.bookmark_outline,
-                          value: card.saveCount,
-                          label: 'saves'),
-                    ],
-                  ),
+  children: [
+    Expanded(
+      child: _StatChip(
+        icon: Icons.remove_red_eye_outlined,
+        value: card.viewCount,
+        label: 'views',
+      ),
+    ),
+    Expanded(
+      child: _StatChip(
+        icon: Icons.qr_code_scanner,
+        value: card.scanCount,
+        label: 'scans',
+      ),
+    ),
+    Expanded(
+      child: _StatChip(
+        icon: Icons.bookmark_outline,
+        value: card.saveCount,
+        label: 'saves',
+      ),
+    ),
+  ],
+),
                 ],
               ),
             ),
@@ -818,8 +827,8 @@ class _CardAvatar extends StatelessWidget {
   }
 }
 
-class _StatChip extends StatelessWidget {
-  const _StatChip(
+class _StatChip1 extends StatelessWidget {
+  const _StatChip1(
       {required this.icon, required this.value, required this.label});
   final IconData icon;
   final int value;
@@ -835,6 +844,39 @@ class _StatChip extends StatelessWidget {
           '$value $label',
           style:
               const TextStyle(color: Colors.white38, fontSize: 11),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatChip extends StatelessWidget {
+  const _StatChip({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
+  final IconData icon;
+  final int value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 12, color: Colors.white38),
+        const SizedBox(width: 3),
+        Flexible(
+          child: Text(
+            '$value $label',
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white38,
+              fontSize: 11,
+            ),
+          ),
         ),
       ],
     );

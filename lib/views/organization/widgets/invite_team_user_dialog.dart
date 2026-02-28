@@ -498,7 +498,7 @@ class _InviteTeamUserDialogState extends State<InviteTeamUserDialog> {
                       onPressed: () => Get.back(),
                       style: TextButton.styleFrom(
                         backgroundColor: Colors.white.withOpacity(0.08),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                         minimumSize: const Size(0, 52),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       ),
@@ -527,10 +527,10 @@ class _InviteTeamUserDialogState extends State<InviteTeamUserDialog> {
           child: TextButton(
             onPressed: () => Get.back(),
             style: TextButton.styleFrom(
-              backgroundColor: Colors.white.withOpacity(0.08),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              minimumSize: const Size(0, 52),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+               backgroundColor: Colors.white.withOpacity(0.08),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                        minimumSize: const Size(0, 52),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),
             child: const Text('Cancel', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600)),
           ),

@@ -104,7 +104,7 @@ class _MetricsRow extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       crossAxisSpacing: 10,
       mainAxisSpacing: 10,
-      childAspectRatio: 1.6,
+      childAspectRatio: 1.3,
       children: metrics.map((m) => _MetricCard(data: m)).toList(),
     );
   }
@@ -134,7 +134,7 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: const Color(0xFF1E1E2E),
         borderRadius: BorderRadius.circular(12),
@@ -142,14 +142,16 @@ class _MetricCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min, // ← don't expand unnecessarily
+
         children: [
           Container(
             padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
               color: data.iconBg.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(data.icon, color: data.iconColor, size: 16),
+            child: Icon(data.icon, color: data.iconColor, size: 14),
           ),
           const Spacer(),
           Text(
@@ -370,13 +372,39 @@ class _DateInfo extends StatelessWidget {
 
 // ── Assignment Section ─────────────────────────────────────────────────────
 
-class _AssignmentSection extends StatelessWidget {
+class _AssignmentSection extends StatefulWidget {
   const _AssignmentSection({required this.card});
   final OrgCard card;
 
   @override
+  State<_AssignmentSection> createState() => _AssignmentSectionState();
+}
+
+class _AssignmentSectionState extends State<_AssignmentSection> {
+final controller = Get.put(OrgUserManagementController());
+
+     void _onAssignUser() {
+    if (controller.allUsers.isEmpty) controller.fetchAllUsers();
+    showDialog(
+      context: context,
+      builder: (_) => AssignCardDialog(
+        cardId: widget.card.id,
+        currentUserId: widget.card.assignedUser?.id,
+        users: controller.allUsers,
+        isUsersLoading: controller.isUsersLoading,
+        isAssigning: controller.isAssigning,
+        onAssign: (userId) async {
+          final ok = await controller.assignCardToUser(widget.card.id, userId);
+           Get.back();
+          if (ok) CommonSnackbar.success('Card assigned successfully');
+        },
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final assignedUser = card.assignedUser;
+    final assignedUser = widget.card.assignedUser;
     final isAssigned = assignedUser != null;
 
     return Container(
@@ -499,9 +527,7 @@ class _AssignmentSection extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () {
-                // TODO: open assign-user bottom sheet
-              },
+            onPressed: () => _onAssignUser(),
               icon: const Icon(Icons.person_add_outlined,
                   size: 16, color: Color(0xFF7C5CFC)),
               label: Text(

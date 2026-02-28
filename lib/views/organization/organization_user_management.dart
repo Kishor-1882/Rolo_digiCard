@@ -73,23 +73,27 @@ class OrganizationUserManagement extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'User Management',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'User Management',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  Text(
-                    'Manage your team members',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                  ),
-                ],
+                    Text(
+                      'Manage your team members',
+                      style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                    ),
+                  ],
+                ),
               ),
+                          const SizedBox(width: 8),  // ← add spacing between the two sides
+
               Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(

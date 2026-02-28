@@ -107,7 +107,7 @@ class OrganizationCardsView extends GetView<CardManagementController> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   ),
                 ),
@@ -302,33 +302,55 @@ class OrganizationCardsView extends GetView<CardManagementController> {
           child: Row(
             children: [
               Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2B2B36),
-                  borderRadius: BorderRadius.circular(16), // Fixed: Removed conflicts with Shape decoration if any existed in passed data, mostly just safe standard box
-                  image: card.profile != null
-                      ? DecorationImage(
-                          image: NetworkImage(card.profile!),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFE91E8E), Color(0xFF8B5CF6)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                child: card.profile == null
-                    ? Center(
-                        child: Text(
-                          card.company.isNotEmpty
-                              ? card.company[0].toUpperCase()
-                              : 'C',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24,
-                          ),
-                        ),
-                      )
-                    : null,
+                borderRadius: BorderRadius.circular(16),
               ),
+              child: Center(
+                child: Text(
+                  card.name[0],
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ),
+              // Container(
+              //   width: 60,
+              //   height: 60,
+              //   decoration: BoxDecoration(
+              //     color: const Color(0xFF2B2B36),
+              //     borderRadius: BorderRadius.circular(16), // Fixed: Removed conflicts with Shape decoration if any existed in passed data, mostly just safe standard box
+              //     image: card.profile != null
+              //         ? DecorationImage(
+              //             image: NetworkImage(card.profile!),
+              //             fit: BoxFit.cover,
+              //           )
+              //         : null,
+              //   ),
+              //   child: card.profile == null
+              //       ? Center(
+              //           child: Text(
+              //             card.company.isNotEmpty
+              //                 ? card.company[0].toUpperCase()
+              //                 : 'C',
+              //             style: const TextStyle(
+              //               color: Colors.white,
+              //               fontWeight: FontWeight.bold,
+              //               fontSize: 24,
+              //             ),
+              //           ),
+              //         )
+              //       : null,
+              // ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(

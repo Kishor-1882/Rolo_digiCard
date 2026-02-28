@@ -164,8 +164,7 @@ final active =
 
   Widget _buildStatBox(String value, String label, IconData icon) {
     return Container(
-      height: 90, 
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       decoration: BoxDecoration(
         color: const Color(0xFF1E1E2C),
         borderRadius: BorderRadius.circular(20),

@@ -665,6 +665,7 @@ void _confirmUnlink(String groupId, String groupName) {
         indicatorColor: const Color(0xFFCC44EE),
         indicatorWeight: 2,
         indicatorSize: TabBarIndicatorSize.label,
+        dividerColor: Colors.transparent, // ← removes the bottom line
         tabs: const [
           Tab(text: 'Users'),
           Tab(text: 'Cards'),
@@ -1027,6 +1028,8 @@ Widget _buildUsersTab() {
                             'Members of this group will have access to cards in these groups.',
                             style: TextStyle(
                                 color: Colors.white54, fontSize: 11),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
@@ -1211,39 +1214,41 @@ Widget _buildUsersTab() {
   }
 
 Widget _buildStatsRow() {
-    return Obx(() => Row(
-          children: [
-            Expanded(
-              child: _buildStatBox(
-                icon: Icons.group_outlined,
-                iconColor: const Color(0xFF4FC3F7),
-                label: 'Members',
-                value: '${controller.selectedGroup.value?.members.length ?? 0}',
-              ),
+  return Obx(() => Column(
+    children: [
+      Row(
+        children: [
+          Expanded(
+            child: _buildStatBox(
+              icon: Icons.group_outlined,
+              iconColor: const Color(0xFF4FC3F7),
+              label: 'Members',
+              value: '${controller.selectedGroup.value?.members.length ?? 0}',
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _buildStatBox(
-                icon: Icons.layers_outlined,
-                iconColor: const Color(0xFF4CAF50),
-                label: 'Card Groups',
-                value:
-                    '${controller.selectedGroup.value?.linkedGroups?.length ?? 0}',
-              ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: _buildStatBox(
+              icon: Icons.layers_outlined,
+              iconColor: const Color(0xFF4CAF50),
+              label: 'Card Groups',
+              value: '${controller.selectedGroup.value?.linkedGroups?.length ?? 0}',
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _buildStatBox(
-                icon: Icons.people_alt_outlined,
-                iconColor: const Color(0xFF4FC3F7),
-                label: 'Type',
-                value: widget.isUserGroup ? 'User\nGroup' : 'Card\nGroup',
-                valueFontSize: 13,
-              ),
-            ),
-          ],
-        ));
-  }
+          ),
+        ],
+      ),
+      const SizedBox(height: 10),
+      // Full width bottom box
+      _buildStatBox(
+        icon: Icons.people_alt_outlined,
+        iconColor: const Color(0xFF4FC3F7),
+        label: 'Type',
+        value: widget.isUserGroup ? 'User Group' : 'Card Group',
+        valueFontSize: 13,
+      ),
+    ],
+  ));
+}
 
   Widget _buildStatBox({
     required IconData icon,
@@ -1264,10 +1269,12 @@ Widget _buildStatsRow() {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(label,
                     style:
-                        const TextStyle(color: Colors.white54, fontSize: 12)),
+                        const TextStyle(color: Colors.white54, fontSize: 12),          maxLines: 1,
+          overflow: TextOverflow.ellipsis, ),
                 const SizedBox(height: 4),
                 Text(
                   value,
