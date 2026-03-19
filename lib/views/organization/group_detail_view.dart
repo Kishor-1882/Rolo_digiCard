@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/controllers/organization/group_management_controller.dart';
 import 'package:rolo_digi_card/models/group_model.dart';
+import 'package:rolo_digi_card/models/org_model.dart';
 import 'package:rolo_digi_card/utils/color.dart';
 import 'package:rolo_digi_card/views/organization/add_cards_view.dart';
 import 'package:rolo_digi_card/views/organization/add_members_view.dart';
@@ -503,26 +504,15 @@ void _confirmUnlink(String groupId, String groupName) {
                 itemBuilder: (context, index) {
                   final card = cards[index]; 
 
-                  // Support both Map (full object) and String (ID only)
-                  final cardId = card is Map
-                      ? (card.id ?? '')
-                      : card.toString();
+                  final orgCard = card as OrgCard;
+                  final cardId = orgCard.id;
+                  final firstName = orgCard.name.isNotEmpty ? orgCard.name : 'Card ${index + 1}';
+                  final destination = orgCard.title;
+                  final isActive = orgCard.isActive;
 
-
-                  final firstName = card is Map
-                      ? (card.name ??
-                          'Card ${index + 1}')
-                      : 'Card ${index + 1}';
-                  final lastName =
-                      card is Map ? (card.name ?? '') : '';
-                  final destination =
-                      card is Map ? (card.title ?? '') : '';
-                  final isActive =
-                      card is Map ? (card.isActive ?? true) : true;
-
-                  final initials =
-                      '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}'
-                          .toUpperCase();
+                  final initials = firstName.length >= 2
+                      ? firstName.substring(0, 2).toUpperCase()
+                      : (firstName.isNotEmpty ? firstName[0].toUpperCase() : 'C');
 
 
                   final avatarColors = [
@@ -558,7 +548,7 @@ void _confirmUnlink(String groupId, String groupName) {
                         Expanded(
                           flex: 4,
                           child: Text(
-                            '${card.name} $lastName'.trim(),
+                            firstName,
                             style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
@@ -577,8 +567,8 @@ void _confirmUnlink(String groupId, String groupName) {
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  card.title.isNotEmpty
-                                      ? card.title
+                                  destination.isNotEmpty
+                                      ? destination
                                       : '—',
                                   style: const TextStyle(
                                       color: Colors.white70, fontSize: 12),
@@ -621,16 +611,17 @@ void _confirmUnlink(String groupId, String groupName) {
 
                         // Actions: eye + delete
                         GestureDetector(
-                          onTap: () {
-                            Get.to(() => CardDetailsCardModel(card: card));
-                            // Navsigate to card detail if needed
-                          },
+                          onTap: () => Get.to(() => CardDetailsCardModel(card: orgCard)),
                           child: const Icon(Icons.remove_red_eye_outlined,
                               color: Color(0xFF4FC3F7), size: 20),
                         ),
                         const SizedBox(width: 12),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () async {
+                            if (cardId.isNotEmpty) {
+                              await controller.removeGroupCard(widget.group.id, cardId);
+                            }
+                          },
                           child: const Icon(Icons.delete_outline,
                               color: Colors.red, size: 20),
                         ),

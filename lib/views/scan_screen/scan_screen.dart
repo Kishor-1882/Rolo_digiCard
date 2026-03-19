@@ -10,6 +10,7 @@ class QRScannerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScanController scanController = Get.put(ScanController());
+    scanController.resetScan();
 
     return Scaffold(
       backgroundColor: Colors.black,

@@ -13,6 +13,7 @@ import 'package:rolo_digi_card/views/splash_screen/splash_screen.dart';
 
 import 'views/home_page/create_new_card.dart';
 import 'views/my_cards_page/widget/business_card_details.dart';
+import 'views/organization/manual_entry_view.dart';
 import 'views/scan_screen/scan_screen.dart';
 
 
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: "/sidebar", page: () => SideBar()),
         GetPage(name: "/create-card", page: () => CreateNewCard()),
         GetPage(name: "/scan-card", page: () => QRScannerPage()),
+        GetPage(name: "/manual-entry", page: () => const ManualEntryView()),
         // GetPage(name: "/card-profile", page: () => BusinessCardProfilePage()),
       ],
     );

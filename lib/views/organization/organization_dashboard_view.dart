@@ -796,13 +796,23 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
             style: TextStyle(color: Colors.white54, fontSize: 12),
           ),
           const SizedBox(height: 12),
-          ...recentGroups
-              .map(
-                (g) => _buildGroupItem(
-                  g['name'] ?? 'Untitled',
-                  '${g['members']?.length ?? 0} members',
-                ),
+          SizedBox(
+            height: 120,
+            child: Scrollbar(
+              thumbVisibility: true,
+              child: ListView(
+                shrinkWrap: true,
+                children: recentGroups
+                    .map(
+                      (g) => _buildGroupItem(
+                        g['name'] ?? 'Untitled',
+                        '${g['members']?.length ?? g['cards']?.length ?? 0} ${(g['groupType'] ?? 'user') == 'card' ? 'cards' : 'members'}',
+                      ),
+                    )
+                    .toList(),
               ),
+            ),
+          ),
         ],
       ],
     );

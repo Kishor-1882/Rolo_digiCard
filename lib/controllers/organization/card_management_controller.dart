@@ -17,6 +17,7 @@ class CardManagementController extends GetxController {
   var orgCards = <OrgCard>[].obs;
   var cardStats = <String, dynamic>{}.obs; // To store simple stats object
   final searchQuery = ''.obs;
+  final searchController = TextEditingController();
   final statusFilter = 'All...'.obs;
 
   List<OrgCard> get filteredCards {
@@ -48,6 +49,7 @@ class CardManagementController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    searchController.addListener(() => searchQuery.value = searchController.text);
     final authController = Get.find<AuthController>();
     if (authController.userType.value == 'organization') {
       getOrganizationCards();
@@ -64,6 +66,7 @@ class CardManagementController extends GetxController {
     nameController.dispose();
     titleController.dispose();
     emailController.dispose();
+    searchController.dispose();
     super.onClose();
   }
 

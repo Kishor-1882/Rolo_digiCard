@@ -86,8 +86,20 @@ class ScanController extends GetxController with GetSingleTickerProviderStateMix
       }
     } catch (e,t) {
       isSuccess.value = false;
-      CommonSnackbar.error('Failed to save card');
       scannedData.value = null;
+      String msg = 'Failed to save card';
+      if (e is DioException && e.response?.data != null) {
+        final data = e.response!.data;
+        if (data is Map) {
+          final apiMsg = (data['message'] ?? data['error'] ?? '').toString().toLowerCase();
+          if (apiMsg.contains('own') || apiMsg.contains('already') || apiMsg.contains('your card')) {
+            msg = 'This is your own card or it is already saved';
+          } else if (apiMsg.isNotEmpty) {
+            msg = data['message'] ?? data['error'] ?? msg;
+          }
+        }
+      }
+      CommonSnackbar.error(msg);
       print('Error saving card: ${e} $t');
     } finally {
       isLoading.value = false;

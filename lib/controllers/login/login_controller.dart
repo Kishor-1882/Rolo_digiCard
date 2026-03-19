@@ -79,6 +79,11 @@ class LoginController extends GetxController {
         DioClient.setToken(accessToken);
 
         isLoggedIn.value = true;
+        final isAdmin = userType == 'organization' || userType == 'admin';
+        CommonSnackbar.success(
+          isAdmin ? 'Welcome back, Admin!' : 'Welcome back!',
+          title: 'Login Success',
+        );
         Get.offAllNamed("/sidebar");
         update();
       } else {

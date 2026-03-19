@@ -49,6 +49,7 @@ class AuthController extends GetxController {
       if (response.statusCode == 200) {
         // Clear stored token
         await storage.delete(key: 'accessToken');
+        await storage.delete(key: 'refreshToken');
 
         // Clear SharedPreferences if needed
         final prefs = await SharedPreferences.getInstance();
@@ -60,6 +61,9 @@ class AuthController extends GetxController {
         log("Logout successful");
         final token = await storage.read(key: 'accessToken');
         log("Token:$token");
+          final Rtoken = await storage.read(key: 'refreshToken');
+        log("Refresh Token:$Rtoken");
+
         return true;
       } else {
         throw Exception('Logout failed');

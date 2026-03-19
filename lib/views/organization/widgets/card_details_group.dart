@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
 import 'package:rolo_digi_card/controllers/organization/organization_user_management_controller.dart';
@@ -562,9 +563,12 @@ class _ActionsSectionState extends State<_ActionsSection> {
 final controller = Get.put(OrgUserManagementController());
 
 
-  // ── Empty stubs — fill in API calls when ready ──────────────────────────
-  void _onViewInBrowser() {
-    // TODO: launch URL — e.g. launchUrl(Uri.parse('https://yourapp.com/c/${card.shortUrl}'))
+  void _onViewInBrowser() async {
+    final code = widget.card.shortUrl.isNotEmpty ? widget.card.shortUrl : widget.card.id;
+    final url = Uri.parse('https://digi.roloscan.com/c/$code');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
   }
 
   void _onAssignUser() {

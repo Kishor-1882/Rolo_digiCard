@@ -1,9 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:rolo_digi_card/common/snack_bar.dart';
+import 'package:rolo_digi_card/services/dio_client.dart';
+import 'package:rolo_digi_card/services/end_points.dart';
 import 'package:rolo_digi_card/utils/color.dart';
 
-class OrganizationQRScannerView extends StatelessWidget {
+class OrganizationQRScannerView extends StatefulWidget {
   const OrganizationQRScannerView({super.key});
+
+  @override
+  State<OrganizationQRScannerView> createState() => _OrganizationQRScannerViewState();
+}
+
+class _OrganizationQRScannerViewState extends State<OrganizationQRScannerView> {
+  final _imagePicker = ImagePicker();
+  bool _isUploading = false;
+
+  String? _extractCardId(String qrData) {
+    final uri = Uri.tryParse(qrData);
+    if (uri != null && uri.pathSegments.length >= 2 && uri.pathSegments[uri.pathSegments.length - 2] == 'c') {
+      return uri.pathSegments.last;
+    }
+    return qrData;
+  }
+
+  Future<void> _onUploadImage() async {
+    if (_isUploading) return;
+    try {
+      final picked = await _imagePicker.pickImage(source: ImageSource.gallery);
+      if (picked == null || !mounted) return;
+
+      setState(() => _isUploading = true);
+      final path = picked.path;
+      if (path.isEmpty) {
+        CommonSnackbar.error('Could not read image');
+        return;
+      }
+
+      final scannerController = MobileScannerController();
+      try {
+        final capture = await scannerController.analyzeImage(path);
+        if (capture == null || capture.barcodes.isEmpty) {
+          CommonSnackbar.error('No QR code found in image');
+          return;
+        }
+
+        final code = capture.barcodes.first.rawValue;
+        if (code == null || code.isEmpty) {
+          CommonSnackbar.error('Could not read QR code');
+          return;
+        }
+
+        final cardId = _extractCardId(code);
+        if (cardId == null) {
+          CommonSnackbar.error('Invalid QR code format');
+          return;
+        }
+
+        final response = await dioClient.post(ApiEndpoints.saveCard(cardId));
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          CommonSnackbar.success('Card saved successfully!');
+          Get.offAllNamed('/sidebar');
+        } else {
+          CommonSnackbar.error('Failed to save card');
+        }
+      } finally {
+        scannerController.dispose();
+      }
+    } catch (e) {
+      CommonSnackbar.error('Failed to process image');
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,17 +179,15 @@ class OrganizationQRScannerView extends StatelessWidget {
               icon: Icons.file_upload_outlined,
               title: 'Upload Image',
               subtitle: 'Extract QR from photo',
-              onTap: () {
-                print('kishor gay');
-              },
+              onTap: _isUploading ? () {} : _onUploadImage,
             ),
             const SizedBox(height: 16),
             _buildActionCard(
               icon: Icons.keyboard_alt_outlined,
               title: 'Manual Entry',
-              subtitle: 'Enter card ID manually',
+              subtitle: 'Enter card ID to view card',
               onTap: () {
-                Get.toNamed('/create-card');
+                Get.toNamed('/manual-entry');
               },
             ),
             const SizedBox(height: 48),

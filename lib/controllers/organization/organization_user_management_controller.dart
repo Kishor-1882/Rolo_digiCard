@@ -15,7 +15,9 @@ class OrgUserManagementController extends GetxController {
   final filteredUsers = <OrgUser>[].obs;
   final isLoading = false.obs;
   final searchQuery = ''.obs;
+  final searchController = TextEditingController();
   final statusFilter = 'All'.obs;
+  final roleFilter = 'All'.obs;
 
   final RxList<OrgCard> userCards = <OrgCard>[].obs;
   final RxBool isCardsLoading = false.obs;
@@ -35,9 +37,17 @@ class OrgUserManagementController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    searchController.addListener(() => searchQuery.value = searchController.text);
     fetchUsers();
     ever(searchQuery, (_) => _applyFilters());
     ever(statusFilter, (_) => _applyFilters());
+    ever(roleFilter, (_) => _applyFilters());
+  }
+
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
   }
 
   // ── Filter / Search ───────────────────────────────────────────────────────
@@ -60,6 +70,11 @@ class OrgUserManagementController extends GetxController {
       result = result.where((u) => !u.isActive && !u.isBlocked).toList();
     } else if (filter == 'Blocked') {
       result = result.where((u) => u.isBlocked).toList();
+    }
+
+    final role = roleFilter.value;
+    if (role != 'All') {
+      result = result.where((u) => u.organizationRole.toLowerCase() == role.toLowerCase()).toList();
     }
 
     filteredUsers.assignAll(result);

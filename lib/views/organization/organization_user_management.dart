@@ -216,19 +216,29 @@ class OrganizationUserManagement extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white.withOpacity(0.05)),
             ),
-            child: TextField(
+            child: Obx(() => TextField(
+              controller: controller.searchController,
               onChanged: (v) => controller.searchQuery.value = v,
               style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Search users...',
-                hintStyle: TextStyle(color: Colors.white38),
+                hintStyle: const TextStyle(color: Colors.white38),
                 border: InputBorder.none,
-                icon: Icon(Icons.search, color: Colors.white38),
+                icon: const Icon(Icons.search, color: Colors.white38),
+                suffixIcon: controller.searchQuery.value.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, color: Colors.white38, size: 18),
+                        onPressed: () {
+                          controller.searchController.clear();
+                          controller.searchQuery.value = '';
+                        },
+                      )
+                    : null,
               ),
-            ),
+            )),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
@@ -247,6 +257,35 @@ class OrganizationUserManagement extends StatelessWidget {
                     .toList(),
                 onChanged: (v) {
                   if (v != null) controller.statusFilter.value = v;
+                },
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: Colors.white54,
+                  size: 18,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E2C),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withOpacity(0.05)),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: Obx(
+              () => DropdownButton<String>(
+                dropdownColor: const Color(0xFF1E1E2C),
+                value: controller.roleFilter.value,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                items: <String>['All', 'Admin', 'Member', 'User']
+                    .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                    .toList(),
+                onChanged: (v) {
+                  if (v != null) controller.roleFilter.value = v;
                 },
                 icon: const Icon(
                   Icons.keyboard_arrow_down,

@@ -71,6 +71,7 @@ class DioClient {
   Future<void> _onError(
       DioException error, ErrorInterceptorHandler handler) async {
     if (error.response?.statusCode == 401) {
+      log("Received 401 error, attempting token refresh...");
       final requestOptions = error.requestOptions;
 
       // Queue the failed request
@@ -120,7 +121,7 @@ class DioClient {
     try {
       const storage = FlutterSecureStorage();
       final refreshToken = await storage.read(key: 'refreshToken');
-
+      log("Refresh Token: $refreshToken");
       if (refreshToken == null) return false;
 
       final response = await Dio().post(
@@ -132,7 +133,7 @@ class DioClient {
 
       final newAccessToken = response.data["tokens"]["accessToken"];
       final newRefreshToken = response.data["tokens"]["refreshToken"];
-
+    
       await storage.write(key: 'accessToken', value: newAccessToken);
       await storage.write(key: 'refreshToken', value: newRefreshToken);
 

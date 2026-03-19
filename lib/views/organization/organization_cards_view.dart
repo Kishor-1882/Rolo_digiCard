@@ -101,7 +101,7 @@ class OrganizationCardsView extends GetView<CardManagementController> {
                   },
                   icon: const Icon(Icons.add, color: Colors.white, size: 18),
                   label: const Text(
-                    'New Group', // Kept as New Group to match screenshot, though functionality is create card
+                    'Create Card',
                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -208,7 +208,8 @@ class OrganizationCardsView extends GetView<CardManagementController> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white.withOpacity(0.05)),
             ),
-            child: TextField(
+            child: Obx(() => TextField(
+              controller: controller.searchController,
               onChanged: (value) => controller.searchQuery.value = value,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
@@ -223,11 +224,14 @@ class OrganizationCardsView extends GetView<CardManagementController> {
                           color: Colors.white38,
                           size: 18,
                         ),
-                        onPressed: () => controller.searchQuery.value = '',
+                        onPressed: () {
+                          controller.searchController.clear();
+                          controller.searchQuery.value = '';
+                        },
                       )
                     : null,
               ),
-            ),
+            )),
           ),
         ),
         const SizedBox(width: 12),

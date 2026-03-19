@@ -65,30 +65,30 @@ class QRCodeSharePage extends StatelessWidget {
                     const SizedBox(height: 40),
 
                     // QR Code Container
-                    Container(
-                      width: 240,
-                      height: 240,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: card.qrCodeUrl.startsWith('data:image')
-                          ? Image.memory(
-                        _base64ToImage(card.qrCodeUrl),
-                        fit: BoxFit.contain,
-                      )
-                          : RepaintBoundary(
-                                 key: _qrKey,
-
-                            child: QrImageView(
-                                                    data: card.publicUrl,
-                                                    version: QrVersions.auto,
-                                                    size: 200.0,
-                                                    backgroundColor: Colors.white,
-                                                  ),
-                          ),
-                    ),
+                    
+                    RepaintBoundary(
+  key: _qrKey,
+  child: Container(
+    width: 240,
+    height: 240,
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: card.qrCodeUrl.startsWith('data:image')
+        ? Image.memory(
+            _base64ToImage(card.qrCodeUrl),
+            fit: BoxFit.contain,
+          )
+        : QrImageView(
+            data: card.publicUrl,
+            version: QrVersions.auto,
+            size: 200.0,
+            backgroundColor: Colors.white,
+          ),
+  ),
+),
                     const SizedBox(height: 40),
 
                     // Download QR Code button
@@ -284,36 +284,41 @@ class QRCodeSharePage extends StatelessWidget {
   // Download QR Code
 Future<void> _downloadQRCode() async {
   try {
-    // Capture QR code as image
-    final boundary = _qrKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    // Guard: ensure the key has a valid context
+    final context = _qrKey.currentContext;
+    if (context == null) {
+      debugPrint('Save QR failed: QR key has no context');
+      return;
+    }
+
+    final boundary = context.findRenderObject();
+
+    // Guard: ensure the render object is a RenderRepaintBoundary
+    if (boundary == null || boundary is! RenderRepaintBoundary) {
+      debugPrint('Save QR failed: Could not find RenderRepaintBoundary');
+      return;
+    }
+
     final image = await boundary.toImage(pixelRatio: 3.0);
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    final bytes = byteData!.buffer.asUint8List();
-    
-    // Save to temporary file
+
+    // Guard: ensure byte data was produced
+    if (byteData == null) {
+      debugPrint('Save QR failed: toByteData returned null');
+      return;
+    }
+
+    final bytes = byteData.buffer.asUint8List();
+
     final directory = await getTemporaryDirectory();
     final filePath = '${directory.path}/qr_${DateTime.now().millisecondsSinceEpoch}.png';
     final file = File(filePath);
     await file.writeAsBytes(bytes);
-    
-    // Save to gallery using gal
+
     await Gal.putImage(file.path);
-    
     debugPrint('QR code saved to gallery');
-    
-    // Optional: Show success message
-    // if (mounted) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(content: Text('QR code saved to gallery')),
-    //   );
-    // }
   } catch (e) {
     debugPrint('Save QR failed: $e');
-    // if (mounted) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text('Failed to save: $e')),
-    //   );
-    // }
   }
 }
 
