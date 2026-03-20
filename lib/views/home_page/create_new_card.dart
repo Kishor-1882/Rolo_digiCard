@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/common/common_textfield.dart';
 import 'package:rolo_digi_card/common/custom_textfield.dart';
+import 'package:rolo_digi_card/common/phone_input_field.dart';
 import 'package:rolo_digi_card/controllers/home/home_page_controller.dart';
 import 'package:rolo_digi_card/controllers/organization/card_management_controller.dart';
 import 'package:rolo_digi_card/models/card_model.dart';
@@ -115,15 +116,22 @@ class _CreateNewCardState extends State<CreateNewCard> {
     homePageController.nameController.text = editingCard!.name;
     homePageController.designationController.text = editingCard!.title;
     homePageController.companyController.text = editingCard!.company ?? '';
-    homePageController.phoneController.text = editingCard!.contact.phone ?? '';
+    final workPhone = HomePageController.parsePhone(editingCard!.contact.phone);
+    homePageController.workPhoneCountryCode.value = workPhone.countryCode;
+    homePageController.workPhoneDialCode.value = workPhone.dialCode;
+    homePageController.phoneController.text = workPhone.number;
+    homePageController.workPhoneExtController.text = workPhone.ext;
     homePageController.emailController.text = editingCard!.contact.email ?? '';
     homePageController.websiteController.text = editingCard!.website ?? '';
 
     // New Fields
     homePageController.personalEmailController.text =
         editingCard!.contact.personalEmail ?? '';
-    homePageController.personalPhoneController.text =
-        editingCard!.contact.personalPhone ?? '';
+    final personalPhone = HomePageController.parsePhone(editingCard!.contact.personalPhone);
+    homePageController.personalPhoneCountryCode.value = personalPhone.countryCode;
+    homePageController.personalPhoneDialCode.value = personalPhone.dialCode;
+    homePageController.personalPhoneController.text = personalPhone.number;
+    homePageController.personalPhoneExtController.text = personalPhone.ext;
 
     if (editingCard!.address != null) {
       homePageController.addressLine1Controller.text =
@@ -286,6 +294,7 @@ class _CreateNewCardState extends State<CreateNewCard> {
             title: 'Phone Number',
             hintText: 'Enter your phone number',
             controller: controller.phoneController,
+            keyboardType: TextInputType.number, // 👈 Number keyboard
           ),
           const SizedBox(height: 20),
           CustomFormTextField(
@@ -304,11 +313,14 @@ class _CreateNewCardState extends State<CreateNewCard> {
       icon: Icons.call_outlined,
       title: 'Contact',
       content: Column(
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        // mainAxisAlignment: MainAxisAlignment.start,
         children: [
           CustomFormTextField(
             title: 'Website',
-            hintText: 'Enter your website',
+            hintText: 'example.com',
             controller: controller.websiteController,
+            urlPlatform: 'website',
           ),
           const SizedBox(height: 20),
           // Email Addresses
@@ -342,17 +354,33 @@ class _CreateNewCardState extends State<CreateNewCard> {
             ),
           ),
           const SizedBox(height: 10),
-          CustomFormTextField(
-            isImportant: true,
+          PhoneInputField(
             title: 'Work Phone',
-            hintText: '+1 ...',
-            controller: controller.phoneController,
+            isImportant: true,
+            countryCode: controller.workPhoneCountryCode.value,
+            onCountryChanged: (c) {
+              controller.workPhoneCountryCode.value = c.code ?? 'US';
+              controller.workPhoneDialCode.value = c.dialCode ?? '+1';
+              controller.update();
+            },
+            numberController: controller.phoneController,
+            extController: controller.workPhoneExtController,
+            numberHint: '5551234567',
+            extHint: '5555',
           ),
           const SizedBox(height: 10),
-          CustomFormTextField(
+          PhoneInputField(
             title: 'Personal Phone',
-            hintText: '+1 ...',
-            controller: controller.personalPhoneController,
+            countryCode: controller.personalPhoneCountryCode.value,
+            onCountryChanged: (c) {
+              controller.personalPhoneCountryCode.value = c.code ?? 'US';
+              controller.personalPhoneDialCode.value = c.dialCode ?? '+1';
+              controller.update();
+            },
+            numberController: controller.personalPhoneController,
+            extController: controller.personalPhoneExtController,
+            numberHint: '5551234567',
+            extHint: '5555',
           ),
 
           const SizedBox(height: 20),
@@ -418,8 +446,10 @@ class _CreateNewCardState extends State<CreateNewCard> {
               Expanded(
                 child: CustomFormTextField(
                   title: 'Zip Code',
-                  hintText: '12345',
+                  hintText: '628002',
                   controller: controller.zipController,
+                  keyboardType: TextInputType.number,
+                  onUnfocus: () => controller.fetchGeocodeByZip(controller.zipController.text),
                 ),
               ),
             ],
@@ -577,36 +607,42 @@ class _CreateNewCardState extends State<CreateNewCard> {
             title: 'LinkedIn',
             hintText: 'linkedin.com/in/username',
             controller: controller.linkedinController,
+            urlPlatform: 'linkedin',
           ),
           const SizedBox(height: 20),
           CustomFormTextField(
             title: 'Twitter',
             hintText: '@username',
             controller: controller.twitterController,
+            urlPlatform: 'twitter',
           ),
           const SizedBox(height: 20),
           CustomFormTextField(
             title: 'Instagram',
             hintText: '@username',
             controller: controller.instagramController,
+            urlPlatform: 'instagram',
           ),
           const SizedBox(height: 20),
           CustomFormTextField(
             title: 'GitHub',
             hintText: 'github.com/username',
             controller: controller.githubController,
+            urlPlatform: 'github',
           ),
           const SizedBox(height: 20),
           CustomFormTextField(
             title: 'YouTube',
             hintText: 'youtube.com/@channel',
             controller: controller.youtubeController,
+            urlPlatform: 'youtube',
           ),
           const SizedBox(height: 20),
           CustomFormTextField(
             title: 'Facebook',
             hintText: 'facebook.com/username',
             controller: controller.facebookController,
+            urlPlatform: 'facebook',
           ),
         ],
       ),

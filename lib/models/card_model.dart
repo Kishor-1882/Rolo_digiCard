@@ -78,7 +78,7 @@ class AddressModel {
       city: json['city'],
       state: json['state'],
       country: json['country'],
-      zipCode: json['zipCode'],
+      zipCode: json['zipCode'] ?? json['zip'],
     );
   }
 

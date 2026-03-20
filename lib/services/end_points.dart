@@ -12,6 +12,9 @@ class ApiEndpoints {
   static const String uploadAvatar = "/api/profile/upload-avatar";
   static const String removeAvatar = "/api/profile/remove-avatar";
 
+  // Geocode
+  static String geocodeByZip(String zip) => "/api/geocode?zip=$zip";
+
   // Card
   static const String dashboardCardCount = "/api/analytics/dashboard";
   static const String createCard = "/api/cards";

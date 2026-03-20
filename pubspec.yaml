@@ -52,6 +52,8 @@ dependencies:
   gal: ^2.3.2
   fl_chart: ^0.65.0
   syncfusion_flutter_charts: ^32.2.3
+  country_code_picker: ^3.4.1
+  phone_numbers_parser: ^9.0.20
 
 dev_dependencies:
   flutter_test:

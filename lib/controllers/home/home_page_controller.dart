@@ -12,6 +12,9 @@ import 'package:rolo_digi_card/common/snack_bar.dart';
 import 'package:rolo_digi_card/models/card_model.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
 import 'package:rolo_digi_card/services/end_points.dart';
+import 'package:rolo_digi_card/utils/url_helper.dart';
+import 'package:rolo_digi_card/common/phone_input_field.dart';
+import 'package:rolo_digi_card/models/geocode_model.dart';
 
 import '../../models/dashboard_analytics.dart';
 
@@ -26,6 +29,12 @@ class HomePageController extends GetxController {
   final designationController = TextEditingController();
   final companyController = TextEditingController();
   final phoneController = TextEditingController();
+  var workPhoneCountryCode = 'US'.obs;
+  var workPhoneDialCode = '+1'.obs;
+  final workPhoneExtController = TextEditingController();
+  var personalPhoneCountryCode = 'US'.obs;
+  var personalPhoneDialCode = '+1'.obs;
+  final personalPhoneExtController = TextEditingController();
   final emailController = TextEditingController();
   final websiteController = TextEditingController();
   final addressController = TextEditingController();
@@ -117,6 +126,69 @@ class HomePageController extends GetxController {
     isMinimalView.value = value;
   }
 
+  /// Fetches geocode by zip and auto-fills city, state, country.
+  Future<void> fetchGeocodeByZip(String zip) async {
+    final trimmed = zip.trim();
+    if (trimmed.isEmpty || trimmed.length < 3) return;
+
+    try {
+      final response = await _dio.get(ApiEndpoints.geocodeByZip(trimmed));
+      if (response.statusCode == 200 && response.data['status'] == 'OK') {
+        final result = GeocodeResult.fromJson(response.data);
+        if (result.locality != null) cityController.text = result.locality!;
+        if (result.state != null) stateController.text = result.state!;
+        if (result.country != null) countryController.text = result.country!;
+        update();
+      }
+    } catch (e) {
+      log('Geocode fetch error: $e');
+    }
+  }
+
+  String _buildPhoneWithExt(String dialCode, String number, String ext) {
+    final dc = dialCode.trim();
+    final num = number.trim();
+    final e = ext.trim();
+    if (dc.isEmpty && num.isEmpty) return '';
+    final base = dc.isNotEmpty ? '$dc $num' : num;
+    return e.isNotEmpty ? '$base ext. $e' : base;
+  }
+
+  String _buildLocation() {
+    final parts = <String>[];
+    if (cityController.text.trim().isNotEmpty) parts.add(cityController.text.trim());
+    if (stateController.text.trim().isNotEmpty) parts.add(stateController.text.trim());
+    if (countryController.text.trim().isNotEmpty) parts.add(countryController.text.trim());
+    if (zipController.text.trim().isNotEmpty) parts.add(zipController.text.trim());
+    return parts.join(', ');
+  }
+
+  /// Parses "dialCode number ext. extNum" into (countryCode, dialCode, number, ext).
+  /// Maps common dial codes to ISO country codes for CountryCodePicker.
+  static const Map<String, String> _dialToIso = {
+    '+1': 'US', '+91': 'IN', '+44': 'GB', '+81': 'JP', '+86': 'CN',
+    '+49': 'DE', '+33': 'FR', '+39': 'IT', '+34': 'ES', '+61': 'AU',
+    '+55': 'BR', '+7': 'RU', '+82': 'KR', '+380': 'UA', '+971': 'AE',
+  };
+
+  static ({String countryCode, String dialCode, String number, String ext}) parsePhone(String? full) {
+    if (full == null || full.trim().isEmpty) {
+      return (countryCode: 'US', dialCode: '+1', number: '', ext: '');
+    }
+    final s = full.trim();
+    final extMatch = RegExp(r'\s+ext\.\s*(.+)$', caseSensitive: false).firstMatch(s);
+    final ext = extMatch != null ? extMatch.group(1)?.trim() ?? '' : '';
+    final withoutExt = extMatch != null ? s.substring(0, extMatch.start).trim() : s;
+    final parts = withoutExt.split(RegExp(r'\s+'));
+    if (parts.isEmpty) return (countryCode: 'US', dialCode: '+1', number: '', ext: ext);
+    if (parts.length == 1) return (countryCode: 'US', dialCode: '+1', number: parts[0], ext: ext);
+    final first = parts[0];
+    final dialCode = first.startsWith('+') ? first : '+1';
+    final countryCode = _dialToIso[dialCode] ?? 'US';
+    final number = first.startsWith('+') ? parts.sublist(1).join('') : withoutExt;
+    return (countryCode: countryCode, dialCode: dialCode, number: number, ext: ext);
+  }
+
   // Map theme to color values
   Map<String, String> getThemeColors() {
     switch (selectedTheme.value) {
@@ -188,6 +260,26 @@ class HomePageController extends GetxController {
       return false;
     }
 
+    final workPhoneError = validatePhoneNumber(
+      phoneController.text.trim(),
+      workPhoneCountryCode.value,
+    );
+    if (workPhoneError != null) {
+      CommonSnackbar.error(workPhoneError);
+      return false;
+    }
+
+    if (personalPhoneController.text.trim().isNotEmpty) {
+      final personalPhoneError = validatePhoneNumber(
+        personalPhoneController.text.trim(),
+        personalPhoneCountryCode.value,
+      );
+      if (personalPhoneError != null) {
+        CommonSnackbar.error(personalPhoneError);
+        return false;
+      }
+    }
+
     if (designationController.text.trim().isEmpty) {
       CommonSnackbar.error('Please enter your designation');
       return false;
@@ -199,20 +291,44 @@ class HomePageController extends GetxController {
     }
 
     if (linkedinController.text.trim().isNotEmpty &&
-        !isValidUrl(linkedinController.text.trim())) {
+        !isValidUrl(toValidUrl(linkedinController.text.trim(), platform: 'linkedin'))) {
       CommonSnackbar.error('Please enter a valid LinkedIn URL');
       return false;
     }
 
     if (twitterController.text.trim().isNotEmpty &&
-        !isValidUrl(twitterController.text.trim())) {
+        !isValidUrl(toValidUrl(twitterController.text.trim(), platform: 'twitter'))) {
       CommonSnackbar.error('Please enter a valid Twitter URL');
       return false;
     }
 
     if (websiteController.text.trim().isNotEmpty &&
-        !isValidUrl(websiteController.text.trim())) {
+        !isValidUrl(toValidUrl(websiteController.text.trim()))) {
       CommonSnackbar.error('Please enter a valid Website URL');
+      return false;
+    }
+
+    if (instagramController.text.trim().isNotEmpty &&
+        !isValidUrl(toValidUrl(instagramController.text.trim(), platform: 'instagram'))) {
+      CommonSnackbar.error('Please enter a valid Instagram URL');
+      return false;
+    }
+
+    if (githubController.text.trim().isNotEmpty &&
+        !isValidUrl(toValidUrl(githubController.text.trim(), platform: 'github'))) {
+      CommonSnackbar.error('Please enter a valid GitHub URL');
+      return false;
+    }
+
+    if (youtubeController.text.trim().isNotEmpty &&
+        !isValidUrl(toValidUrl(youtubeController.text.trim(), platform: 'youtube'))) {
+      CommonSnackbar.error('Please enter a valid YouTube URL');
+      return false;
+    }
+
+    if (facebookController.text.trim().isNotEmpty &&
+        !isValidUrl(toValidUrl(facebookController.text.trim(), platform: 'facebook'))) {
+      CommonSnackbar.error('Please enter a valid Facebook URL');
       return false;
     }
 
@@ -268,10 +384,22 @@ class HomePageController extends GetxController {
         'industry': industryController.text.trim(),
         'contact': {
           'email': emailController.text.trim(),
-          'phone': phoneController.text.trim(),
-          'mobileNumber': phoneController.text.trim(),
+          'phone': _buildPhoneWithExt(
+            workPhoneDialCode.value,
+            phoneController.text,
+            workPhoneExtController.text,
+          ),
+          'mobileNumber': _buildPhoneWithExt(
+            workPhoneDialCode.value,
+            phoneController.text,
+            workPhoneExtController.text,
+          ),
           'personalEmail': personalEmailController.text.trim(),
-          'personalPhone': personalPhoneController.text.trim(),
+          'personalPhone': _buildPhoneWithExt(
+            personalPhoneDialCode.value,
+            personalPhoneController.text,
+            personalPhoneExtController.text,
+          ),
           'hidePersonalEmail': false,
           'hidePersonalPhone': false,
         },
@@ -281,16 +409,18 @@ class HomePageController extends GetxController {
           'city': cityController.text.trim(),
           'state': stateController.text.trim(),
           'country': countryController.text.trim(),
+          'zip': zipController.text.trim(),
           'zipCode': zipController.text.trim(),
         },
+        'location': _buildLocation(),
         'bio': bioController.text.trim(),
-        'website': websiteController.text.trim(),
-        'linkedinUrl': linkedinController.text.trim(),
-        'twitterUrl': twitterController.text.trim(),
-        'instagramUrl': instagramController.text.trim(),
-        'githubUrl': githubController.text.trim(),
-        'facebookUrl': facebookController.text.trim(),
-        'youtubeUrl': youtubeController.text.trim(),
+        'website': toValidUrl(websiteController.text.trim()),
+        'linkedinUrl': toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
+        'twitterUrl': toValidUrl(twitterController.text.trim(), platform: 'twitter'),
+        'instagramUrl': toValidUrl(instagramController.text.trim(), platform: 'instagram'),
+        'githubUrl': toValidUrl(githubController.text.trim(), platform: 'github'),
+        'facebookUrl': toValidUrl(facebookController.text.trim(), platform: 'facebook'),
+        'youtubeUrl': toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
         'tags': skills.value,
         'theme': {
           'cardStyle': themeColors['cardStyle'],
@@ -404,10 +534,22 @@ class HomePageController extends GetxController {
         'industry': industryController.text.trim(),
         'contact': {
           'email': emailController.text.trim(),
-          'phone': phoneController.text.trim(),
-          'mobileNumber': phoneController.text.trim(),
+          'phone': _buildPhoneWithExt(
+            workPhoneDialCode.value,
+            phoneController.text,
+            workPhoneExtController.text,
+          ),
+          'mobileNumber': _buildPhoneWithExt(
+            workPhoneDialCode.value,
+            phoneController.text,
+            workPhoneExtController.text,
+          ),
           'personalEmail': personalEmailController.text.trim(),
-          'personalPhone': personalPhoneController.text.trim(),
+          'personalPhone': _buildPhoneWithExt(
+            personalPhoneDialCode.value,
+            personalPhoneController.text,
+            personalPhoneExtController.text,
+          ),
           'hidePersonalEmail': false,
           'hidePersonalPhone': false,
         },
@@ -417,16 +559,18 @@ class HomePageController extends GetxController {
           'city': cityController.text.trim(),
           'state': stateController.text.trim(),
           'country': countryController.text.trim(),
+          'zip': zipController.text.trim(),
           'zipCode': zipController.text.trim(),
         },
+        'location': _buildLocation(),
         'bio': bioController.text.trim(),
-        'website': websiteController.text.trim(),
-        'linkedinUrl': linkedinController.text.trim(),
-        'twitterUrl': twitterController.text.trim(),
-        'instagramUrl': instagramController.text.trim(),
-        'githubUrl': githubController.text.trim(),
-        'facebookUrl': facebookController.text.trim(),
-        'youtubeUrl': youtubeController.text.trim(),
+        'website': toValidUrl(websiteController.text.trim()),
+        'linkedinUrl': toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
+        'twitterUrl': toValidUrl(twitterController.text.trim(), platform: 'twitter'),
+        'instagramUrl': toValidUrl(instagramController.text.trim(), platform: 'instagram'),
+        'githubUrl': toValidUrl(githubController.text.trim(), platform: 'github'),
+        'facebookUrl': toValidUrl(facebookController.text.trim(), platform: 'facebook'),
+        'youtubeUrl': toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
         'tags': skills.value,
         'theme': {
           'cardStyle': themeColors['cardStyle'],
@@ -532,6 +676,12 @@ class HomePageController extends GetxController {
     designationController.clear();
     companyController.clear();
     phoneController.clear();
+    workPhoneCountryCode.value = 'US';
+    workPhoneDialCode.value = '+1';
+    workPhoneExtController.clear();
+    personalPhoneCountryCode.value = 'US';
+    personalPhoneDialCode.value = '+1';
+    personalPhoneExtController.clear();
     emailController.clear();
     websiteController.clear();
     addressController.clear();
@@ -599,10 +749,22 @@ class HomePageController extends GetxController {
       'industry': industryController.text.trim(),
       'contact': {
         'email': emailController.text.trim(),
-        'phone': phoneController.text.trim(),
-        'mobileNumber': phoneController.text.trim(),
+        'phone': _buildPhoneWithExt(
+          workPhoneDialCode.value,
+          phoneController.text,
+          workPhoneExtController.text,
+        ),
+        'mobileNumber': _buildPhoneWithExt(
+          workPhoneDialCode.value,
+          phoneController.text,
+          workPhoneExtController.text,
+        ),
         'personalEmail': personalEmailController.text.trim(),
-        'personalPhone': personalPhoneController.text.trim(),
+        'personalPhone': _buildPhoneWithExt(
+          personalPhoneDialCode.value,
+          personalPhoneController.text,
+          personalPhoneExtController.text,
+        ),
         'hidePersonalEmail': false,
         'hidePersonalPhone': false,
       },
@@ -612,16 +774,18 @@ class HomePageController extends GetxController {
         'city': cityController.text.trim(),
         'state': stateController.text.trim(),
         'country': countryController.text.trim(),
+        'zip': zipController.text.trim(),
         'zipCode': zipController.text.trim(),
       },
+      'location': _buildLocation(),
       'bio': bioController.text.trim(),
-      'website': websiteController.text.trim(),
-      'linkedinUrl': linkedinController.text.trim(),
-      'twitterUrl': twitterController.text.trim(),
-      'instagramUrl': instagramController.text.trim(),
-      'githubUrl': githubController.text.trim(),
-      'facebookUrl': facebookController.text.trim(),
-      'youtubeUrl': youtubeController.text.trim(),
+      'website': toValidUrl(websiteController.text.trim()),
+      'linkedinUrl': toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
+      'twitterUrl': toValidUrl(twitterController.text.trim(), platform: 'twitter'),
+      'instagramUrl': toValidUrl(instagramController.text.trim(), platform: 'instagram'),
+      'githubUrl': toValidUrl(githubController.text.trim(), platform: 'github'),
+      'facebookUrl': toValidUrl(facebookController.text.trim(), platform: 'facebook'),
+      'youtubeUrl': toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
       'tags': skills.toList(),
       'theme': {
         'cardStyle': themeColors['cardStyle'],

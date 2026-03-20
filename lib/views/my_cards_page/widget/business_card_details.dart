@@ -8,6 +8,7 @@ import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rolo_digi_card/common/snack_bar.dart';
 import 'package:rolo_digi_card/models/card_model.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
 import 'package:rolo_digi_card/services/end_points.dart';
@@ -467,8 +468,16 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                                       borderRadius: BorderRadius.circular(15),
                                     ),
                                     child: ElevatedButton(
-                                      onPressed: () {
-                                        saveContactToPhone(card: card);
+                                      onPressed: () async {
+                                        try {
+                                          await saveContactToPhone(card: card);
+                                        } catch (e) {
+                                          CommonSnackbar.error(
+                                            e.toString().contains('denied')
+                                                ? 'Contacts permission is required to save to your phone'
+                                                : 'Failed to save contact',
+                                          );
+                                        }
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.transparent,
@@ -610,6 +619,12 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
     await ContactsService.addContact(contact);
     */
   }
+  /// Strips " ext. XXXX" from phone number for saving to device contacts.
+  String _phoneWithoutExt(String? phone) {
+    if (phone == null || phone.isEmpty) return '';
+    return phone.replaceFirst(RegExp(r'\s+ext\.\s*\S+$', caseSensitive: false), '').trim();
+  }
+
   Future<void> saveContactToPhone({required CardModel card}) async {
     // Ask permission
     final permission = await Permission.contacts.request();
@@ -617,12 +632,12 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
       throw Exception('Contacts permission denied');
     }
 
+    final phoneForContact = _phoneWithoutExt(card.contact.phone);
     final contact = Contact(
       name: Name(first: card.name),
       phones:
-          card.contact.phone != null &&
-              (card.contact.phone?.isNotEmpty ?? false)
-          ? [Phone(card.contact.phone ?? '')]
+          phoneForContact.isNotEmpty
+          ? [Phone(phoneForContact)]
           : [],
       emails:
           card.contact.email != null &&

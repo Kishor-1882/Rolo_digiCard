@@ -187,6 +187,12 @@ class DashboardPage extends StatelessWidget {
                               icon: Icons.qr_code_scanner,
                               iconColor: AppColors.chartPurple,
                             ),
+                             StatCard(
+                              title: 'Contact',
+                              value: '0',
+                              icon: Icons.qr_code_scanner,
+                              iconColor: AppColors.chartPurple,
+                            ),
                           ],
                         ),
                         // const SizedBox(height: 24),
@@ -307,13 +313,13 @@ class DashboardPage extends StatelessWidget {
                               const SizedBox(height: 16),
                               const ProgressBarWidget(
                                 title: 'Profile Completion',
-                                percentage: '100%',
-                                progress: 1.0,
+                                percentage: '60%',
+                                progress: 0.6,
                               ),
                               const ProgressBarWidget(
                                 title: 'Engagement Rate',
-                                percentage: '50%',
-                                progress: 0.5,
+                                percentage: '0%',
+                                progress: 0,
                               ),
                             ],
                           ),
@@ -401,62 +407,97 @@ class DashboardPage extends StatelessWidget {
                               )
                           ),
                           child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    'Recent Activity (Dummy Data)',
-                                    style: TextStyle(
-                                      color: AppColors.textPrimary,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Get.to(()=>RecentActivityPage());
-                                    },
-                                    child: const Row(
-                                      children: [
-                                        Text(
-                                          'View all',
-                                          style: TextStyle(
-                                            color: AppColors.textSecondary,
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                        SizedBox(width: 4),
-                                        Icon(
-                                          Icons.arrow_forward,
-                                          color: AppColors.textSecondary,
-                                          size: 16,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                               Divider(
-                                color:AppColors.textPrimary.withOpacity(0.10),     // line color
-                              ),
-                              const SizedBox(height: 12),
-                              const ActivityItem(
-                                title: 'Your "Samuel Thornton" card was viewed',
-                                time: 'Live now',
-                              ),
-                              const ActivityItem(
-                                title: 'Your "Sarah Simmons" card was viewed',
-                                time: '4 hours ago',
-                              ),
-                              const ActivityItem(
-                                title: 'Your "Daniel Kimura" card was viewed',
-                                time: '5 hours ago',
-                              ),
-                            ],
-                          ),
+  children: [
+    Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Recent Activity',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            Get.to(() => RecentActivityPage());
+          },
+          child: const Row(
+            children: [
+              Text(
+                'View all',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              SizedBox(width: 4),
+              Icon(
+                Icons.arrow_forward,
+                color: AppColors.textSecondary,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+
+    const SizedBox(height: 12),
+
+    Divider(
+      color: AppColors.textPrimary.withOpacity(0.10),
+    ),
+
+    const SizedBox(height: 12),
+
+    /// 🔥 THIS IS THE IMPORTANT PART
+    true
+        ? Column(
+            children: const [
+              Icon(
+                Icons.access_time,
+                color: AppColors.textSecondary,
+                size: 40,
+              ),
+              SizedBox(height: 10),
+              Text(
+                'No recent activity',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                ),
+              ),
+              SizedBox(height: 6),
+              Text(
+                'Share your cards to see activity here',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          )
+        : const Column(
+            children: [
+              ActivityItem(
+                title: 'Your "Samuel Thornton" card was viewed',
+                time: 'Live now',
+              ),
+              ActivityItem(
+                title: 'Your "Sarah Simmons" card was viewed',
+                time: '4 hours ago',
+              ),
+              ActivityItem(
+                title: 'Your "Daniel Kimura" card was viewed',
+                time: '5 hours ago',
+              ),
+            ],
+          ),
+  ],
+),
                         ),
                         const SizedBox(height: 80),
                       ],
