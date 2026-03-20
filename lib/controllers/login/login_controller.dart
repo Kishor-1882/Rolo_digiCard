@@ -74,9 +74,10 @@ class LoginController extends GetxController {
         await storage.write(key: 'refreshToken', value: refreshToken);
         await storage.write(key: 'userType', value: userType);
 
-        Get.find<AuthController>().userType.value = userType;
-
+        final auth = Get.find<AuthController>();
+        auth.userType.value = userType;
         DioClient.setToken(accessToken);
+        await auth.fetchUserProfile();
 
         isLoggedIn.value = true;
         final isAdmin = userType == 'organization' || userType == 'admin';

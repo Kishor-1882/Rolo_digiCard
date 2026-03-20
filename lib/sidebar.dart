@@ -12,7 +12,6 @@ import 'package:rolo_digi_card/views/organization/analytics_view.dart';
 import 'package:rolo_digi_card/views/organization/organization_cards_view.dart';
 import 'package:rolo_digi_card/views/organization/organization_dashboard_view.dart';
 import 'package:rolo_digi_card/views/organization/organization_groups_view.dart';
-import 'package:rolo_digi_card/views/organization/organization_saved_view.dart';
 import 'package:rolo_digi_card/views/organization/organization_user_management.dart';
 import 'package:rolo_digi_card/views/profile_page/profile_page.dart';
 import 'package:rolo_digi_card/views/saved_cards_page/saved_cards.dart';
@@ -55,15 +54,51 @@ class _SideBarState extends State<SideBar> {
     AnalyticsView(),
   ];
 
+  /// Nav config for individual: (index, permission, label, icon)
+  static const _individualNav = [
+    (0, 'card:read', 'Home', Icons.grid_view_rounded),
+    (1, 'card:read', 'My Cards', Icons.credit_card),
+    (2, 'card:read', 'Saved', Icons.bookmark_outline),
+    (3, null, 'Profile', Icons.account_circle_outlined), // Profile always visible
+  ];
+
+  /// Nav config for organization: (index, permission, label, icon)
+  static const _orgNav = [
+    (0, 'analytics:read', 'Dashboard', Icons.grid_view_rounded),
+    (1, 'user:read', 'Users', Icons.account_circle_outlined),
+    (2, 'card:read', 'Cards', Icons.credit_card),
+    (3, 'group:read', 'Groups', Icons.group_outlined),
+    (4, 'analytics:read', 'Analytics', Icons.analytics_outlined),
+  ];
+
+  List<({int index, String? permission, String label, IconData icon})> _visibleNavItems(bool isOrg) {
+    final items = isOrg ? _orgNav : _individualNav;
+    return items
+        .where((e) => e.$2 == null || _authController.hasPermission(e.$2!))
+        .map((e) => (index: e.$1, permission: e.$2, label: e.$3, icon: e.$4))
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final isOrg = _authController.userType.value == 'organization';
+      final visible = _visibleNavItems(isOrg);
+      var currentIndex = _orgController.selectedNavIndex.value;
+      if (visible.isEmpty) {
+        currentIndex = 0;
+      } else if (!visible.any((e) => e.index == currentIndex)) {
+        currentIndex = visible.first.index;
+        _orgController.selectedNavIndex.value = currentIndex;
+      }
+
       return Scaffold(
         body: isOrg
-            ? _orgPages[_orgController.selectedNavIndex.value]
-            : _pages[_orgController.selectedNavIndex.value],
-        bottomNavigationBar: Container(
+            ? _orgPages[currentIndex]
+            : _pages[currentIndex],
+        bottomNavigationBar: visible.isEmpty
+            ? null
+            : Container(
           decoration: BoxDecoration(
             color: const Color(0xFF2a2a2a),
             boxShadow: [
@@ -77,72 +112,25 @@ class _SideBarState extends State<SideBar> {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
-              child: isOrg
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(
-                          child: _buildNavItemOrg(
-                            icon: Icons.grid_view_rounded,
-                            label: 'Dashboard',
-                            index: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: visible.map((item) {
+                  final useOrgStyle = isOrg && visible.length > 3;
+                  return Expanded(
+                    child: useOrgStyle
+                        ? _buildNavItemOrg(
+                            icon: item.icon,
+                            label: item.label,
+                            index: item.index,
+                          )
+                        : _buildNavItem(
+                            icon: item.icon,
+                            label: item.label,
+                            index: item.index,
                           ),
-                        ),
-                        Expanded(
-                          child: _buildNavItemOrg(
-                            icon: Icons.account_circle_outlined,
-                            label: 'Users',
-                            index: 1,
-                          ),
-                        ),
-                        Expanded(
-                          child: _buildNavItemOrg(
-                            icon: Icons.credit_card,
-                            label: 'Cards',
-                            index: 2,
-                          ),
-                        ),
-                        Expanded(
-                          child: _buildNavItemOrg(
-                            icon: Icons.group_outlined,
-                            label: 'Groups',
-                            index: 3,
-                          ),
-                        ),
-                        Expanded(
-                          child: _buildNavItemOrg(
-                            icon: Icons.analytics_outlined,
-                            label: 'Analytics',
-                            index: 4,
-                          ),
-                        ),
-                      ],
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildNavItem(
-                          icon: Icons.grid_view_rounded,
-                          label: 'Home',
-                          index: 0,
-                        ),
-                        _buildNavItem(
-                          icon: Icons.credit_card,
-                          label: 'My Cards',
-                          index: 1,
-                        ),
-                        _buildNavItem(
-                          icon: Icons.bookmark_outline,
-                          label: 'Saved',
-                          index: 2,
-                        ),
-                        _buildNavItem(
-                          icon: Icons.account_circle_outlined,
-                          label: 'Profile',
-                          index: 3,
-                        ),
-                      ],
-                    ),
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ),

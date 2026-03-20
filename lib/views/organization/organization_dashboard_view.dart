@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/controllers/organization/organization_controller.dart';
 import 'package:rolo_digi_card/models/organization_model.dart';
 import 'package:rolo_digi_card/utils/color.dart';
@@ -118,8 +119,10 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
-                _buildScannedCards(),
+                if (Get.find<AuthController>().hasPermission('card:read')) ...[
+                  const SizedBox(height: 24),
+                  _buildScannedCards(),
+                ],
                 const SizedBox(height: 32),
               ],
             ),

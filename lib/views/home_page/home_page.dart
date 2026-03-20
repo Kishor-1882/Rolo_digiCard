@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/common/header.dart';
+import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/controllers/home/home_page_controller.dart';
 import 'package:rolo_digi_card/controllers/profile/profile_controller.dart';
 import 'package:rolo_digi_card/models/card_model.dart';
@@ -70,12 +71,13 @@ class DashboardPage extends StatelessWidget {
                         const SizedBox(height: 24),
                         Row(
                           children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: (){
-                                  Get.toNamed('/create-card');
-                                },
-                                child: Container(
+                            if (Get.find<AuthController>().hasPermission('card:create'))
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Get.toNamed('/create-card');
+                                  },
+                                  child: Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 11,
                                     vertical: 8,
@@ -109,13 +111,15 @@ class DashboardPage extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            SizedBox(width: 10,),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () {
-                                  Get.toNamed('/scan-card');
-                                },
-                                child: Container(
+                            if (Get.find<AuthController>().hasPermission('card:create'))
+                              SizedBox(width: 10,),
+                            if (Get.find<AuthController>().hasPermission('card:read'))
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Get.toNamed('/scan-card');
+                                  },
+                                  child: Container(
                                   padding: const EdgeInsets.all(2), // thickness of gradient border
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
@@ -153,10 +157,10 @@ class DashboardPage extends StatelessWidget {
                                         ),
                                       ],
                                     ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            )
                           ],
                         ),
                         const SizedBox(height: 24),
@@ -534,10 +538,11 @@ class DashboardPage extends StatelessWidget {
          maxWidth: 100,  // Set maximum width
        ),
        items: [
-         PopupMenuItem<String>(
-           height: 30,
-           value: 'view',
-           child: Row(
+         if (Get.find<AuthController>().hasPermission('card:read'))
+           PopupMenuItem<String>(
+             height: 30,
+             value: 'view',
+             child: Row(
              children: [
                Icon(
                  Icons.visibility_outlined,
@@ -566,10 +571,11 @@ class DashboardPage extends StatelessWidget {
            ),
          ),
 
-         PopupMenuItem<String>(
-           height: 30,
-           value: 'edit',
-           child: Row(
+         if (Get.find<AuthController>().hasPermission('card:update'))
+           PopupMenuItem<String>(
+             height: 30,
+             value: 'edit',
+             child: Row(
              children: [
                Icon(
                  Icons.edit_outlined,
@@ -599,10 +605,11 @@ class DashboardPage extends StatelessWidget {
            ),
          ),
 
-         PopupMenuItem<String>(
-           height: 30,
-           value: 'delete',
-           child: Row(
+         if (Get.find<AuthController>().hasPermission('card:delete'))
+           PopupMenuItem<String>(
+             height: 30,
+             value: 'delete',
+             child: Row(
              children: [
                Icon(
                  Icons.delete_outline,

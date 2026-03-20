@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/models/user_model.dart';
-import 'package:rolo_digi_card/services/dio_client.dart';
+import 'package:rolo_digi_card/services/dio_client.dart' show dioClient;
 import 'package:rolo_digi_card/services/end_points.dart';
 
 class ProfileController extends GetxController{
@@ -22,7 +22,7 @@ class ProfileController extends GetxController{
     isLoading = true;
     update();
     try {
-      final response = await DioClient().dio.get(
+      final response = await dioClient.get(
         ApiEndpoints.getUserProfile,
       );
       if (response.statusCode == 200) {
