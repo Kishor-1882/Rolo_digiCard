@@ -51,7 +51,14 @@ final active =
                 const SizedBox(height: 24),
                 _buildSearchAndFilter(searchHint),
                 const SizedBox(height: 24),
-                _buildGroupList(context, groups, isUserGroup),
+                controller.isLoading.value
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(32.0),
+                          child: CircularProgressIndicator(color: AppColors.primaryPink),
+                        ),
+                      )
+                    : _buildGroupList(context, groups, isUserGroup),
                 const SizedBox(height: 32),
               ],
             ),

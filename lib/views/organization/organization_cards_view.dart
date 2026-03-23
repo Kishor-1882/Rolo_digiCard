@@ -94,10 +94,7 @@ class OrganizationCardsView extends GetView<CardManagementController> {
                 ),
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    Get.dialog(
-                      const CreateGroupDialog(),
-                      barrierDismissible: true,
-                    );
+                    Get.toNamed('/create-card', arguments: {'isOrganization': true});
                   },
                   icon: const Icon(Icons.add, color: Colors.white, size: 18),
                   label: const Text(
@@ -465,20 +462,28 @@ class OrganizationCardsView extends GetView<CardManagementController> {
                             fontSize: 12,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                         Icon(
-                          Icons.history,
-                          color: Colors.white38,
-                          size: 14,
-                        ),
-                         const SizedBox(width: 4),
-                        Text(
-                          'Updated 2 days ago', // Placeholder
-                          style: const TextStyle(
+                        if (card.assignedUser != null) ...[
+                          const SizedBox(width: 12),
+                          Icon(
+                            Icons.person_outline,
                             color: Colors.white38,
-                            fontSize: 12,
+                            size: 14,
                           ),
-                        ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              card.assignedUser!.fullName.trim().isNotEmpty
+                                  ? card.assignedUser!.fullName
+                                  : card.assignedUser!.email,
+                              style: const TextStyle(
+                                color: Colors.white38,
+                                fontSize: 12,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ],

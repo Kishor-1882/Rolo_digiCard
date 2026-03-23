@@ -23,6 +23,20 @@ class AssignedUser {
   }
 
   String get fullName => '$firstName $lastName'.trim();
+
+  AssignedUser copyWith({
+    String? id,
+    String? email,
+    String? firstName,
+    String? lastName,
+  }) {
+    return AssignedUser(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+    );
+  }
 }
 
 // ─── Model ───────────────────────────────────────────────────────────────────
@@ -115,4 +129,49 @@ class OrgCard {
 
   String get formattedCreatedAt => _formatDate(createdAt);
   String get formattedUpdatedAt => _formatDate(updatedAt);
+
+  OrgCard copyWith({
+    String? id,
+    String? name,
+    String? title,
+    String? company,
+    String? email,
+    String? phone,
+    String? profile,
+    String? shortUrl,
+    String? mode,
+    bool? isActive,
+    bool? isBlocked,
+    int? viewCount,
+    int? scanCount,
+    int? saveCount,
+    int? shareCount,
+    String? createdAt,
+    String? updatedAt,
+    Map<String, dynamic>? theme,
+    AssignedUser? assignedUser,
+    bool setAssignedUserToNull = false,
+  }) {
+    return OrgCard(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      title: title ?? this.title,
+      company: company ?? this.company,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      profile: profile ?? this.profile,
+      shortUrl: shortUrl ?? this.shortUrl,
+      mode: mode ?? this.mode,
+      isActive: isActive ?? this.isActive,
+      isBlocked: isBlocked ?? this.isBlocked,
+      viewCount: viewCount ?? this.viewCount,
+      scanCount: scanCount ?? this.scanCount,
+      saveCount: saveCount ?? this.saveCount,
+      shareCount: shareCount ?? this.shareCount,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      theme: theme ?? this.theme,
+      assignedUser: setAssignedUserToNull ? null : (assignedUser ?? this.assignedUser),
+    );
+  }
 }

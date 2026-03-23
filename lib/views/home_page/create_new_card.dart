@@ -6,9 +6,8 @@ import 'package:rolo_digi_card/common/custom_textfield.dart';
 import 'package:rolo_digi_card/common/phone_input_field.dart';
 import 'package:rolo_digi_card/controllers/home/home_page_controller.dart';
 import 'package:rolo_digi_card/controllers/organization/card_management_controller.dart';
+import 'package:rolo_digi_card/controllers/organization/organization_controller.dart';
 import 'package:rolo_digi_card/models/card_model.dart';
-// Assuming AppColors is available and contains the necessary colors
-// like AppColors.gradientStart, AppColors.textPrimary, etc.
 import 'package:rolo_digi_card/utils/color.dart';
 import 'package:rolo_digi_card/views/home_page/home_page.dart';
 import 'package:rolo_digi_card/views/my_cards_page/widget/business_card_details.dart';
@@ -959,6 +958,9 @@ class _CreateNewCardState extends State<CreateNewCard> {
                         ),
                         child: OutlinedButton(
                           onPressed: () {
+                            if (Get.isRegistered<OrganizationController>()) {
+                              Get.find<OrganizationController>().changeIndex(0);
+                            }
                             Get.offAllNamed("/sidebar");
                           },
                           style: OutlinedButton.styleFrom(

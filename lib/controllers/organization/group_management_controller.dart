@@ -66,6 +66,7 @@ class GroupManagementController extends GetxController {
   }
 
   void setGroupType(String type) {
+    groups.clear();
     groupType.value = type;
     getGroups();
   }
