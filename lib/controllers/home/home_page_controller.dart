@@ -22,8 +22,16 @@ class HomePageController extends GetxController {
   String? shortUrl;
   DashboardAnalytics? dashboardAnalytics;
   CardsResponseModel? cardsResponse;
+  CardModel? createdCard;
 
   var isLoadingCards = false.obs;
+  // Search and Filter for My Cards
+  final searchController = TextEditingController();
+  var searchText = ''.obs;
+  var selectedFilter = 'All Cards'.obs;
+  var selectedSort = 'Sort by Date'.obs;
+  var isAscending = false.obs;
+
   // Form controllers
   final nameController = TextEditingController();
   final designationController = TextEditingController();
@@ -77,6 +85,12 @@ class HomePageController extends GetxController {
     super.onInit();
     getDashboardAnalytics();
     getRecentCards();
+    
+    // Add listener for search
+    searchController.addListener(() {
+      searchText.value = searchController.text;
+      update();
+    });
   }
   // @override
   // void onClose() {
@@ -377,63 +391,92 @@ class HomePageController extends GetxController {
 
       // Prepare the request body matching your API structure
       // Prepare the request body
-      Map<String, dynamic> cardDataMap = {
-        'name': nameController.text.trim(),
-        'title': designationController.text.trim(),
-        'company': companyController.text.trim(),
-        'industry': industryController.text.trim(),
-        'contact': {
-          'email': emailController.text.trim(),
-          'phone': _buildPhoneWithExt(
-            workPhoneDialCode.value,
-            phoneController.text,
-            workPhoneExtController.text,
-          ),
-          'mobileNumber': _buildPhoneWithExt(
-            workPhoneDialCode.value,
-            phoneController.text,
-            workPhoneExtController.text,
-          ),
-          'personalEmail': personalEmailController.text.trim(),
-          'personalPhone': _buildPhoneWithExt(
-            personalPhoneDialCode.value,
-            personalPhoneController.text,
-            personalPhoneExtController.text,
-          ),
-          'hidePersonalEmail': false,
-          'hidePersonalPhone': false,
-        },
-        'address': {
-          'addressLine1': addressLine1Controller.text.trim(),
-          'addressLine2': addressLine2Controller.text.trim(),
-          'city': cityController.text.trim(),
-          'state': stateController.text.trim(),
-          'country': countryController.text.trim(),
-          'zip': zipController.text.trim(),
-          'zipCode': zipController.text.trim(),
-        },
-        'location': _buildLocation(),
-        'bio': bioController.text.trim(),
-        'website': toValidUrl(websiteController.text.trim()),
-        'linkedinUrl': toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
-        'twitterUrl': toValidUrl(twitterController.text.trim(), platform: 'twitter'),
-        'instagramUrl': toValidUrl(instagramController.text.trim(), platform: 'instagram'),
-        'githubUrl': toValidUrl(githubController.text.trim(), platform: 'github'),
-        'facebookUrl': toValidUrl(facebookController.text.trim(), platform: 'facebook'),
-        'youtubeUrl': toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
-        'tags': skills.value,
-        'theme': {
-          'cardStyle': themeColors['cardStyle'],
-          'primaryColor': themeColors['primaryColor'],
-          'backgroundColor': themeColors['backgroundColor'],
-          'textColor': themeColors['textColor'],
-        },
-        'isPublic': isPublicCard.value,
-      };
+Map<String, dynamic> cardDataMap = {
+  'name': nameController.text.trim(),
+  'title': designationController.text.trim(),
+  'company': companyController.text.trim(),
+  'industry': industryController.text.trim(),
+  'bio': bioController.text.trim(),
+  'website': toValidUrl(websiteController.text.trim()),
 
-      if (skills.isNotEmpty) {
-        cardDataMap['tags'] = skills.toList();
-      }
+  // location + flat fields (as per your JSON)
+  'location': _buildLocation(),
+  'city': cityController.text.trim(),
+  'state': stateController.text.trim(),
+  'country': countryController.text.trim(),
+  'zipCode': zipController.text.trim(),
+  'address1': addressLine1Controller.text.trim(),
+  'address2': addressLine2Controller.text.trim(),
+
+  // nested address
+  'address': {
+    'addressLine1': addressLine1Controller.text.trim(),
+    'addressLine2': addressLine2Controller.text.trim(),
+    'city': cityController.text.trim(),
+    'state': stateController.text.trim(),
+    'country': countryController.text.trim(),
+    'zip': zipController.text.trim(),
+  },
+
+  // contact (fixed keys + removed privacy nesting)
+  'contact': {
+    'email': emailController.text.trim(),
+    'phone': _buildPhoneWithExt(
+      workPhoneDialCode.value,
+      phoneController.text,
+      workPhoneExtController.text,
+    ),
+    'personalEmail': personalEmailController.text.trim(),
+    'personalPhone': _buildPhoneWithExt(
+      personalPhoneDialCode.value,
+      personalPhoneController.text,
+      personalPhoneExtController.text,
+    ),
+
+    'hidePersonalEmail': false,
+    'hidePersonalPhone': false,
+    'hideContactDetails': false,
+    'hidePersonalContactDetails': false,
+    'hideWorkEmailPrivacy': false,
+    'hidePersonalEmailPrivacy': false,
+    'hideWorkPhonePrivacy': false,
+    'hidePersonalPhonePrivacy': false,
+  },
+
+  // profile
+  'profile': '',
+  'profileFileName': '',
+
+  // social
+  'linkedinUrl': toValidUrl(
+    linkedinController.text.trim(),
+    platform: 'linkedin',
+  ),
+  'socialLinks': {
+    'linkedin': toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
+    'twitter': toValidUrl(twitterController.text.trim(), platform: 'twitter'),
+    'facebook': toValidUrl(facebookController.text.trim(), platform: 'facebook'),
+    'github': toValidUrl(githubController.text.trim(), platform: 'github'),
+    'instagram': toValidUrl(instagramController.text.trim(), platform: 'instagram'),
+    'youtube': toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
+  },
+
+  'tags': skills.toList(),
+
+  // theme
+  'theme': {
+    'primaryColor': themeColors['primaryColor'],
+    'backgroundColor': themeColors['backgroundColor'],
+    'textColor': themeColors['textColor'],
+    'cardStyle': themeColors['cardStyle'],
+    'template': themeColors['cardStyle'],
+  },
+
+  // top-level settings (NOT nested)
+  'isPublic': isPublicCard.value,
+  'mode': 'customized',
+  'isMinimalMode': isMinimalView.value,
+};
 
       log("Create Card Data:${jsonEncode(cardDataMap)}");
 
@@ -471,6 +514,8 @@ class HomePageController extends GetxController {
 
       // Updating fields in the JSON payload
 
+      log("Card Map Data:$cardDataMap");
+
       final response = await _dio.post(
         ApiEndpoints.createCard,
         data: cardDataMap,
@@ -478,9 +523,12 @@ class HomePageController extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
-        // adjust key based on actual response structure
-        shortUrl = data['card']['shortUrl'];
-        log("Short URL stored: ${data['card']['shortUrl']}");
+        // Parse created card
+        if (data['card'] != null) {
+          createdCard = CardModel.fromJson(data['card']);
+          shortUrl = createdCard?.shortUrl;
+        }
+        log("Short URL stored: $shortUrl");
 
         // Show success
         showSuccess.value = true;
@@ -531,15 +579,20 @@ class HomePageController extends GetxController {
         'name': nameController.text.trim(),
         'title': designationController.text.trim(),
         'company': companyController.text.trim(),
+        'dateOfBirth': '',
+        'bio': bioController.text.trim(),
         'industry': industryController.text.trim(),
+        'address': {
+          'addressLine1': addressLine1Controller.text.trim(),
+          'addressLine2': addressLine2Controller.text.trim(),
+          'city': cityController.text.trim(),
+          'state': stateController.text.trim(),
+          'country': countryController.text.trim(),
+          'zipCode': zipController.text.trim(),
+        },
         'contact': {
-          'email': emailController.text.trim(),
-          'phone': _buildPhoneWithExt(
-            workPhoneDialCode.value,
-            phoneController.text,
-            workPhoneExtController.text,
-          ),
-          'mobileNumber': _buildPhoneWithExt(
+          'workEmail': emailController.text.trim(),
+          'workPhone': _buildPhoneWithExt(
             workPhoneDialCode.value,
             phoneController.text,
             workPhoneExtController.text,
@@ -550,40 +603,41 @@ class HomePageController extends GetxController {
             personalPhoneController.text,
             personalPhoneExtController.text,
           ),
-          'hidePersonalEmail': false,
-          'hidePersonalPhone': false,
-        },
-        'address': {
-          'addressLine1': addressLine1Controller.text.trim(),
-          'addressLine2': addressLine2Controller.text.trim(),
-          'city': cityController.text.trim(),
-          'state': stateController.text.trim(),
-          'country': countryController.text.trim(),
-          'zip': zipController.text.trim(),
-          'zipCode': zipController.text.trim(),
+          'privacy': {
+            'hideContactDetails': false,
+            'hidePersonalContactDetails': false,
+            'hidePersonalEmail': false,
+            'hidePersonalEmailPrivacy': false,
+            'hidePersonalPhone': false,
+            'hidePersonalPhonePrivacy': false,
+            'hideWorkEmailPrivacy': false,
+            'hideWorkPhonePrivacy': false,
+          },
         },
         'location': _buildLocation(),
-        'bio': bioController.text.trim(),
+        'socialLinks': {
+          'linkedin': toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
+          'twitter': toValidUrl(twitterController.text.trim(), platform: 'twitter'),
+          'facebook': toValidUrl(facebookController.text.trim(), platform: 'facebook'),
+          'github': toValidUrl(githubController.text.trim(), platform: 'github'),
+          'instagram': toValidUrl(instagramController.text.trim(), platform: 'instagram'),
+          'youtube': toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
+        },
         'website': toValidUrl(websiteController.text.trim()),
-        'linkedinUrl': toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
-        'twitterUrl': toValidUrl(twitterController.text.trim(), platform: 'twitter'),
-        'instagramUrl': toValidUrl(instagramController.text.trim(), platform: 'instagram'),
-        'githubUrl': toValidUrl(githubController.text.trim(), platform: 'github'),
-        'facebookUrl': toValidUrl(facebookController.text.trim(), platform: 'facebook'),
-        'youtubeUrl': toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
-        'tags': skills.value,
+        'tags': skills.toList(),
+        'settings': {
+          'isMinimalMode': isMinimalView.value,
+          'isPublic': isPublicCard.value,
+          'mode': 'customized',
+          'template': themeColors['cardStyle'],
+        },
         'theme': {
-          'cardStyle': themeColors['cardStyle'],
           'primaryColor': themeColors['primaryColor'],
           'backgroundColor': themeColors['backgroundColor'],
           'textColor': themeColors['textColor'],
+          'cardStyle': themeColors['cardStyle'],
         },
-        'isPublic': isPublicCard.value,
       };
-
-      if (skills.isNotEmpty) {
-        cardDataMap['tags'] = skills.toList();
-      }
 
       log("Update Card Data:${jsonEncode(cardDataMap)}");
 
@@ -595,7 +649,11 @@ class HomePageController extends GetxController {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        shortUrl = data['card']['shortUrl'];
+        // Parse updated card
+        if (data['card'] != null) {
+          createdCard = CardModel.fromJson(data['card']);
+          shortUrl = createdCard?.shortUrl;
+        }
         // Show success
         showSuccess.value = true;
         isLoading.value = false;
@@ -629,6 +687,49 @@ class HomePageController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  List<CardModel> get filteredCards {
+    if (cardsResponse == null) return [];
+    
+    List<CardModel> list = List.from(cardsResponse!.cards);
+    
+    // 1. Search Filter
+    if (searchText.value.isNotEmpty) {
+      final query = searchText.value.toLowerCase();
+      list = list.where((card) {
+        final name = card.name.toLowerCase();
+        final title = card.title.toLowerCase();
+        final company = card.company.toLowerCase();
+        final tags = card.tags.join(' ').toLowerCase();
+        return name.contains(query) || 
+               title.contains(query) || 
+               company.contains(query) || 
+               tags.contains(query);
+      }).toList();
+    }
+    
+    // 2. Visibility Filter
+    if (selectedFilter.value == 'Public Card') {
+      list = list.where((card) => card.isPublic).toList();
+    } else if (selectedFilter.value == 'Private Card') {
+      list = list.where((card) => !card.isPublic).toList();
+    }
+    
+    // 3. Sorting
+    list.sort((a, b) {
+      int result = 0;
+      if (selectedSort.value == 'Sort by Name') {
+        result = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      } else if (selectedSort.value == 'Sort by View') {
+        result = a.viewCount.compareTo(b.viewCount);
+      } else { // Sort by Date
+        result = a.createdAt.compareTo(b.createdAt);
+      }
+      return isAscending.value ? result : -result;
+    });
+    
+    return list;
   }
 
   Future<void> getRecentCards({int page = 1, int limit = 10}) async {
@@ -746,15 +847,20 @@ class HomePageController extends GetxController {
       'name': nameController.text.trim(),
       'title': designationController.text.trim(),
       'company': companyController.text.trim(),
+      'dateOfBirth': '',
+      'bio': bioController.text.trim(),
       'industry': industryController.text.trim(),
+      'address': {
+        'addressLine1': addressLine1Controller.text.trim(),
+        'addressLine2': addressLine2Controller.text.trim(),
+        'city': cityController.text.trim(),
+        'state': stateController.text.trim(),
+        'country': countryController.text.trim(),
+        'zipCode': zipController.text.trim(),
+      },
       'contact': {
-        'email': emailController.text.trim(),
-        'phone': _buildPhoneWithExt(
-          workPhoneDialCode.value,
-          phoneController.text,
-          workPhoneExtController.text,
-        ),
-        'mobileNumber': _buildPhoneWithExt(
+        'workEmail': emailController.text.trim(),
+        'workPhone': _buildPhoneWithExt(
           workPhoneDialCode.value,
           phoneController.text,
           workPhoneExtController.text,
@@ -765,35 +871,40 @@ class HomePageController extends GetxController {
           personalPhoneController.text,
           personalPhoneExtController.text,
         ),
-        'hidePersonalEmail': false,
-        'hidePersonalPhone': false,
-      },
-      'address': {
-        'addressLine1': addressLine1Controller.text.trim(),
-        'addressLine2': addressLine2Controller.text.trim(),
-        'city': cityController.text.trim(),
-        'state': stateController.text.trim(),
-        'country': countryController.text.trim(),
-        'zip': zipController.text.trim(),
-        'zipCode': zipController.text.trim(),
+        'privacy': {
+          'hideContactDetails': false,
+          'hidePersonalContactDetails': false,
+          'hidePersonalEmail': false,
+          'hidePersonalEmailPrivacy': false,
+          'hidePersonalPhone': false,
+          'hidePersonalPhonePrivacy': false,
+          'hideWorkEmailPrivacy': false,
+          'hideWorkPhonePrivacy': false,
+        },
       },
       'location': _buildLocation(),
-      'bio': bioController.text.trim(),
+      'socialLinks': {
+        'linkedin': toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
+        'twitter': toValidUrl(twitterController.text.trim(), platform: 'twitter'),
+        'facebook': toValidUrl(facebookController.text.trim(), platform: 'facebook'),
+        'github': toValidUrl(githubController.text.trim(), platform: 'github'),
+        'instagram': toValidUrl(instagramController.text.trim(), platform: 'instagram'),
+        'youtube': toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
+      },
       'website': toValidUrl(websiteController.text.trim()),
-      'linkedinUrl': toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
-      'twitterUrl': toValidUrl(twitterController.text.trim(), platform: 'twitter'),
-      'instagramUrl': toValidUrl(instagramController.text.trim(), platform: 'instagram'),
-      'githubUrl': toValidUrl(githubController.text.trim(), platform: 'github'),
-      'facebookUrl': toValidUrl(facebookController.text.trim(), platform: 'facebook'),
-      'youtubeUrl': toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
       'tags': skills.toList(),
+      'settings': {
+        'isMinimalMode': isMinimalView.value,
+        'isPublic': isPublicCard.value,
+        'mode': 'customized',
+        'template': themeColors['cardStyle'],
+      },
       'theme': {
-        'cardStyle': themeColors['cardStyle'],
         'primaryColor': themeColors['primaryColor'],
         'backgroundColor': themeColors['backgroundColor'],
         'textColor': themeColors['textColor'],
+        'cardStyle': themeColors['cardStyle'],
       },
-      'isPublic': isPublicCard.value,
     };
   }
 }

@@ -169,10 +169,12 @@ class SavedCards extends StatelessWidget {
       if (value != null) {
         switch (value) {
           case 'view':
-          // Handle view action
-            // Get.to(
-            //       () => BusinessCardProfilePage(card: card.card,),
-            // );
+            final cardModel = controller.getCardModelFromSaved(card);
+            if (cardModel != null) {
+              Get.to(() => BusinessCardProfilePage(card: cardModel));
+            } else {
+              CommonSnackbar.error('Card details not available');
+            }
             break;
           case 'delete':
           // Handle delete action
@@ -418,6 +420,13 @@ class SavedCards extends StatelessWidget {
                                           print("Share");
                                           if (cardModel != null) {
                                             controller.shareCard(cardModel);
+                                          } else {
+                                            CommonSnackbar.error('Card details not available');
+                                          }
+                                        },
+                                        onCardTap: () {
+                                          if (cardModel != null) {
+                                            Get.to(() => BusinessCardProfilePage(card: cardModel));
                                           } else {
                                             CommonSnackbar.error('Card details not available');
                                           }

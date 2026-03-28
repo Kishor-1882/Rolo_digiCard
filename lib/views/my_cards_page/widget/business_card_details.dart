@@ -17,6 +17,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BusinessCardProfilePage extends StatefulWidget {
   final CardModel card;
@@ -302,41 +303,64 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                             const SizedBox(height: 32),
 
                             // Contact information
-                            if (card.contact.email != null &&
-                                card.contact.email!.isNotEmpty)
-                              _buildContactItem(
-                                Icons.email_outlined,
-                                card.contact.email!,
-                                Color(0xFF6C5CE7),
-                                card,
-                              ),
-                            if (card.contact.email != null &&
-                                card.contact.email!.isNotEmpty)
-                              const SizedBox(height: 20),
+                             if (card.contact.displayEmail != null &&
+                                 card.contact.displayEmail!.isNotEmpty)
+                               _buildContactItem(
+                                 Icons.email_outlined,
+                                 card.contact.displayEmail!,
+                                 Color(0xFF6C5CE7),
+                                 card,
+                               ),
+                             if (card.contact.displayEmail != null &&
+                                 card.contact.displayEmail!.isNotEmpty)
+                               const SizedBox(height: 20),
 
-                            if (card.contact.phone != null &&
-                                card.contact.phone!.isNotEmpty)
-                              _buildContactItem(
-                                Icons.phone_outlined,
-                                card.contact.phone!,
-                                Color(0xFF6C5CE7),
-                                card,
-                              ),
-                            if (card.contact.phone != null &&
-                                card.contact.phone!.isNotEmpty)
-                              const SizedBox(height: 20),
+                             if (card.contact.displayPhone != null &&
+                                 card.contact.displayPhone!.isNotEmpty)
+                               _buildContactItem(
+                                 Icons.phone_outlined,
+                                 card.contact.displayPhone!,
+                                 Color(0xFF6C5CE7),
+                                 card,
+                               ),
+                             if (card.contact.displayPhone != null &&
+                                 card.contact.displayPhone!.isNotEmpty)
+                               const SizedBox(height: 20),
 
-                            if (card.contact.mobileNumber != null &&
-                                card.contact.mobileNumber!.isNotEmpty)
-                              _buildContactItem(
-                                Icons.smartphone_outlined,
-                                card.contact.mobileNumber!,
-                                Color(0xFF6C5CE7),
-                                card,
-                              ),
-                            if (card.contact.mobileNumber != null &&
-                                card.contact.mobileNumber!.isNotEmpty)
-                              const SizedBox(height: 20),
+                             if (card.contact.personalEmail != null &&
+                                 card.contact.personalEmail!.isNotEmpty)
+                               _buildContactItem(
+                                 Icons.email_outlined,
+                                 card.contact.personalEmail!,
+                                 Color(0xFF6C5CE7),
+                                 card,
+                               ),
+                             if (card.contact.personalEmail != null &&
+                                 card.contact.personalEmail!.isNotEmpty)
+                               const SizedBox(height: 20),
+
+                             if (card.contact.personalPhone != null &&
+                                 card.contact.personalPhone!.isNotEmpty)
+                               _buildContactItem(
+                                 Icons.smartphone_outlined,
+                                 card.contact.personalPhone!,
+                                 Color(0xFF6C5CE7),
+                                 card,
+                               ),
+                             if (card.contact.personalPhone != null &&
+                                 card.contact.personalPhone!.isNotEmpty)
+                               const SizedBox(height: 20),
+
+                             // Address
+                             if (card.displayAddress.isNotEmpty)
+                               _buildContactItem(
+                                 Icons.location_on_outlined,
+                                 card.displayAddress,
+                                 Color(0xFF6C5CE7),
+                                 card,
+                               ),
+                             if (card.displayAddress.isNotEmpty)
+                               const SizedBox(height: 20),
 
                             // Public URL
                             _buildContactItem(
@@ -455,6 +479,60 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                               ),
                               const SizedBox(height: 32),
                             ],
+
+                             // Social Links (from socialLinks object)
+                             if (card.socialLinks != null) ...[
+                               Align(
+                                 alignment: Alignment.centerLeft,
+                                 child: Text(
+                                   'Social Links',
+                                   style: TextStyle(
+                                     color:
+                                         card.theme.cardStyle == 'professional'
+                                         ? Colors.black
+                                         : Colors.white,
+                                     fontSize: 16,
+                                     fontWeight: FontWeight.w600,
+                                   ),
+                                 ),
+                               ),
+                               const SizedBox(height: 12),
+                               Align(
+                                 alignment: Alignment.centerLeft,
+                                 child: Wrap(
+                                   spacing: 12,
+                                   runSpacing: 12,
+                                   children: card.socialLinks!.toMap().entries
+                                       .where((e) => e.value != null && e.value!.isNotEmpty)
+                                       .map((e) {
+                                     return Container(
+                                       width: 44,
+                                       height: 44,
+                                       decoration: BoxDecoration(
+                                         color: Color(0xFFF3F4F6),
+                                         borderRadius: BorderRadius.circular(8),
+                                         border: Border.all(
+                                           color: Color(0xFFE0E0E0),
+                                           width: 1,
+                                         ),
+                                       ),
+                                       child: IconButton(
+                                         icon: Icon(
+                                           e.key == 'linkedin' ? Icons.link :
+                                           e.key == 'twitter' ? Icons.link :
+                                           e.key == 'facebook' ? Icons.facebook :
+                                           Icons.link,
+                                           color: Color(0xFF4F39F6),
+                                           size: 24,
+                                         ),
+                                         onPressed: () => launchUrl(Uri.parse(e.value!)),
+                                       ),
+                                     );
+                                   }).toList(),
+                                 ),
+                               ),
+                               const SizedBox(height: 32),
+                             ],
 
                             // Action buttons
                             Row(
@@ -632,7 +710,7 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
       throw Exception('Contacts permission denied');
     }
 
-    final phoneForContact = _phoneWithoutExt(card.contact.phone);
+    final phoneForContact = _phoneWithoutExt(card.contact.displayPhone);
     final contact = Contact(
       name: Name(first: card.name),
       phones:
@@ -640,9 +718,9 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
           ? [Phone(phoneForContact)]
           : [],
       emails:
-          card.contact.email != null &&
-              (card.contact.email?.isNotEmpty ?? false)
-          ? [Email(card.contact.email ?? '')]
+          card.contact.displayEmail != null &&
+              (card.contact.displayEmail?.isNotEmpty ?? false)
+          ? [Email(card.contact.displayEmail ?? '')]
           : [],
       organizations: card.company != null && card.company.isNotEmpty
           ? [Organization(company: card.company, title: card.title ?? '')]
@@ -664,8 +742,8 @@ FN:${card.name}
 N:${card.name};;;;
 ORG:${card.company ?? ''}
 TITLE:${card.title ?? ''}
-TEL;TYPE=CELL:${card.contact.phone ?? ''}
-EMAIL:${card.contact.email ?? ''}
+TEL;TYPE=CELL:${card.contact.displayPhone ?? ''}
+EMAIL:${card.contact.displayEmail ?? ''}
 END:VCARD
 '''
         .trim();

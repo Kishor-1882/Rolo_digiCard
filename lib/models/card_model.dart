@@ -1,6 +1,8 @@
 class ContactModel {
-  final String? email;
-  final String? phone;
+  final String? email;       // legacy fallback
+  final String? phone;       // legacy fallback
+  final String? workEmail;
+  final String? workPhone;
   final String? mobileNumber;
   final String? personalEmail;
   final String? personalPhone;
@@ -13,6 +15,8 @@ class ContactModel {
   ContactModel({
     this.email,
     this.phone,
+    this.workEmail,
+    this.workPhone,
     this.mobileNumber,
     this.personalEmail,
     this.personalPhone,
@@ -23,15 +27,22 @@ class ContactModel {
     this.isPhoneVerified = false,
   });
 
+  /// Convenience: returns workEmail ?? email for display
+  String? get displayEmail => workEmail ?? email;
+  /// Convenience: returns workPhone ?? phone for display
+  String? get displayPhone => workPhone ?? phone;
+
   factory ContactModel.fromJson(Map<String, dynamic> json) {
     return ContactModel(
-      email: json['email'],
-      phone: json['phone'],
-      mobileNumber: json['mobileNumber'],
+      workEmail: json['workEmail']?.toString(),
+      workPhone: json['workPhone']?.toString(),
+      email: json['email']?.toString(),
+      phone: json['phone']?.toString(),
+      mobileNumber: json['mobileNumber']?.toString(),
       personalEmail: json['personalEmail']?.toString(),
       personalPhone: json['personalPhone']?.toString(),
-      hidePersonalEmail: json['hidePersonalEmail'] ?? false,
-      hidePersonalPhone: json['hidePersonalPhone'] ?? false,
+      hidePersonalEmail: json['privacy']?['hidePersonalEmail'] ?? json['hidePersonalEmail'] ?? false,
+      hidePersonalPhone: json['privacy']?['hidePersonalPhone'] ?? json['hidePersonalPhone'] ?? false,
       isEmailVerified: json['isEmailVerified'] ?? false,
       isMobileVerified: json['isMobileVerified'] ?? false,
       isPhoneVerified: json['isPhoneVerified'] ?? false,
@@ -40,6 +51,8 @@ class ContactModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'workEmail': workEmail,
+      'workPhone': workPhone,
       'email': email,
       'phone': phone,
       'mobileNumber': mobileNumber,
@@ -52,6 +65,83 @@ class ContactModel {
       'isPhoneVerified': isPhoneVerified,
     };
   }
+}
+
+class SocialLinksModel {
+  final String? linkedin;
+  final String? twitter;
+  final String? facebook;
+  final String? github;
+  final String? instagram;
+  final String? youtube;
+
+  SocialLinksModel({
+    this.linkedin,
+    this.twitter,
+    this.facebook,
+    this.github,
+    this.instagram,
+    this.youtube,
+  });
+
+  factory SocialLinksModel.fromJson(Map<String, dynamic> json) {
+    return SocialLinksModel(
+      linkedin: json['linkedin'],
+      twitter: json['twitter'],
+      facebook: json['facebook'],
+      github: json['github'],
+      instagram: json['instagram'],
+      youtube: json['youtube'],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'linkedin': linkedin,
+    'twitter': twitter,
+    'facebook': facebook,
+    'github': github,
+    'instagram': instagram,
+    'youtube': youtube,
+  };
+
+  Map<String, String?> toMap() => {
+    'linkedin': linkedin,
+    'twitter': twitter,
+    'facebook': facebook,
+    'github': github,
+    'instagram': instagram,
+    'youtube': youtube,
+  };
+}
+
+class SettingsModel {
+  final bool isMinimalMode;
+  final bool isPublic;
+  final String mode;
+  final String template;
+
+  SettingsModel({
+    this.isMinimalMode = false,
+    this.isPublic = true,
+    this.mode = 'customized',
+    this.template = 'professional',
+  });
+
+  factory SettingsModel.fromJson(Map<String, dynamic> json) {
+    return SettingsModel(
+      isMinimalMode: json['isMinimalMode'] ?? false,
+      isPublic: json['isPublic'] ?? true,
+      mode: json['mode'] ?? 'customized',
+      template: json['template'] ?? 'professional',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'isMinimalMode': isMinimalMode,
+    'isPublic': isPublic,
+    'mode': mode,
+    'template': template,
+  };
 }
 
 class AddressModel {
@@ -147,6 +237,7 @@ class CardModel {
   final String qrCodeUrl;
   final String shortUrl;
   final String publicUrl;
+  // Legacy flat social URLs (kept for backwards compat with old API responses)
   final String? linkedinUrl;
   final String? twitterUrl;
   final String? instagramUrl;
@@ -155,6 +246,8 @@ class CardModel {
   final String? youtubeUrl;
   final String? website;
   final AddressModel? address;
+  final SocialLinksModel? socialLinks;
+  final SettingsModel? settings;
   final bool isPublic;
   final bool isMinimalMode;
   final bool isBlocked;
@@ -168,6 +261,23 @@ class CardModel {
   final ThemeModel theme;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? location;
+
+  /// Combined address for display
+  String get displayAddress {
+    if (address != null) {
+      final parts = [
+        address!.addressLine1,
+        address!.addressLine2,
+        address!.city,
+        address!.state,
+        address!.country,
+        address!.zipCode,
+      ].where((p) => p != null && p.isNotEmpty).toList();
+      if (parts.isNotEmpty) return parts.join(', ');
+    }
+    return location ?? '';
+  }
 
   CardModel({
     required this.id,
@@ -185,6 +295,8 @@ class CardModel {
     this.youtubeUrl,
     this.website,
     this.address,
+    this.socialLinks,
+    this.settings,
     this.profileFileName,
     this.isLinkedinVerified = false,
     required this.bio,
@@ -205,6 +317,7 @@ class CardModel {
     required this.theme,
     required this.createdAt,
     required this.updatedAt,
+    this.location,
   });
 
   factory CardModel.fromJson(Map<String, dynamic> json) {
@@ -220,16 +333,16 @@ class CardModel {
       userId: extractUserId(json['userId']),
       name: json['name'] ?? 'Untitled Card',
       title: json['title'] ?? '',
-      linkedinUrl: json['linkedinUrl'],
-      twitterUrl: json['twitterUrl'],
-      instagramUrl: json['instagramUrl'],
-      githubUrl: json['githubUrl'],
-      facebookUrl: json['facebookUrl'],
-      youtubeUrl: json['youtubeUrl'],
+      linkedinUrl: json['linkedinUrl'] ?? json['socialLinks']?['linkedin'],
+      twitterUrl: json['twitterUrl'] ?? json['socialLinks']?['twitter'],
+      instagramUrl: json['instagramUrl'] ?? json['socialLinks']?['instagram'],
+      githubUrl: json['githubUrl'] ?? json['socialLinks']?['github'],
+      facebookUrl: json['facebookUrl'] ?? json['socialLinks']?['facebook'],
+      youtubeUrl: json['youtubeUrl'] ?? json['socialLinks']?['youtube'],
       website: json['website'],
-      address: json['address'] != null
-          ? AddressModel.fromJson(json['address'])
-          : null,
+      address: json['address'] != null ? AddressModel.fromJson(json['address']) : null,
+      socialLinks: json['socialLinks'] != null ? SocialLinksModel.fromJson(json['socialLinks']) : null,
+      settings: json['settings'] != null ? SettingsModel.fromJson(json['settings']) : null,
       company: json['company'] ?? '',
       industry: json['industry'] ?? '',
       profile: json['profile'],
@@ -239,9 +352,9 @@ class CardModel {
       tags: List<String>.from(json['tags'] ?? []),
       qrCodeUrl: json['qrCodeUrl'] ?? '',
       shortUrl: json['shortUrl'] ?? '',
-      publicUrl: json['publicUrl'] ?? '', // API sometimes omits this
-      isPublic: json['isPublic'] ?? true,
-      isMinimalMode: json['isMinimalMode'] ?? false,
+      publicUrl: json['publicUrl'] ?? '',
+      isPublic: json['settings']?['isPublic'] ?? json['isPublic'] ?? true,
+      isMinimalMode: json['settings']?['isMinimalMode'] ?? json['isMinimalMode'] ?? false,
       isBlocked: json['isBlocked'] ?? false,
       isActive: json['isActive'] ?? true,
       viewCount: json['viewCount'] ?? 0,
@@ -251,12 +364,9 @@ class CardModel {
       customLinks: json['customLinks'] ?? [],
       contact: ContactModel.fromJson(json['contact'] ?? {}),
       theme: ThemeModel.fromJson(json['theme'] ?? {}),
-      createdAt: json['createdAt'] == null
-          ? DateTime.now()
-          : DateTime.parse(json['createdAt']),
-      updatedAt: json['updatedAt'] == null
-          ? DateTime.now()
-          : DateTime.parse(json['updatedAt']),
+      createdAt: json['createdAt'] == null ? DateTime.now() : DateTime.parse(json['createdAt']),
+      updatedAt: json['updatedAt'] == null ? DateTime.now() : DateTime.parse(json['updatedAt']),
+      location: json['location'],
     );
   }
 
@@ -277,6 +387,8 @@ class CardModel {
       'youtubeUrl': youtubeUrl,
       'website': website,
       'address': address?.toJson(),
+      'socialLinks': socialLinks?.toJson(),
+      'settings': settings?.toJson(),
       'profileFileName': profileFileName,
       'isLinkedinVerified': isLinkedinVerified,
       'bio': bio,
@@ -297,6 +409,7 @@ class CardModel {
       'theme': theme.toJson(),
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'location': location,
     };
   }
 }

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
 import 'package:rolo_digi_card/controllers/auth_controller.dart';
+import 'package:rolo_digi_card/controllers/home/home_page_controller.dart';
 import 'package:rolo_digi_card/models/card_model.dart';
 import 'package:rolo_digi_card/models/org_model.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
@@ -16,6 +17,7 @@ class CardManagementController extends GetxController {
   var isLoading = false.obs;
   var orgCards = <OrgCard>[].obs;
   var cardStats = <String, dynamic>{}.obs; // To store simple stats object
+  CardModel? createdCard;
   final searchQuery = ''.obs;
   final searchController = TextEditingController();
   final statusFilter = 'All...'.obs;
@@ -147,6 +149,16 @@ class CardManagementController extends GetxController {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data != null) {
+          createdCard = CardModel.fromJson(data);
+          if (Get.isRegistered<HomePageController>()) {
+            final homeController = Get.find<HomePageController>();
+            homeController.createdCard = createdCard;
+            homeController.showSuccess.value = true;
+            homeController.update();
+          }
+        }
         CommonSnackbar.success('Card created successfully');
         getOrganizationCards(); // Refresh list
       }
@@ -181,6 +193,16 @@ class CardManagementController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        final data = response.data;
+        if (data != null) {
+          createdCard = CardModel.fromJson(data);
+          if (Get.isRegistered<HomePageController>()) {
+            final homeController = Get.find<HomePageController>();
+            homeController.createdCard = createdCard;
+            homeController.showSuccess.value = true;
+            homeController.update();
+          }
+        }
         CommonSnackbar.success('Card updated successfully');
         getOrganizationCards();
       }

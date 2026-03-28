@@ -4,13 +4,36 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
+import 'package:rolo_digi_card/controllers/organization/card_management_controller.dart';
+import 'package:rolo_digi_card/controllers/organization/group_management_controller.dart';
 import 'package:rolo_digi_card/controllers/organization/organization_user_management_controller.dart';
 import 'package:rolo_digi_card/models/org_model.dart';
 import 'package:rolo_digi_card/views/organization/widgets/assign_card_dialog.dart';
 
-class CardDetailPage extends StatelessWidget {
+class CardDetailPage extends StatefulWidget {
   const CardDetailPage({super.key, required this.card});
   final OrgCard card;
+
+  @override
+  State<CardDetailPage> createState() => _CardDetailPageState();
+}
+
+class _CardDetailPageState extends State<CardDetailPage> {
+  late OrgCard currentCard;
+
+  @override
+  void initState() {
+    super.initState();
+    currentCard = widget.card;
+  }
+
+  void _onUpdate(OrgCard updatedCard) {
+    if (mounted) {
+      setState(() {
+        currentCard = updatedCard;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,19 +57,19 @@ class CardDetailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Metrics Row ──
-            _MetricsRow(card: card),
+            _MetricsRow(card: currentCard),
             const SizedBox(height: 16),
 
             // ── Card Preview ──
-            _CardPreviewSection(card: card),
+            _CardPreviewSection(card: currentCard),
             const SizedBox(height: 16),
 
             // ── Assignment ──
-            _AssignmentSection(card: card),
-            const SizedBox(height: 16), 
+            _AssignmentSection(card: currentCard, onUpdate: _onUpdate),
+            const SizedBox(height: 16),
 
             // ── Actions ──
-            _ActionsSection(card: card),
+            _ActionsSection(card: currentCard, onUpdate: _onUpdate),
             const SizedBox(height: 32),
           ],
         ),
@@ -372,17 +395,18 @@ class _DateInfo extends StatelessWidget {
 // ── Assignment Section ─────────────────────────────────────────────────────
 
 class _AssignmentSection extends StatefulWidget {
-   _AssignmentSection({required this.card});
+  const _AssignmentSection({required this.card, required this.onUpdate});
   final OrgCard card;
+  final ValueChanged<OrgCard> onUpdate;
 
   @override
   State<_AssignmentSection> createState() => _AssignmentSectionState();
 }
 
 class _AssignmentSectionState extends State<_AssignmentSection> {
-final controller = Get.put(OrgUserManagementController());
+  final controller = Get.put(OrgUserManagementController());
 
-   void _onAssignUser() {
+  void _onAssignUser() {
     if (controller.allUsers.isEmpty) controller.fetchAllUsers();
     showDialog(
       context: context,
@@ -394,8 +418,30 @@ final controller = Get.put(OrgUserManagementController());
         isAssigning: controller.isAssigning,
         onAssign: (userId) async {
           final ok = await controller.assignCardToUser(widget.card.id, userId);
-           Get.back();
-          if (ok) CommonSnackbar.success('Card assigned successfully');
+          Get.back();
+          if (ok) {
+            CommonSnackbar.success('Card assigned successfully');
+            final assignedUser = controller.allUsers
+                .where((u) => u.id == userId)
+                .firstOrNull;
+            if (assignedUser != null) {
+              widget.onUpdate(widget.card.copyWith(
+                assignedUser: AssignedUser(
+                  id: assignedUser.id,
+                  email: assignedUser.email,
+                  firstName: assignedUser.firstName,
+                  lastName: assignedUser.lastName,
+                ),
+              ));
+            }
+            if (Get.isRegistered<CardManagementController>()) {
+              Get.find<CardManagementController>().getOrganizationCards();
+              Get.find<CardManagementController>().getCardStats();
+            }
+            if (Get.isRegistered<GroupManagementController>()) {
+              Get.find<GroupManagementController>().fetchOrganizationCards();
+            }
+          }
         },
       ),
     );
@@ -550,17 +596,16 @@ final controller = Get.put(OrgUserManagementController());
 // ── Actions Section ────────────────────────────────────────────────────────
 
 class _ActionsSection extends StatefulWidget {
-   _ActionsSection({required this.card});
+  const _ActionsSection({required this.card, required this.onUpdate});
   final OrgCard card;
+  final ValueChanged<OrgCard> onUpdate;
 
   @override
   State<_ActionsSection> createState() => _ActionsSectionState();
 }
 
 class _ActionsSectionState extends State<_ActionsSection> {
-// final controller = Get.find<OrgUserManagementController>();
-final controller = Get.put(OrgUserManagementController());
-
+  final controller = Get.put(OrgUserManagementController());
 
   void _onViewInBrowser() async {
     final code = widget.card.shortUrl.isNotEmpty ? widget.card.shortUrl : widget.card.id;
@@ -582,23 +627,60 @@ final controller = Get.put(OrgUserManagementController());
         isAssigning: controller.isAssigning,
         onAssign: (userId) async {
           final ok = await controller.assignCardToUser(widget.card.id, userId);
-           Get.back();
-          if (ok) CommonSnackbar.success('Card assigned successfully');
+          Get.back();
+          if (ok) {
+            CommonSnackbar.success('Card assigned successfully');
+            final assignedUser = controller.allUsers
+                .where((u) => u.id == userId)
+                .firstOrNull;
+            if (assignedUser != null) {
+              widget.onUpdate(widget.card.copyWith(
+                assignedUser: AssignedUser(
+                  id: assignedUser.id,
+                  email: assignedUser.email,
+                  firstName: assignedUser.firstName,
+                  lastName: assignedUser.lastName,
+                ),
+              ));
+            }
+            if (Get.isRegistered<CardManagementController>()) {
+              Get.find<CardManagementController>().getOrganizationCards();
+              Get.find<CardManagementController>().getCardStats();
+            }
+            if (Get.isRegistered<GroupManagementController>()) {
+              Get.find<GroupManagementController>().fetchOrganizationCards();
+            }
+          }
         },
       ),
     );
   }
 
   void _onToggleActive() {
-   controller.toggleCardActive(widget.card, onSuccess: () {
-     setState(() {}); // Refresh UI to reflect active status change
-   });
+    controller.toggleCardActive(widget.card, onSuccess: () {
+      widget.onUpdate(
+          widget.card.copyWith(isActive: !widget.card.isActive));
+      if (Get.isRegistered<CardManagementController>()) {
+        Get.find<CardManagementController>().getOrganizationCards();
+        Get.find<CardManagementController>().getCardStats();
+      }
+      if (Get.isRegistered<GroupManagementController>()) {
+        Get.find<GroupManagementController>().fetchOrganizationCards();
+      }
+    });
   }
 
   void _onDeleteCard() {
     controller.deleteCard(widget.card.id, onSuccess: () {
-      Get.back(); // Return to previous screen after deletion
-    }); 
+      if (Get.isRegistered<CardManagementController>()) {
+        Get.find<CardManagementController>().getOrganizationCards();
+        Get.find<CardManagementController>().getCardStats();
+      }
+      if (Get.isRegistered<GroupManagementController>()) {
+        Get.find<GroupManagementController>().fetchOrganizationCards();
+      }
+      Get.back();
+    });
   }
 
   // ───────────────────────────────────────────────────────────────────────

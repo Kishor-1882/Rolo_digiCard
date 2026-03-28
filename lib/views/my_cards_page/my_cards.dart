@@ -273,82 +273,187 @@ class MyCardsPage extends StatelessWidget {
                             ),
                         ],
                       )
-                      : controller.cardsResponse!.cards.isEmpty
-                          ? Center(
-                              child: Container(
-                                padding: EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.credit_card_off,
-                                      size: 60,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                    SizedBox(height: 16),
-                                    Text(
-                                      "No cards created yet",
-                                      style: TextStyle(
-                                        color: AppColors.textSecondary,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ],
+                      : Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Search Bar
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1E1E2E),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.white.withOpacity(0.1)),
+                                ),
+                                child: TextField(
+                                  controller: controller.searchController,
+                                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                                  decoration: InputDecoration(
+                                    hintText: 'Search cards by name, title, company, or tags...',
+                                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 13),
+                                    prefixIcon: Icon(Icons.search, color: Colors.white.withOpacity(0.5), size: 20),
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                                  ),
                                 ),
                               ),
-                            )
-                          : Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              const SizedBox(height: 12),
+
+                              // Filter and Sort Row
+                              Row(
                                 children: [
-                                  Text(
-                                    "${controller.cardsResponse!.cards.length} card${controller.cardsResponse!.cards.length > 1 ? 's' : ''} created",
-                                    style: TextStyle(
-                                      color: AppColors.textSecondary,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  ListView.builder(
-                                    itemCount:
-                                        controller.cardsResponse!.cards.length,
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemBuilder: (context, index) {
-                                      final card =
-                                          controller.cardsResponse!.cards[index];
-                                      return Padding(
-                                        padding: const EdgeInsets.only(bottom: 5.0),
-                                        child: CommonCardWidget(
-                                          initials: _getInitials(card.name),
-                                          name: card.name,
-                                          role: card.title,
-                                          company: card.company,
-                                          visibility:
-                                              card.isPublic ? "Public" : "Private",
-                                          viewsCount: card.viewCount,
-                                          qrCount: card.scanCount,
-                                          themeMode:
-                                              card.theme.cardStyle.capitalize ??
-                                                  "Default",
-                                          onQrTap: () {
-                                            Get.to(() => QRCodeSharePage(
-                                                  card: card,
-                                                ));
-                                          },
-                                          onMenuTap: (TapDownDetails details) {
-                                            _showPopupMenu(context,
-                                                details.globalPosition, card,controller);
+                                  // Visibility Filter
+                                  Expanded(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF1E1E2E),
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(color: Colors.white.withOpacity(0.1)),
+                                      ),
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton<String>(
+                                          value: controller.selectedFilter.value,
+                                          dropdownColor: const Color(0xFF1E1E2E),
+                                          icon: Icon(Icons.keyboard_arrow_down, color: Colors.white.withOpacity(0.5), size: 18),
+                                          style: const TextStyle(color: Colors.white, fontSize: 12),
+                                          items: ['All Cards', 'Private Card', 'Public Card'].map((String value) {
+                                            return DropdownMenuItem<String>(
+                                              value: value,
+                                              child: Text(value),
+                                            );
+                                          }).toList(),
+                                          onChanged: (value) {
+                                            controller.selectedFilter.value = value!;
+                                            controller.update();
                                           },
                                         ),
-                                      );
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Sort Dropdown
+                                  Expanded(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF1E1E2E),
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(color: Colors.white.withOpacity(0.1)),
+                                      ),
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton<String>(
+                                          value: controller.selectedSort.value,
+                                          dropdownColor: const Color(0xFF1E1E2E),
+                                          icon: Icon(Icons.keyboard_arrow_down, color: Colors.white.withOpacity(0.5), size: 18),
+                                          style: const TextStyle(color: Colors.white, fontSize: 12),
+                                          items: ['Sort by Date', 'Sort by View', 'Sort by Name'].map((String value) {
+                                            return DropdownMenuItem<String>(
+                                              value: value,
+                                              child: Text(value),
+                                            );
+                                          }).toList(),
+                                          onChanged: (value) {
+                                            controller.selectedSort.value = value!;
+                                            controller.update();
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Ascending/Descending Toggle
+                                  GestureDetector(
+                                    onTap: () {
+                                      controller.isAscending.toggle();
+                                      controller.update();
                                     },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF1E1E2E),
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(color: Colors.white.withOpacity(0.1)),
+                                      ),
+                                      child: Icon(
+                                        controller.isAscending.value ? Icons.south : Icons.sort,
+                                        color: Colors.white.withOpacity(0.7),
+                                        size: 18,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
+                              const SizedBox(height: 20),
+
+                              if (controller.filteredCards.isEmpty)
+                                Center(
+                                  child: Container(
+                                    padding: EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.credit_card_off,
+                                          size: 60,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                        SizedBox(height: 16),
+                                        Text(
+                                          controller.searchText.value.isEmpty && controller.selectedFilter.value == 'All Cards'
+                                              ? "No cards created yet"
+                                              : "No matching cards found",
+                                          style: TextStyle(
+                                            color: AppColors.textSecondary,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              else ...[
+                                Text(
+                                  "${controller.filteredCards.length} card${controller.filteredCards.length > 1 ? 's' : ''} found",
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                SizedBox(height: 15),
+                                ListView.builder(
+                                  itemCount: controller.filteredCards.length,
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemBuilder: (context, index) {
+                                    final card = controller.filteredCards[index];
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 5.0),
+                                      child: CommonCardWidget(
+                                        initials: _getInitials(card.name),
+                                        name: card.name,
+                                        role: card.title,
+                                        company: card.company,
+                                        visibility: card.isPublic ? "Public" : "Private",
+                                        viewsCount: card.viewCount,
+                                        qrCount: card.scanCount,
+                                        themeMode: card.theme.cardStyle.capitalize ?? "Default",
+                                        onQrTap: () {
+                                          Get.to(() => QRCodeSharePage(card: card));
+                                        },
+                                        onMenuTap: (TapDownDetails details) {
+                                          _showPopupMenu(context, details.globalPosition, card, controller);
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
                 ),
               ),
             ],

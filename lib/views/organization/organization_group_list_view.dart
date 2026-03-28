@@ -37,7 +37,8 @@ class OrganizationGroupListView extends GetView<GroupManagementController> {
           final total = controller.groups.length;
 final active =
     controller.groups.where((group) => group.isActive).length;
-              final members = controller.groups.fold(0, (sum, g) => sum + g.members.length);          final primaryCount = groups.fold(0, (sum, g) => sum + (isUserGroup ? g.members.length : g.cards.length));
+              final members = controller.groups.fold(0, (sum, g) => sum + g.totalMembers);
+              final primaryCount = groups.fold(0, (sum, g) => sum + (isUserGroup ? g.totalMembers : g.totalCards));
           
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -420,7 +421,7 @@ final active =
                 children: [
                    _buildMetaItem(
                     icon: isUserGroup ? Icons.people_outline : Icons.credit_card, 
-                    label: '${isUserGroup ? group.members.length : group.cards.length} ${isUserGroup ? 'Members' : 'Cards'}'
+                    label: '${isUserGroup ? group.totalMembers : group.totalCards} ${isUserGroup ? 'Members' : 'Cards'}'
                   ),
                   const SizedBox(width: 16),
                   _buildMetaItem(icon: Icons.calendar_today_outlined, label: timeAgo(group.createdAt)), // Placeholder

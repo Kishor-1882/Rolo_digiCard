@@ -18,6 +18,7 @@ class ApiEndpoints {
   // Card
   static const String dashboardCardCount = "/api/analytics/dashboard";
   static const String createCard = "/api/cards";
+  static const String myCards = "/api/cards/my-cards"; // Renamed from myCard or kept both
   static const String myCard = "/api/cards/my-cards";
   static const String savedCard = "/api/cards/saved";
   static String toggleSavedCardFavorite(String cardId) => "/api/cards/saved/$cardId/favorite";
@@ -77,7 +78,13 @@ class ApiEndpoints {
   static String deleteOrgCard(String cardId) => "/api/organization/cards/$cardId";
 
   // Group Management
-  // static const String organizationGroups = "/api/organization/groups";
+  // Individual Groups
+  static const String groups = "/api/groups";
+  static String individualGroupDetails(String groupId) => "/api/groups/$groupId";
+  static String individualGroupCards(String groupId) => "/api/groups/$groupId/cards";
+  static String individualGroupRemoveCard(String groupId, String cardId) => "/api/groups/$groupId/cards/$cardId";
+
+  // Organization Groups
   static String organizationGroups(String type) => "/api/organization/groups?groupType=$type";
 
   static String getOrganizationGroup(String groupId) => "/api/organization/groups/$groupId";

@@ -70,6 +70,12 @@ class DioClient {
   // ---------------- ERROR ----------------
   Future<void> _onError(
       DioException error, ErrorInterceptorHandler handler) async {
+    // Don't intercept 401 for login/register - let the caller handle it (e.g. show "Login failed")
+    if (error.requestOptions.path == ApiEndpoints.login ||
+        error.requestOptions.path == ApiEndpoints.register) {
+      return handler.next(error);
+    }
+
     if (error.response?.statusCode == 401) {
       log("Received 401 error, attempting token refresh...");
       final requestOptions = error.requestOptions;

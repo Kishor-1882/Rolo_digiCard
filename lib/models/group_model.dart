@@ -16,10 +16,15 @@ class GroupModel {
   final String organizationId;
   final List<GroupMember> members;
   final List<OrgCard> cards;
+  final List<String> cardIds;
+  final List<String> memberIds;
   final List<dynamic> linkedGroups;
   final String? createdAt;
   final String? updatedAt;
   final int version;
+
+  int get totalCards => cardIds.length;
+  int get totalMembers => memberIds.length;
 
   GroupModel({
     required this.id,
@@ -33,6 +38,8 @@ class GroupModel {
     required this.organizationId,
     required this.members,
     required this.cards,
+    required this.cardIds,
+    required this.memberIds,
     required this.linkedGroups,
     this.createdAt,
     this.updatedAt,
@@ -60,6 +67,22 @@ class GroupModel {
     cards: (json['cards'] as List<dynamic>? ?? [])
         .where((e) => e is Map<String, dynamic>) // skip plain strings
         .map((e) => OrgCard.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    cardIds: (json['cards'] as List<dynamic>? ?? [])
+        .map((e) {
+          if (e is String) return e;
+          if (e is Map<String, dynamic>) return e['_id']?.toString() ?? e['id']?.toString() ?? '';
+          return '';
+        })
+        .where((e) => e.isNotEmpty)
+        .toList(),
+    memberIds: (json['members'] as List<dynamic>? ?? [])
+        .map((e) {
+          if (e is String) return e;
+          if (e is Map<String, dynamic>) return e['_id']?.toString() ?? e['id']?.toString() ?? '';
+          return '';
+        })
+        .where((e) => e.isNotEmpty)
         .toList(),
     linkedGroups: json['linkedGroups'] ?? [],
     createdAt: json['createdAt'],

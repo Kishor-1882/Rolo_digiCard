@@ -15,6 +15,7 @@ import 'package:rolo_digi_card/views/organization/organization_groups_view.dart'
 import 'package:rolo_digi_card/views/organization/organization_user_management.dart';
 import 'package:rolo_digi_card/views/profile_page/profile_page.dart';
 import 'package:rolo_digi_card/views/saved_cards_page/saved_cards.dart';
+import 'package:rolo_digi_card/views/groups_page/groups_page.dart';
 
 class SideBar extends StatefulWidget {
   const SideBar({super.key});
@@ -42,7 +43,7 @@ class _SideBarState extends State<SideBar> {
     DashboardPage(),
     const MyCardsPage(),
     const SavedCards(),
-    const ProfilePage(),
+    const MyGroupsPage(),
   ];
 
   final List<Widget> _orgPages = [
@@ -59,7 +60,7 @@ class _SideBarState extends State<SideBar> {
     (0, 'card:read', 'Home', Icons.grid_view_rounded),
     (1, 'card:read', 'My Cards', Icons.credit_card),
     (2, 'card:read', 'Saved', Icons.bookmark_outline),
-    (3, null, 'Profile', Icons.account_circle_outlined), // Profile always visible
+    (3, 'card:read', 'Groups', Icons.group_outlined),
   ];
 
   /// Nav config for organization: (index, permission, label, icon)

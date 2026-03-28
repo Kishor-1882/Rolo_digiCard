@@ -1001,12 +1001,12 @@ class _CreateNewCardState extends State<CreateNewCard> {
                       ),
                       child: ElevatedButton(
                         onPressed: () {
-                          if (controller.shortUrl != null) {
-                            // Get.to(
-                            //   () => BusinessCardProfilePage(
-                            //     // cardId: controller.shortUrl ?? '',
-                            //   ),
-                            // );
+                          if (controller.createdCard != null) {
+                            Get.to(
+                              () => BusinessCardProfilePage(
+                                card: controller.createdCard!,
+                              ),
+                            );
                           }
                         },
                         style: ElevatedButton.styleFrom(
