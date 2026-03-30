@@ -153,15 +153,15 @@ class OrganizationGroupsView extends StatelessWidget {
                       fontSize: 12,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    meta,
-                    style: const TextStyle(
-                      color: AppColors.primaryPink,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  // const SizedBox(height: 8),
+                  // Text(
+                  //   meta,
+                  //   style: const TextStyle(
+                  //     color: AppColors.primaryPink,
+                  //     fontSize: 12,
+                  //     fontWeight: FontWeight.bold,
+                  //   ),
+                  // ),
                 ],
               ),
             ),

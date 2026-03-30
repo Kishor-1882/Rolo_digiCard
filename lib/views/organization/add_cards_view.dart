@@ -130,7 +130,7 @@ class _AddCardsViewState extends State<AddCardsView> {
 
             // List
             Expanded(
-              child: controller.isLoading.value
+              child: controller.isLoading.value && controller.cardsList.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : filtered.isEmpty
                       ? const Center(
@@ -266,7 +266,7 @@ class _AddCardsViewState extends State<AddCardsView> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton.icon(
-                  onPressed: _selectedIds.isEmpty
+                  onPressed: _selectedIds.isEmpty || controller.isLoading.value
                       ? null
                       : () async {
                           await controller.addGroupCards(
@@ -276,9 +276,11 @@ class _AddCardsViewState extends State<AddCardsView> {
                           await controller.getGroupById(widget.group.id);
                           Get.back();
                         },
-                  icon: const Icon(Icons.add_card, color: Colors.white),
+                  icon: controller.isLoading.value
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Icon(Icons.add_card, color: Colors.white),
                   label: Text(
-                    'Add Selected (${_selectedIds.length})',
+                    controller.isLoading.value ? 'Adding...' : 'Add Selected (${_selectedIds.length})',
                     style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,

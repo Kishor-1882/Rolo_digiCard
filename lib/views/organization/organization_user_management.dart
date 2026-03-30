@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:rolo_digi_card/common/header.dart';
 import 'package:rolo_digi_card/controllers/organization/organization_user_management_controller.dart';
 import 'package:rolo_digi_card/utils/color.dart';
 import 'package:rolo_digi_card/views/organization/organization_user_details.dart';
@@ -26,7 +27,8 @@ class OrganizationUserManagement extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 16),
+                AppHeader(),
+                SizedBox(height: 10),
                 _buildHeader(controller),
                 const SizedBox(height: 24),
                 _buildStatsGrid(controller),
@@ -64,11 +66,11 @@ class OrganizationUserManagement extends StatelessWidget {
   Widget _buildHeader(OrgUserManagementController controller) {
     return Row(
       children: [
-        GestureDetector(
-          onTap: () => Get.back(),
-          child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
-        ),
-        const SizedBox(width: 8),
+        // GestureDetector(
+        //   onTap: () => Get.back(),
+        //   child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
+        // ),
+        // const SizedBox(width: 8),
         Expanded(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -429,13 +431,14 @@ class OrganizationUserManagement extends StatelessWidget {
                         },
                         itemBuilder: (_) => [
                           _menuItem('view', Icons.visibility_outlined, 'View Details', Colors.white),
-                          if (!user.isActive && !user.isBlocked)
+                          if (!user.isActive && !user.isBlocked && user.organizationRole != 'owner')
                             _menuItem('activate', Icons.check_circle_outline, 'Activate', Colors.greenAccent),
-                          if (user.isActive)
+                          if (user.isActive && user.organizationRole != 'owner')
                             _menuItem('deactivate', Icons.pause_circle_outline, 'Deactivate', Colors.orangeAccent),
                           if (!user.isEmailVerified)
                             _menuItem('resend', Icons.send_outlined, 'Resend Invite', Colors.blueAccent),
-                          _menuItem('delete', Icons.delete_outline, 'Remove User', Colors.redAccent),
+                          if (user.organizationRole != 'owner')
+                            _menuItem('delete', Icons.delete_outline, 'Remove User', Colors.redAccent),
                         ],
                       ),
                     ],

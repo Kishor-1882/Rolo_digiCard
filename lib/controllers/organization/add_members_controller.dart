@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
+import 'package:rolo_digi_card/common/snack_bar.dart';
 import 'package:rolo_digi_card/models/group_model.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
 import 'package:rolo_digi_card/services/end_points.dart';
@@ -106,11 +107,7 @@ Future<bool> addMembersToGroup({
     if (response.statusCode == 200 || response.statusCode == 201) {
       log("Members added successfully: ${response.data}"); // Log success details
       Get.back();
-      Get.snackbar(
-        'Success',
-        'Members added to group successfully',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CommonSnackbar.success('Members added to group');
       return true;
     } else {
       log("Failed to add members. Status code: ${response.statusCode}, Response: ${response.data}"); // Log failure details

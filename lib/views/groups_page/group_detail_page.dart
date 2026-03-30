@@ -74,11 +74,11 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
               SliverToBoxAdapter(
                 child: Container(
                   decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF6D28D9), Color(0xFF8B5CF6)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    // gradient: LinearGradient(
+                    //   colors: [Color(0xFF6D28D9), Color(0xFF8B5CF6)],
+                    //   begin: Alignment.topLeft,
+                    //   end: Alignment.bottomRight,
+                    // ),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                   child: Column(

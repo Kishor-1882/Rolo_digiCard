@@ -34,7 +34,7 @@ class _OrgUserDetailPageState extends State<OrgUserDetailPage>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _loadUser();
-
+    _loadCards();
   }
 
   Future<void> _loadUser() async {
@@ -58,11 +58,8 @@ class _OrgUserDetailPageState extends State<OrgUserDetailPage>
     }
   }
 
-    Future<void> _loadCards() async {
-    // Use cached version first for instant display
-   
-    // Then fetch fresh data
-    final fresh = await _controller.fetchUserCards(widget.userId);
+  Future<void> _loadCards() async {
+    await _controller.fetchUserCards(widget.userId);
     if (mounted) {
       _cards.value = _controller.userCards;
     }
@@ -124,9 +121,6 @@ class _OrgUserDetailPageState extends State<OrgUserDetailPage>
   Widget _buildContent() {
     final user = _user!;
     final cards = _controller.userCards;
-     if (cards.isEmpty) {
-      _loadCards();
-    }
     return Column(
       children: [
         _buildTopBar(),
@@ -477,33 +471,35 @@ class _OrgUserDetailPageState extends State<OrgUserDetailPage>
               ).then((_) => _loadUser());
             },
           ),
-          const SizedBox(height: 12),
-          // Remove User
-          _actionButton(
-            label: 'Remove User',
-            icon: Icons.delete_outline,
-            borderColor: const Color(0xFFFF5252),
-            textColor: const Color(0xFFFF5252),
-            onTap: () => _showDeleteDialog(user),
-          ),
-          const SizedBox(height: 12),
-          // Activate / Deactivate
-          if (user.isActive)
+          if (user.organizationRole != 'owner') ...[
+            const SizedBox(height: 12),
+            // Remove User
             _actionButton(
-              label: 'Deactivate User',
-              icon: Icons.pause_circle_outline,
-              borderColor: Colors.orangeAccent,
-              textColor: Colors.orangeAccent,
-              onTap: () => _onDeactivate(user),
-            )
-          else
-            _actionButton(
-              label: 'Activate User',
-              icon: Icons.lock_open_outlined,
-              borderColor: Colors.orangeAccent,
-              textColor: Colors.orangeAccent,
-              onTap: () => _onActivate(user),
+              label: 'Remove User',
+              icon: Icons.delete_outline,
+              borderColor: const Color(0xFFFF5252),
+              textColor: const Color(0xFFFF5252),
+              onTap: () => _showDeleteDialog(user),
             ),
+            const SizedBox(height: 12),
+            // Activate / Deactivate
+            if (user.isActive)
+              _actionButton(
+                label: 'Deactivate User',
+                icon: Icons.pause_circle_outline,
+                borderColor: Colors.orangeAccent,
+                textColor: Colors.orangeAccent,
+                onTap: () => _onDeactivate(user),
+              )
+            else
+              _actionButton(
+                label: 'Activate User',
+                icon: Icons.lock_open_outlined,
+                borderColor: Colors.orangeAccent,
+                textColor: Colors.orangeAccent,
+                onTap: () => _onActivate(user),
+              ),
+          ],
           // Resend Invite (if not email-verified)
           if (!user.isEmailVerified) ...[
             const SizedBox(height: 12),

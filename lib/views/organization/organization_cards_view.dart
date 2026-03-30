@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rolo_digi_card/common/header.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
 import 'package:rolo_digi_card/common/common_textfield.dart';
 import 'package:rolo_digi_card/controllers/organization/card_management_controller.dart';
@@ -31,7 +32,9 @@ class OrganizationCardsView extends GetView<CardManagementController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 16),
+
+                AppHeader(),
+                SizedBox(height: 10),
                 _buildHeader(),
                 const SizedBox(height: 24),
                 _buildStatsGrid(stats),
@@ -46,7 +49,19 @@ class OrganizationCardsView extends GetView<CardManagementController> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildCardList(cards),
+                if (controller.isLoading.value)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32),
+                      child: CircularProgressIndicator(
+                        color: Color(0xFFE91E8E),
+                      ),
+                    ),
+                  )
+                else if (cards.isEmpty)
+                  _buildEmptyState()
+                else
+                  _buildCardList(cards),
                 const SizedBox(height: 32),
               ],
             ),
@@ -59,11 +74,11 @@ class OrganizationCardsView extends GetView<CardManagementController> {
   Widget _buildHeader() {
     return Row(
       children: [
-        GestureDetector(
-          onTap: () => Get.back(),
-          child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
-        ),
-        const SizedBox(width: 8),
+        // GestureDetector(
+        //   onTap: () => Get.back(),
+        //   child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
+        // ),
+        // const SizedBox(width: 8),
         Expanded(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -493,6 +508,30 @@ class OrganizationCardsView extends GetView<CardManagementController> {
           ),
         );
       },
+    );
+  }
+
+  // ── Empty State ───────────────────────────────────────────────────────────
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 48),
+        child: Column(
+          children: [
+            const Icon(Icons.credit_card_outlined, color: Colors.white24, size: 64),
+            const SizedBox(height: 16),
+            const Text(
+              'No cards found',
+              style: TextStyle(color: Colors.white54, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Create a new card to get started',
+              style: TextStyle(color: Colors.white38, fontSize: 13),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

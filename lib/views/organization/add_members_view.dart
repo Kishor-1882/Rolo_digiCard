@@ -352,8 +352,8 @@ class _AddMembersViewState extends State<AddMembersView> {
               child: SizedBox(
                 width: double.infinity,
                 height: 50,
-                child: ElevatedButton.icon(
-               onPressed: _selectedIds.isEmpty
+                child: Obx(() => ElevatedButton.icon(
+               onPressed: _selectedIds.isEmpty || controller.isLoading.value
               ? null
              : () async {
                final success = await controller.addMembersToGroup(
@@ -361,11 +361,19 @@ class _AddMembersViewState extends State<AddMembersView> {
                   userIds: _selectedIds.toList(),
                   cardGroupIds: [widget.group.id], // Pass the group ID
                 );
-           
+               if (success) {
+                 if (Get.isRegistered<GroupManagementController>()) {
+                   final groupCtrl = Get.find<GroupManagementController>();
+                   groupCtrl.getGroupUsers(widget.group.id);
+                   groupCtrl.getGroups();
+                 }
+               }
       },
-                  icon: const Icon(Icons.person_add, color: Colors.white),
+                  icon: controller.isLoading.value
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Icon(Icons.person_add, color: Colors.white),
                   label: Text(
-                    'Add Selected (${_selectedIds.length})',
+                    controller.isLoading.value ? 'Adding...' : 'Add Selected (${_selectedIds.length})',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -379,7 +387,7 @@ class _AddMembersViewState extends State<AddMembersView> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                ),
+                )),
               ),
             ),
           ],

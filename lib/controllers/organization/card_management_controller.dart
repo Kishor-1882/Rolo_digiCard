@@ -68,7 +68,6 @@ class CardManagementController extends GetxController {
     nameController.dispose();
     titleController.dispose();
     emailController.dispose();
-    searchController.dispose();
     super.onClose();
   }
 

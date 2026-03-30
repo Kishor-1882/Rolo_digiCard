@@ -30,9 +30,11 @@ class _GroupDetailViewState extends State<GroupDetailView> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-     _tabController = TabController(length: 2, vsync: this);
-    controller.getGroupUsers(widget.group.id);
-    controller.getGroupById(widget.group.id);
+    _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.getGroupUsers(widget.group.id);
+      controller.getGroupById(widget.group.id);
+    });
   }
 
    @override

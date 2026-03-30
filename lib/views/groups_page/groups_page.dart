@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rolo_digi_card/common/header.dart';
 import 'package:rolo_digi_card/utils/color.dart';
 import 'package:rolo_digi_card/controllers/individual_group_controller.dart';
 import 'package:rolo_digi_card/models/group_model.dart';
@@ -28,6 +29,8 @@ class _MyGroupsPageState extends State<MyGroupsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header Section
+            AppHeader(),
+            SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
