@@ -171,7 +171,7 @@ class _EditPermissionsDialogState extends State<EditPermissionsDialog> {
           const SizedBox(height: 8),
           Row(
             children: [
-              _roleChip('user', 'Member'),
+              _roleChip('user', 'User'),
               const SizedBox(width: 10),
               _roleChip('admin', 'Administrator'),
             ],

@@ -160,6 +160,31 @@ class InviteUserController extends GetxController {
     if (stepIndex.value > 0) goToStep(0);
   }
 
+  /// Validates first step info (Email, First Name, Last Name)
+  bool validateBasicInfo() {
+    final email = emailController.text.trim();
+    final firstName = firstNameController.text.trim();
+    final lastName = lastNameController.text.trim();
+
+    if (email.isEmpty) {
+      CommonSnackbar.error('Please enter email');
+      return false;
+    }
+    if (!_emailRegex.hasMatch(email)) {
+      CommonSnackbar.error('Please enter a valid email');
+      return false;
+    }
+    if (firstName.isEmpty) {
+      CommonSnackbar.error('Please enter first name');
+      return false;
+    }
+    if (lastName.isEmpty) {
+      CommonSnackbar.error('Please enter last name');
+      return false;
+    }
+    return true;
+  }
+
   /// If role is Administrator, select all permissions (Full Access).
   void applyFullAccessForAdmin() {
     for (final cat in kInvitePermissionCategories) {
@@ -170,25 +195,11 @@ class InviteUserController extends GetxController {
   }
 
   Future<void> sendInvitation({VoidCallback? onSuccess}) async {
+    if (!validateBasicInfo()) return;
+
     final email = emailController.text.trim();
     final firstName = firstNameController.text.trim();
     final lastName = lastNameController.text.trim();
-    if (email.isEmpty) {
-      CommonSnackbar.error('Please enter email');
-      return;
-    }
-    if (!_emailRegex.hasMatch(email)) {
-      CommonSnackbar.error('Please enter a valid email');
-      return;
-    }
-    if (firstName.isEmpty) {
-      CommonSnackbar.error('Please enter first name');
-      return;
-    }
-    if (lastName.isEmpty) {
-      CommonSnackbar.error('Please enter last name');
-      return;
-    }
 
     try {
       isLoading.value = true;
@@ -199,6 +210,7 @@ class InviteUserController extends GetxController {
         'role': role.value,
         'permissions': selectedPermissions.toList(),
       };
+      log( 'Invite user request body: $body');
       final response = await _dio.post(
         ApiEndpoints.inviteUser,
         data: body,

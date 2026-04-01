@@ -1,9 +1,9 @@
 // controllers/save_controller.dart
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
@@ -296,14 +296,33 @@ class SaveController extends GetxController {
   //   CommonSnackbar.success('Downloading ${card.card.name}\'s card');
   // }
 
-  Future<void> downloadCard({
+  Future<bool> downloadCard({
     required CardModel card,
-
   }) async {
     // Ask permission
-    final permission = await Permission.contacts.request();
-    if (!permission.isGranted) {
-      throw Exception('Contacts permission denied');
+    var status = await Permission.contacts.status;
+    if (status.isDenied) {
+      status = await Permission.contacts.request();
+    }
+
+    if (status.isPermanentlyDenied) {
+      CommonSnackbar.error(
+        'Contacts permission is permanently denied. Please enable it in settings to save contacts.',
+        title: 'Permission Denied',
+        mainButton: TextButton(
+          onPressed: () => openAppSettings(),
+          child: const Text(
+            'Settings',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        ),
+      );
+      return false;
+    }
+
+    if (!status.isGranted) {
+      CommonSnackbar.error('Contacts permission is required to save contact details.');
+      return false;
     }
 
     final contact = Contact(
@@ -314,11 +333,11 @@ class SaveController extends GetxController {
       emails: card.contact.email != null && (card.contact.email?.isNotEmpty ?? false)
           ? [Email(card.contact.email ?? '')]
           : [],
-      organizations: card.company != null && card.company.isNotEmpty
+      organizations: card.company.isNotEmpty
           ? [
         Organization(
           company: card.company,
-          title: card.title ?? '',
+          title: card.title,
         )
       ]
           : [],
@@ -329,6 +348,7 @@ class SaveController extends GetxController {
 
     // 🔑 This opens the SYSTEM contact editor
     await FlutterContacts.openExternalInsert(contact);
+    return true;
   }
 
 
@@ -338,8 +358,8 @@ BEGIN:VCARD
 VERSION:3.0
 FN:${card.name}
 N:${card.name};;;;
-ORG:${card.company ?? ''}
-TITLE:${card.title ?? ''}
+ORG:${card.company}
+TITLE:${card.title}
 TEL;TYPE=CELL:${card.contact.phone ?? ''}
 EMAIL:${card.contact.email ?? ''}
 END:VCARD
@@ -395,12 +415,17 @@ END:VCARD
       }
 
       // Download each card
+      int successCount = 0;
       for (final card in cardsToExport) {
-        await downloadCard(card: card);
-        await Future.delayed(Duration(milliseconds: 500)); // Small delay between downloads
+        final success = await downloadCard(card: card);
+        if (!success) break;
+        successCount++;
+        await Future.delayed(const Duration(milliseconds: 500)); // Small delay between downloads
       }
 
-      CommonSnackbar.success('Exported ${cardsToExport.length} contact(s)');
+      if (successCount > 0) {
+        CommonSnackbar.success('Exported $successCount contact(s)');
+      }
 
       // Clear selection after export
       deselectAllCards();

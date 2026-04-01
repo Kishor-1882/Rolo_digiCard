@@ -239,10 +239,12 @@ class _InviteTeamUserDialogState extends State<InviteTeamUserDialog> {
         _buildPrimaryButton(
           label: 'Continue to Permissions >',
           onPressed: () {
-            if (controller.role.value == 'admin') {
-              controller.applyFullAccessForAdmin();
+            if (controller.validateBasicInfo()) {
+              if (controller.role.value == 'admin') {
+                controller.applyFullAccessForAdmin();
+              }
+              controller.nextStep();
             }
-            controller.nextStep();
           },
         ),
       ],

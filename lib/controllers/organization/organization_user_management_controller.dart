@@ -26,9 +26,11 @@ class OrgUserManagementController extends GetxController {
 
   // ── Computed stats ────────────────────────────────────────────────────────
   int get totalUsers => users.length;
-  int get activeUsers => users.where((u) => u.isActive && !u.isBlocked).length;
-  int get inactiveUsers => users.where((u) => !u.isActive && !u.isBlocked).length;
-  int get blockedUsers => users.where((u) => u.isBlocked).length;
+  int get activeUsers => users.where((u) => u.isActive && u.isEmailVerified && u.userState.toLowerCase() != 'expired').length;
+  int get inactiveUsers => users.where((u) => !u.isActive && u.isEmailVerified && u.userState.toLowerCase() != 'expired').length;
+  int get pendingUsers => users.where((u) => !u.isEmailVerified && u.userState.toLowerCase() != 'expired').length;
+  int get expiredUsers => users.where((u) => u.userState.toLowerCase() == 'expired').length;
+  int get adminUsers => users.where((u) => u.organizationRole == 'admin').length;
 
     final RxList<OrgUser> allUsers = <OrgUser>[].obs;
   final RxBool isUsersLoading = false.obs;
@@ -64,17 +66,29 @@ class OrgUserManagementController extends GetxController {
     }
 
     final filter = statusFilter.value;
-    if (filter == 'Active') {
-      result = result.where((u) => u.isActive && !u.isBlocked).toList();
-    } else if (filter == 'Inactive') {
-      result = result.where((u) => !u.isActive && !u.isBlocked).toList();
-    } else if (filter == 'Blocked') {
-      result = result.where((u) => u.isBlocked).toList();
+    if (filter != 'All') {
+      result = result.where((u) {
+        final state = u.userState.toLowerCase();
+        if (filter == 'Expired') return state == 'expired';
+        if (state == 'expired') return false; // Already handled
+        
+        if (filter == 'Pending') return !u.isEmailVerified;
+        if (!u.isEmailVerified) return false; // Already handled
+        
+        if (filter == 'Active') return u.isActive;
+        if (filter == 'Inactive') return !u.isActive;
+        
+        return false;
+      }).toList();
     }
 
     final role = roleFilter.value;
     if (role != 'All') {
-      result = result.where((u) => u.organizationRole.toLowerCase() == role.toLowerCase()).toList();
+      String targetRole = role.toLowerCase();
+      if (role == 'User') targetRole = 'user';
+      if (role == 'Admin') targetRole = 'admin';
+      
+      result = result.where((u) => u.organizationRole.toLowerCase() == targetRole).toList();
     }
 
     filteredUsers.assignAll(result);
@@ -87,6 +101,7 @@ class OrgUserManagementController extends GetxController {
       isLoading.value = true;
       final response = await _dio.get(ApiEndpoints.organizationUsers);
       if (response.statusCode == 200) {
+        log('Fetch users response: ${response.data}');
         final List<dynamic> data = response.data is List
             ? response.data
             : (response.data['users'] ?? response.data['data'] ?? []);
@@ -422,11 +437,13 @@ class OrgUser {
   String get displayRole {
     if (organizationRole == 'owner') return 'Owner';
     if (organizationRole == 'admin') return 'Administrator';
-    return 'Member';
+    return 'User';
   }
 
   String get statusLabel {
-    if (isBlocked) return 'Blocked';
+    final state = userState.toLowerCase();
+    if (state == 'expired') return 'Expired';
+    if (!isEmailVerified) return 'Pending';
     if (isActive) return 'Active';
     return 'Inactive';
   }

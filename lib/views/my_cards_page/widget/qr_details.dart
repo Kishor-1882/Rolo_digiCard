@@ -317,6 +317,8 @@ Future<void> _downloadQRCode() async {
 
     await Gal.putImage(file.path);
     debugPrint('QR code saved to gallery');
+    CommonSnackbar.success('QR Code saved to gallery');
+
   } catch (e) {
     debugPrint('Save QR failed: $e');
   }

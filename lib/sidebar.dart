@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/controllers/auth_controller.dart';
+import 'package:rolo_digi_card/controllers/home/home_page_controller.dart';
 import 'package:rolo_digi_card/controllers/organization/analytics_controller.dart';
 import 'package:rolo_digi_card/controllers/organization/card_management_controller.dart';
 import 'package:rolo_digi_card/controllers/organization/group_management_controller.dart';
@@ -147,6 +148,11 @@ class _SideBarState extends State<SideBar> {
     final isSelected = _orgController.selectedNavIndex.value == index;
     return GestureDetector(
       onTap: () {
+        if (index == 0) {
+          final homeController = Get.find<HomePageController>();
+          homeController.getDashboardAnalytics();
+          homeController.getRecentCards();
+        }
         _orgController.selectedNavIndex.value = index;
       },
       child: Column(
@@ -215,6 +221,10 @@ class _SideBarState extends State<SideBar> {
     final isSelected = _orgController.selectedNavIndex.value == index;
     return GestureDetector(
       onTap: () {
+        if (index == 0) {
+          _orgController.getOrganization();
+          _orgController.getDashboardStats();
+        }
         _orgController.selectedNavIndex.value = index;
       },
       child: Column(

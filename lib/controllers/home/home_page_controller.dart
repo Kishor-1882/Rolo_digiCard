@@ -391,92 +391,7 @@ class HomePageController extends GetxController {
 
       // Prepare the request body matching your API structure
       // Prepare the request body
-Map<String, dynamic> cardDataMap = {
-  'name': nameController.text.trim(),
-  'title': designationController.text.trim(),
-  'company': companyController.text.trim(),
-  'industry': industryController.text.trim(),
-  'bio': bioController.text.trim(),
-  'website': toValidUrl(websiteController.text.trim()),
-
-  // location + flat fields (as per your JSON)
-  'location': _buildLocation(),
-  'city': cityController.text.trim(),
-  'state': stateController.text.trim(),
-  'country': countryController.text.trim(),
-  'zipCode': zipController.text.trim(),
-  'address1': addressLine1Controller.text.trim(),
-  'address2': addressLine2Controller.text.trim(),
-
-  // nested address
-  'address': {
-    'addressLine1': addressLine1Controller.text.trim(),
-    'addressLine2': addressLine2Controller.text.trim(),
-    'city': cityController.text.trim(),
-    'state': stateController.text.trim(),
-    'country': countryController.text.trim(),
-    'zip': zipController.text.trim(),
-  },
-
-  // contact (fixed keys + removed privacy nesting)
-  'contact': {
-    'email': emailController.text.trim(),
-    'phone': _buildPhoneWithExt(
-      workPhoneDialCode.value,
-      phoneController.text,
-      workPhoneExtController.text,
-    ),
-    'personalEmail': personalEmailController.text.trim(),
-    'personalPhone': _buildPhoneWithExt(
-      personalPhoneDialCode.value,
-      personalPhoneController.text,
-      personalPhoneExtController.text,
-    ),
-
-    'hidePersonalEmail': false,
-    'hidePersonalPhone': false,
-    'hideContactDetails': false,
-    'hidePersonalContactDetails': false,
-    'hideWorkEmailPrivacy': false,
-    'hidePersonalEmailPrivacy': false,
-    'hideWorkPhonePrivacy': false,
-    'hidePersonalPhonePrivacy': false,
-  },
-
-  // profile
-  'profile': '',
-  'profileFileName': '',
-
-  // social
-  'linkedinUrl': toValidUrl(
-    linkedinController.text.trim(),
-    platform: 'linkedin',
-  ),
-  'socialLinks': {
-    'linkedin': toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
-    'twitter': toValidUrl(twitterController.text.trim(), platform: 'twitter'),
-    'facebook': toValidUrl(facebookController.text.trim(), platform: 'facebook'),
-    'github': toValidUrl(githubController.text.trim(), platform: 'github'),
-    'instagram': toValidUrl(instagramController.text.trim(), platform: 'instagram'),
-    'youtube': toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
-  },
-
-  'tags': skills.toList(),
-
-  // theme
-  'theme': {
-    'primaryColor': themeColors['primaryColor'],
-    'backgroundColor': themeColors['backgroundColor'],
-    'textColor': themeColors['textColor'],
-    'cardStyle': themeColors['cardStyle'],
-    'template': themeColors['cardStyle'],
-  },
-
-  // top-level settings (NOT nested)
-  'isPublic': isPublicCard.value,
-  'mode': 'customized',
-  'isMinimalMode': isMinimalView.value,
-};
+Map<String, dynamic> cardDataMap = buildCardDataMap(themeColors);
 
       log("Create Card Data:${jsonEncode(cardDataMap)}");
 
@@ -575,69 +490,7 @@ Map<String, dynamic> cardDataMap = {
 
       // Prepare the request body matching your API structure
       // Prepare the request body
-      Map<String, dynamic> cardDataMap = {
-        'name': nameController.text.trim(),
-        'title': designationController.text.trim(),
-        'company': companyController.text.trim(),
-        'dateOfBirth': '',
-        'bio': bioController.text.trim(),
-        'industry': industryController.text.trim(),
-        'address': {
-          'addressLine1': addressLine1Controller.text.trim(),
-          'addressLine2': addressLine2Controller.text.trim(),
-          'city': cityController.text.trim(),
-          'state': stateController.text.trim(),
-          'country': countryController.text.trim(),
-          'zipCode': zipController.text.trim(),
-        },
-        'contact': {
-          'workEmail': emailController.text.trim(),
-          'workPhone': _buildPhoneWithExt(
-            workPhoneDialCode.value,
-            phoneController.text,
-            workPhoneExtController.text,
-          ),
-          'personalEmail': personalEmailController.text.trim(),
-          'personalPhone': _buildPhoneWithExt(
-            personalPhoneDialCode.value,
-            personalPhoneController.text,
-            personalPhoneExtController.text,
-          ),
-          'privacy': {
-            'hideContactDetails': false,
-            'hidePersonalContactDetails': false,
-            'hidePersonalEmail': false,
-            'hidePersonalEmailPrivacy': false,
-            'hidePersonalPhone': false,
-            'hidePersonalPhonePrivacy': false,
-            'hideWorkEmailPrivacy': false,
-            'hideWorkPhonePrivacy': false,
-          },
-        },
-        'location': _buildLocation(),
-        'socialLinks': {
-          'linkedin': toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
-          'twitter': toValidUrl(twitterController.text.trim(), platform: 'twitter'),
-          'facebook': toValidUrl(facebookController.text.trim(), platform: 'facebook'),
-          'github': toValidUrl(githubController.text.trim(), platform: 'github'),
-          'instagram': toValidUrl(instagramController.text.trim(), platform: 'instagram'),
-          'youtube': toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
-        },
-        'website': toValidUrl(websiteController.text.trim()),
-        'tags': skills.toList(),
-        'settings': {
-          'isMinimalMode': isMinimalView.value,
-          'isPublic': isPublicCard.value,
-          'mode': 'customized',
-          'template': themeColors['cardStyle'],
-        },
-        'theme': {
-          'primaryColor': themeColors['primaryColor'],
-          'backgroundColor': themeColors['backgroundColor'],
-          'textColor': themeColors['textColor'],
-          'cardStyle': themeColors['cardStyle'],
-        },
-      };
+      Map<String, dynamic> cardDataMap = buildCardDataMap(themeColors);
 
       log("Update Card Data:${jsonEncode(cardDataMap)}");
 
@@ -847,20 +700,27 @@ Map<String, dynamic> cardDataMap = {
       'name': nameController.text.trim(),
       'title': designationController.text.trim(),
       'company': companyController.text.trim(),
-      'dateOfBirth': '',
-      'bio': bioController.text.trim(),
       'industry': industryController.text.trim(),
+      'bio': bioController.text.trim(),
+      'website': toValidUrl(websiteController.text.trim()),
+      'location': _buildLocation(),
+      'city': cityController.text.trim(),
+      'state': stateController.text.trim(),
+      'country': countryController.text.trim(),
+      'zipCode': zipController.text.trim(),
+      'address1': addressLine1Controller.text.trim(),
+      'address2': addressLine2Controller.text.trim(),
       'address': {
         'addressLine1': addressLine1Controller.text.trim(),
         'addressLine2': addressLine2Controller.text.trim(),
         'city': cityController.text.trim(),
         'state': stateController.text.trim(),
         'country': countryController.text.trim(),
-        'zipCode': zipController.text.trim(),
+        'zip': zipController.text.trim(),
       },
       'contact': {
-        'workEmail': emailController.text.trim(),
-        'workPhone': _buildPhoneWithExt(
+        'email': emailController.text.trim(),
+        'phone': _buildPhoneWithExt(
           workPhoneDialCode.value,
           phoneController.text,
           workPhoneExtController.text,
@@ -871,18 +731,21 @@ Map<String, dynamic> cardDataMap = {
           personalPhoneController.text,
           personalPhoneExtController.text,
         ),
-        'privacy': {
-          'hideContactDetails': false,
-          'hidePersonalContactDetails': false,
-          'hidePersonalEmail': false,
-          'hidePersonalEmailPrivacy': false,
-          'hidePersonalPhone': false,
-          'hidePersonalPhonePrivacy': false,
-          'hideWorkEmailPrivacy': false,
-          'hideWorkPhonePrivacy': false,
-        },
+        'hidePersonalEmail': false,
+        'hidePersonalPhone': false,
+        'hideContactDetails': false,
+        'hidePersonalContactDetails': false,
+        'hideWorkEmailPrivacy': false,
+        'hidePersonalEmailPrivacy': false,
+        'hideWorkPhonePrivacy': false,
+        'hidePersonalPhonePrivacy': false,
       },
-      'location': _buildLocation(),
+      'profile': '',
+      'profileFileName': '',
+      'linkedinUrl': toValidUrl(
+        linkedinController.text.trim(),
+        platform: 'linkedin',
+      ),
       'socialLinks': {
         'linkedin': toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
         'twitter': toValidUrl(twitterController.text.trim(), platform: 'twitter'),
@@ -891,20 +754,17 @@ Map<String, dynamic> cardDataMap = {
         'instagram': toValidUrl(instagramController.text.trim(), platform: 'instagram'),
         'youtube': toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
       },
-      'website': toValidUrl(websiteController.text.trim()),
       'tags': skills.toList(),
-      'settings': {
-        'isMinimalMode': isMinimalView.value,
-        'isPublic': isPublicCard.value,
-        'mode': 'customized',
-        'template': themeColors['cardStyle'],
-      },
       'theme': {
         'primaryColor': themeColors['primaryColor'],
         'backgroundColor': themeColors['backgroundColor'],
         'textColor': themeColors['textColor'],
         'cardStyle': themeColors['cardStyle'],
+        'template': themeColors['cardStyle'],
       },
+      'isPublic': isPublicCard.value,
+      'mode': 'customized',
+      'isMinimalMode': isMinimalView.value,
     };
   }
 }

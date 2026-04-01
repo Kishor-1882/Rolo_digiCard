@@ -608,6 +608,7 @@ final controller = Get.put(OrgUserManagementController());
   void _onViewInBrowser() async {
     final code = widget.card.shortUrl.isNotEmpty ? widget.card.shortUrl : widget.card.id;
     final url = Uri.parse('https://digi.roloscan.com/c/$code');
+    print("Opening URL: $url");
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }

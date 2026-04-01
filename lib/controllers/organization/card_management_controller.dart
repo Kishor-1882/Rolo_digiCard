@@ -139,6 +139,8 @@ class CardManagementController extends GetxController {
   // Here I'll assume we pass the full map similar to HomePageController
   Future<void> createOrgCard(Map<String, dynamic> cardData) async {
     try {
+
+      log("card Data:$cardData");
       isLoading.value = true;
       update();
 

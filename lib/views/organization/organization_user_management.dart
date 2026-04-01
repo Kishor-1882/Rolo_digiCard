@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -134,33 +136,68 @@ class OrganizationUserManagement extends StatelessWidget {
 
   // ── Stats Grid ────────────────────────────────────────────────────────────
   Widget _buildStatsGrid(OrgUserManagementController controller) {
-    return Row(
+    return Column(
       children: [
-        Expanded(
-          child: _buildStatBox(
-            controller.totalUsers.toString(),
-            'Total Users',
-            Icons.people_outline,
-            const Color(0xFF8B5CF6),
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatBox(
+                controller.totalUsers.toString(),
+                'Total Users',
+                Icons.people_outline,
+                const Color(0xFF8B5CF6),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildStatBox(
+                controller.adminUsers.toString(),
+                'Admin',
+                Icons.admin_panel_settings_outlined,
+                const Color(0xFFE91E8E),
+              ),
+            ),
+            const SizedBox(width: 8),
+             Expanded(
+              child: _buildStatBox(
+                controller.activeUsers.toString(),
+                'Active',
+                Icons.check_circle_outline,
+                Colors.greenAccent,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildStatBox(
-            controller.activeUsers.toString(),
-            'Active',
-            Icons.check_circle_outline,
-            Colors.greenAccent,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildStatBox(
-            controller.inactiveUsers.toString(),
-            'Inactive',
-            Icons.pause_circle_outline,
-            Colors.orangeAccent,
-          ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatBox(
+                controller.inactiveUsers.toString(),
+                'Inactive',
+                Icons.pause_circle_outline,
+                Colors.orangeAccent,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildStatBox(
+                controller.pendingUsers.toString(),
+                'Pending',
+                Icons.hourglass_empty,
+                Colors.amberAccent,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildStatBox(
+                controller.expiredUsers.toString(),
+                'Expired',
+                Icons.timer_off_outlined,
+                Colors.redAccent.withOpacity(0.7),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -242,7 +279,7 @@ class OrganizationUserManagement extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             color: const Color(0xFF1E1E2C),
             borderRadius: BorderRadius.circular(12),
@@ -253,9 +290,17 @@ class OrganizationUserManagement extends StatelessWidget {
               () => DropdownButton<String>(
                 dropdownColor: const Color(0xFF1E1E2C),
                 value: controller.statusFilter.value,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                items: <String>['All', 'Active', 'Inactive', 'Blocked']
-                    .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                hint: const Text('Status', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                selectedItemBuilder: (context) => <String>['All', 'Active', 'Inactive', 'Pending', 'Expired']
+                    .map((v) => Center(
+                          child: Text(
+                            v == 'All' ? 'Status' : v,
+                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                        ))
+                    .toList(),
+                items: <String>['All', 'Active', 'Inactive', 'Pending', 'Expired']
+                    .map((v) => DropdownMenuItem(value: v, child: Text(v, style: const TextStyle(color: Colors.white, fontSize: 13))))
                     .toList(),
                 onChanged: (v) {
                   if (v != null) controller.statusFilter.value = v;
@@ -263,7 +308,7 @@ class OrganizationUserManagement extends StatelessWidget {
                 icon: const Icon(
                   Icons.keyboard_arrow_down,
                   color: Colors.white54,
-                  size: 18,
+                  size: 16,
                 ),
               ),
             ),
@@ -271,7 +316,7 @@ class OrganizationUserManagement extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             color: const Color(0xFF1E1E2C),
             borderRadius: BorderRadius.circular(12),
@@ -282,9 +327,17 @@ class OrganizationUserManagement extends StatelessWidget {
               () => DropdownButton<String>(
                 dropdownColor: const Color(0xFF1E1E2C),
                 value: controller.roleFilter.value,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                items: <String>['All', 'Admin', 'Member', 'User']
-                    .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                hint: const Text('Role', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                selectedItemBuilder: (context) => <String>['All', 'Admin', 'User', 'Owner']
+                    .map((v) => Center(
+                          child: Text(
+                            v == 'All' ? 'Role' : v,
+                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                          ),
+                        ))
+                    .toList(),
+                items: <String>['All', 'Admin', 'User', 'Owner']
+                    .map((v) => DropdownMenuItem(value: v, child: Text(v, style: const TextStyle(color: Colors.white, fontSize: 13))))
                     .toList(),
                 onChanged: (v) {
                   if (v != null) controller.roleFilter.value = v;
@@ -292,7 +345,7 @@ class OrganizationUserManagement extends StatelessWidget {
                 icon: const Icon(
                   Icons.keyboard_arrow_down,
                   color: Colors.white54,
-                  size: 18,
+                  size: 16,
                 ),
               ),
             ),
@@ -316,8 +369,12 @@ class OrganizationUserManagement extends StatelessWidget {
     final controller = Get.find<OrgUserManagementController>();
 
     Color statusColor;
-    if (user.isBlocked) {
-      statusColor = Colors.redAccent;
+    final state = user.userState.toLowerCase();
+    
+    if (state == 'expired') {
+      statusColor = Colors.redAccent.withOpacity(0.7);
+    } else if (!user.isEmailVerified) {
+      statusColor = Colors.amberAccent;
     } else if (user.isActive) {
       statusColor = Colors.greenAccent;
     } else {
