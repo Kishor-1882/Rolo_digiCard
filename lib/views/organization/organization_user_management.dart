@@ -255,7 +255,7 @@ class OrganizationUserManagement extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white.withOpacity(0.05)),
             ),
-            child: Obx(() => TextField(
+            child: TextField(
               controller: controller.searchController,
               onChanged: (v) => controller.searchQuery.value = v,
               style: const TextStyle(color: Colors.white),
@@ -264,7 +264,7 @@ class OrganizationUserManagement extends StatelessWidget {
                 hintStyle: const TextStyle(color: Colors.white38),
                 border: InputBorder.none,
                 icon: const Icon(Icons.search, color: Colors.white38),
-                suffixIcon: controller.searchQuery.value.isNotEmpty
+                suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear, color: Colors.white38, size: 18),
                         onPressed: () {
@@ -272,9 +272,9 @@ class OrganizationUserManagement extends StatelessWidget {
                           controller.searchQuery.value = '';
                         },
                       )
-                    : null,
+                    : const SizedBox.shrink()),
               ),
-            )),
+            ),
           ),
         ),
         const SizedBox(width: 8),

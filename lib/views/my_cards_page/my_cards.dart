@@ -292,6 +292,14 @@ class MyCardsPage extends StatelessWidget {
                                     hintText: 'Search cards by name, title, company, or tags...',
                                     hintStyle: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 13),
                                     prefixIcon: Icon(Icons.search, color: Colors.white.withOpacity(0.5), size: 20),
+                                    suffixIcon: controller.searchText.value.isNotEmpty
+                                        ? IconButton(
+                                            icon: Icon(Icons.clear, color: Colors.white.withOpacity(0.5), size: 20),
+                                            onPressed: () {
+                                              controller.searchController.clear();
+                                            },
+                                          )
+                                        : null,
                                     border: InputBorder.none,
                                     contentPadding: const EdgeInsets.symmetric(vertical: 12),
                                   ),

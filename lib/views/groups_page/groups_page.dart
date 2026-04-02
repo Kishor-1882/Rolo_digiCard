@@ -19,6 +19,13 @@ class _MyGroupsPageState extends State<MyGroupsPage> {
   bool isGridView = true;
   String sortOption = 'Sort by Date';
   final IndividualGroupController controller = Get.put(IndividualGroupController());
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,17 +150,27 @@ class _MyGroupsPageState extends State<MyGroupsPage> {
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.white12),
                       ),
-                      child: TextField(
+                      child: Obx(() => TextField(
+                        controller: _searchController,
                         onChanged: (val) => controller.searchQuery.value = val,
                         style: const TextStyle(color: Colors.white, fontSize: 14),
                         decoration: InputDecoration(
                           hintText: 'Search groups...',
                           hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
                           prefixIcon: Icon(Icons.search, color: Colors.grey[500], size: 20),
+                          suffixIcon: controller.searchQuery.value.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(Icons.clear, color: Colors.grey[500], size: 20),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    controller.searchQuery.value = '';
+                                  },
+                                )
+                              : null,
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(vertical: 10),
                         ),
-                      ),
+                      )),
                     ),
                   ),
                   const SizedBox(width: 8),

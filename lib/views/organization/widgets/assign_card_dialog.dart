@@ -52,8 +52,11 @@ class _AssignCardDialogState extends State<AssignCardDialog> {
   }
 
   List<OrgUser> _filtered(List<OrgUser> users) {
-    if (_query.isEmpty) return users;
-    return users.where((u) {
+    // Filter only active users first
+    final activeUsers = users.where((u) => u.isActive).toList();
+    
+    if (_query.isEmpty) return activeUsers;
+    return activeUsers.where((u) {
       final name = '${u.firstName} ${u.lastName}'.toLowerCase();
       final email = u.email.toLowerCase();
       return name.contains(_query) || email.contains(_query);

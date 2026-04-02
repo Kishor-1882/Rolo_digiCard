@@ -16,15 +16,32 @@ class AddCardsView extends StatefulWidget {
 class _AddCardsViewState extends State<AddCardsView> {
   final controller = Get.find<GroupManagementController>();
   final Set<String> _selectedIds = {};
+  final Set<String> _preExistingIds = {};
+  final TextEditingController _searchController = TextEditingController();
   String _search = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     controller.fetchOrganizationCards();
+    
+    // Pre-select existing cards
+    if (controller.selectedGroup.value != null) {
+      _preExistingIds.addAll(controller.selectedGroup.value!.cardIds);
+    } else {
+      _preExistingIds.addAll(widget.group.cardIds);
+    }
+    _selectedIds.addAll(_preExistingIds);
   }
 
   void _toggleSelection(String id) {
+    if (_preExistingIds.contains(id)) return;
     setState(() {
       if (_selectedIds.contains(id)) {
         _selectedIds.remove(id);
@@ -73,6 +90,7 @@ class _AddCardsViewState extends State<AddCardsView> {
             Padding(
               padding: const EdgeInsets.all(16),
               child: TextField(
+                controller: _searchController,
                 style: const TextStyle(color: Colors.white),
                 onChanged: (v) => setState(() => _search = v),
                 decoration: InputDecoration(
@@ -80,6 +98,15 @@ class _AddCardsViewState extends State<AddCardsView> {
                   hintStyle: const TextStyle(color: Colors.white38),
                   prefixIcon:
                       const Icon(Icons.search, color: Colors.white38),
+                  suffixIcon: _search.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.white38),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _search = '');
+                          },
+                        )
+                      : null,
                   filled: true,
                   fillColor: const Color(0xFF1E1E2C),
                   border: OutlineInputBorder(
@@ -102,11 +129,13 @@ class _AddCardsViewState extends State<AddCardsView> {
                     children: [
                       TextButton.icon(
                         onPressed: () => setState(() {
-                          if (_selectedIds.length == filtered.length) {
+                          final filteredIds = filtered.map((c) => c.id).toSet();
+                          if (filteredIds.every((id) => _selectedIds.contains(id))) {
+                            // Clear all except pre-existing
                             _selectedIds.clear();
+                            _selectedIds.addAll(_preExistingIds);
                           } else {
-                            _selectedIds
-                                .addAll(filtered.map((c) => c.id));
+                            _selectedIds.addAll(filteredIds);
                           }
                         }),
                         icon: const Icon(Icons.check, size: 16),
@@ -116,7 +145,10 @@ class _AddCardsViewState extends State<AddCardsView> {
                       ),
                       TextButton.icon(
                         onPressed: () =>
-                            setState(() => _selectedIds.clear()),
+                            setState(() {
+                              _selectedIds.clear();
+                              _selectedIds.addAll(_preExistingIds);
+                            }),
                         icon: const Icon(Icons.close, size: 16),
                         label: const Text('Clear'),
                         style: TextButton.styleFrom(
@@ -143,6 +175,7 @@ class _AddCardsViewState extends State<AddCardsView> {
                             final card = filtered[index];
                             final isSelected =
                                 _selectedIds.contains(card.id);
+                            final isPreExisting = _preExistingIds.contains(card.id);
 
                             final avatarColors = [
                               const Color(0xFF9B59B6),
@@ -156,7 +189,9 @@ class _AddCardsViewState extends State<AddCardsView> {
 
                             return GestureDetector(
                               onTap: () => _toggleSelection(card.id),
-                              child: Container(
+                              child: Opacity(
+                                opacity: isPreExisting ? 0.6 : 1.0,
+                                child: Container(
                                 margin: const EdgeInsets.only(bottom: 12),
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
@@ -229,31 +264,54 @@ class _AddCardsViewState extends State<AddCardsView> {
                                       ),
                                     ),
 
-                                    // Status badge
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(20),
-                                        border: Border.all(
-                                            color:
-                                                Colors.white.withOpacity(0.2)),
-                                      ),
-                                      child: Text(
-                                        card.isActive ? 'Active' : 'Disabled',
-                                        style: TextStyle(
-                                          color: card.isActive
-                                              ? const Color(0xFF4CAF50)
-                                              : Colors.white54,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
+                                    // Status badge or Already in Group indicator
+                                    isPreExisting
+                                        ? Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white12,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              border: Border.all(
+                                                  color: Colors.white24),
+                                            ),
+                                            child: const Text(
+                                              'Already Added',
+                                              style: TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          )
+                                        : Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              border: Border.all(
+                                                  color: Colors.white
+                                                      .withOpacity(0.2)),
+                                            ),
+                                            child: Text(
+                                              card.isActive
+                                                  ? 'Active'
+                                                  : 'Disabled',
+                                              style: TextStyle(
+                                                color: card.isActive
+                                                    ? const Color(0xFF4CAF50)
+                                                    : Colors.white54,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
                                   ],
                                 ),
                               ),
+                            ),
                             );
                           },
                         ),
@@ -273,7 +331,6 @@ class _AddCardsViewState extends State<AddCardsView> {
                             widget.group.id,
                             _selectedIds.toList(),
                           );
-                          await controller.getGroupById(widget.group.id);
                           Get.back();
                         },
                   icon: controller.isLoading.value

@@ -65,9 +65,6 @@ class CardManagementController extends GetxController {
 
   @override
   void onClose() {
-    nameController.dispose();
-    titleController.dispose();
-    emailController.dispose();
     super.onClose();
   }
 

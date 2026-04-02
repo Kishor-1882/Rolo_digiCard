@@ -227,6 +227,7 @@ final active =
               border: Border.all(color: Colors.white.withOpacity(0.05)),
             ),
             child: TextField(
+              controller: controller.searchController,
               onChanged: (value) => controller.searchQuery.value = value,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
@@ -234,16 +235,19 @@ final active =
                 hintStyle: const TextStyle(color: Colors.white38),
                 border: InputBorder.none,
                 icon: const Icon(Icons.search, color: Colors.white38),
-                suffixIcon: controller.searchQuery.value.isNotEmpty
+                suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
                     ? IconButton(
                         icon: const Icon(
                           Icons.clear,
                           color: Colors.white38,
                           size: 18,
                         ),
-                        onPressed: () => controller.searchQuery.value = '',
+                        onPressed: () {
+                          controller.searchController.clear();
+                          controller.searchQuery.value = '';
+                        },
                       )
-                    : null,
+                    : const SizedBox.shrink()),
               ),
             ),
           ),
@@ -357,14 +361,19 @@ final active =
                         Row(
                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              group.name,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                             Expanded(
+                               child: Text(
+                                 group.name,
+                                 style: const TextStyle(
+                                   color: Colors.white,
+                                   fontSize: 16,
+                                   fontWeight: FontWeight.bold,
+                                 ),
+                               ),
+                             ),
+                             _buildVisibilityBadge(group.isPublic),
+                             const SizedBox(width: 8),
+                             _buildStatusBadge(group.isActive ? 'Active' : 'Inactive'),
                              PopupMenuButton<String>(
                               icon: const Icon(Icons.more_vert, color: Colors.white54),
                               color: const Color(0xFF2B2B36),
@@ -374,6 +383,10 @@ final active =
                                    Get.to(() => GroupDetailView(group: group,isUserGroup: isUserGroup));
                                 } else if (value == 'delete') {
                                   _showDeleteDialog(context, group);
+                                } else if (value == 'public_toggle') {
+                                  controller.toggleGroupPublicStatus(group.id, !group.isPublic);
+                                } else if (value == 'active_toggle') {
+                                  controller.toggleGroupActiveStatus(group.id, !group.isActive);
                                 }
                               },
                               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -384,6 +397,26 @@ final active =
                                       Icon(Icons.visibility_outlined, color: Colors.white, size: 20),
                                       SizedBox(width: 12),
                                       Text('View Details', style: TextStyle(color: Colors.white)),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem<String>(
+                                  value: 'public_toggle',
+                                  child: Row(
+                                    children: [
+                                      Icon(group.isPublic ? Icons.lock_outline : Icons.public, color: Colors.white, size: 20),
+                                      const SizedBox(width: 12),
+                                      Text(group.isPublic ? 'Make Private' : 'Make Public', style: const TextStyle(color: Colors.white)),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem<String>(
+                                  value: 'active_toggle',
+                                  child: Row(
+                                    children: [
+                                      Icon(group.isActive ? Icons.block : Icons.check_circle_outline, color: Colors.white, size: 20),
+                                      const SizedBox(width: 12),
+                                      Text(group.isActive ? 'Deactivate' : 'Activate', style: const TextStyle(color: Colors.white)),
                                     ],
                                   ),
                                 ),
@@ -472,6 +505,49 @@ final active =
               Navigator.pop(context);
             },
             child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(String status) {
+    Color color = Colors.greenAccent;
+    if (status.toLowerCase() != 'active') color = Colors.redAccent;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Text(
+        status,
+        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildVisibilityBadge(bool isPublic) {
+    Color color = isPublic ? Colors.blueAccent : Colors.orangeAccent;
+    IconData icon = isPublic ? Icons.public : Icons.lock_outline;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 10),
+          const SizedBox(width: 4),
+          Text(
+            isPublic ? 'Public' : 'Private',
+            style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
           ),
         ],
       ),

@@ -31,7 +31,14 @@ class _AddCardsToGroupDialogState extends State<AddCardsToGroupDialog> {
   final IndividualGroupController controller = Get.find<IndividualGroupController>();
   final Set<String> _selectedCardIds = {};
   late final Set<String> _alreadyAddedCardIds;
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -91,11 +98,21 @@ class _AddCardsToGroupDialogState extends State<AddCardsToGroupDialog> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: TextField(
+              controller: _searchController,
               onChanged: (val) => setState(() => _searchQuery = val.toLowerCase()),
               style: const TextStyle(color: Colors.white, fontSize: 14),
               decoration: InputDecoration(
                 hintText: 'Search cards...',
                 hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
+                suffixIcon: _searchQuery.isNotEmpty 
+                    ? IconButton(
+                        icon: Icon(Icons.clear, color: Colors.grey[500], size: 18),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _searchQuery = '');
+                        },
+                      )
+                    : null,
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),

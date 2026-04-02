@@ -16,16 +16,37 @@ class AddMembersView extends StatefulWidget {
 class _AddMembersViewState extends State<AddMembersView> {
   final controller = Get.put(AddMemberController());
   final Set<String> _selectedIds = {};
+  final Set<String> _preExistingIds = {};
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
     // Fetch team members when the view is initialized
     controller.fetchTeamMembers();
+
+    // Pre-select existing members
+    if (Get.isRegistered<GroupManagementController>()) {
+      final groupCtrl = Get.find<GroupManagementController>();
+      final existingMembers = groupCtrl.selectedGroup.value?.members ?? widget.group.members;
+      _preExistingIds.addAll(existingMembers.map((e) => e.id));
+    } else {
+      _preExistingIds.addAll(widget.group.members.map((e) => e.id));
+    }
+    _selectedIds.addAll(_preExistingIds);
   }
 
   void _toggleSelection(String id) {
+    if (_preExistingIds.contains(id)) {
+      return; // Cannot unselect existing members
+    }
     setState(() {
       if (_selectedIds.contains(id)) {
         _selectedIds.remove(id);
@@ -38,19 +59,24 @@ class _AddMembersViewState extends State<AddMembersView> {
   void _selectAll() {
     setState(() {
       final filteredMembers = _getFilteredMembers();
-      if (_selectedIds.length == filteredMembers.length) {
+      final allFilteredIds = filteredMembers.map((m) => m.id as String).toSet();
+      // If we've selected all the currently visible items (plus any preexisting)
+      if (allFilteredIds.every((id) => _selectedIds.contains(id))) {
+        // Clear all except preexisting
         _selectedIds.clear();
+        _selectedIds.addAll(_preExistingIds);
       } else {
-        _selectedIds.addAll(filteredMembers.map((m) => m.id));
+        _selectedIds.addAll(allFilteredIds);
       }
     });
   }
 
   List<dynamic> _getFilteredMembers() {
+    final activeMembers = controller.teamMembers.where((m) => m.isActive).toList();
     if (_searchQuery.isEmpty) {
-      return controller.teamMembers;
+      return activeMembers;
     }
-    return controller.teamMembers.where((member) {
+    return activeMembers.where((member) {
       final fullName = '${member.firstName} ${member.lastName}'.toLowerCase();
       final email = member.email.toLowerCase();
       final query = _searchQuery.toLowerCase();
@@ -135,6 +161,7 @@ class _AddMembersViewState extends State<AddMembersView> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: TextField(
+                controller: _searchController,
                 style: const TextStyle(color: Colors.white),
                 onChanged: (value) {
                   setState(() {
@@ -149,6 +176,7 @@ class _AddMembersViewState extends State<AddMembersView> {
                       ? IconButton(
                           icon: const Icon(Icons.clear, color: Colors.white38),
                           onPressed: () {
+                            _searchController.clear();
                             setState(() {
                               _searchQuery = '';
                             });
@@ -185,9 +213,12 @@ class _AddMembersViewState extends State<AddMembersView> {
                         ),
                       ),
                       TextButton.icon(
-                        onPressed: _selectedIds.isEmpty
+                        onPressed: _selectedIds.length == _preExistingIds.length
                             ? null
-                            : () => setState(() => _selectedIds.clear()),
+                            : () => setState(() {
+                                  _selectedIds.clear();
+                                  _selectedIds.addAll(_preExistingIds);
+                                }),
                         icon: const Icon(Icons.close, size: 16),
                         label: const Text('Clear'),
                         style: TextButton.styleFrom(
@@ -241,15 +272,18 @@ class _AddMembersViewState extends State<AddMembersView> {
                     itemBuilder: (context, index) {
                       final member = filteredMembers[index];
                       final isSelected = _selectedIds.contains(member.id);
+                      final isPreExisting = _preExistingIds.contains(member.id);
                       final initial = member.firstName.isNotEmpty
                           ? member.firstName[0].toUpperCase()
                           : 'U';
 
                       return GestureDetector(
                         onTap: () => _toggleSelection(member.id),
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(12),
+                        child: Opacity(
+                          opacity: isPreExisting ? 0.5 : 1.0,
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: const Color(0xFF1E1E2C),
                             borderRadius: BorderRadius.circular(16),
@@ -342,6 +376,7 @@ class _AddMembersViewState extends State<AddMembersView> {
                             ],
                           ),
                         ),
+                        ),
                       );
                     },
                   ),
@@ -366,7 +401,9 @@ class _AddMembersViewState extends State<AddMembersView> {
                    final groupCtrl = Get.find<GroupManagementController>();
                    groupCtrl.getGroupUsers(widget.group.id);
                    groupCtrl.getGroups();
+                   groupCtrl.getGroupById(widget.group.id);
                  }
+                 Get.back();
                }
       },
                   icon: controller.isLoading.value

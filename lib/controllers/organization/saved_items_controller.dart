@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:rolo_digi_card/controllers/auth_controller.dart';
@@ -12,6 +13,7 @@ class SavedItemsController extends GetxController {
 
   final selectedCategory = 'All'.obs;
   final searchQuery = ''.obs;
+  final TextEditingController searchController = TextEditingController();
   final isLoading = false.obs;
 
   var savedCards = <CardModel>[].obs;

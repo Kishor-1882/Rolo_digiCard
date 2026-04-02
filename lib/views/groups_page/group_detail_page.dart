@@ -24,8 +24,15 @@ class GroupDetailPage extends StatefulWidget {
 
 class _GroupDetailPageState extends State<GroupDetailPage> {
   final IndividualGroupController controller = Get.find<IndividualGroupController>();
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _isGridView = false;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   GroupModel get currentGroup {
     // Always pull the latest version of this group from the controller
@@ -264,12 +271,24 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
                                 border: Border.all(color: Colors.white12),
                               ),
                               child: TextField(
+                                controller: _searchController,
                                 onChanged: (val) => setState(() => _searchQuery = val),
                                 style: const TextStyle(color: Colors.white, fontSize: 14),
                                 decoration: InputDecoration(
                                   hintText: 'Search cards...',
                                   hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
                                   prefixIcon: Icon(Icons.search, color: Colors.grey[600], size: 18),
+                                  suffixIcon: _searchQuery.isNotEmpty 
+                                      ? IconButton(
+                                          icon: Icon(Icons.clear, color: Colors.grey[600], size: 18),
+                                          onPressed: () {
+                                            _searchController.clear();
+                                            setState(() => _searchQuery = '');
+                                          },
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(),
+                                        )
+                                      : null,
                                   border: InputBorder.none,
                                   contentPadding: const EdgeInsets.symmetric(vertical: 10),
                                 ),

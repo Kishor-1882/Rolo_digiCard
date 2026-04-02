@@ -220,7 +220,7 @@ class OrganizationCardsView extends GetView<CardManagementController> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white.withOpacity(0.05)),
             ),
-            child: Obx(() => TextField(
+            child: TextField(
               controller: controller.searchController,
               onChanged: (value) => controller.searchQuery.value = value,
               style: const TextStyle(color: Colors.white),
@@ -229,7 +229,7 @@ class OrganizationCardsView extends GetView<CardManagementController> {
                 hintStyle: const TextStyle(color: Colors.white38),
                 border: InputBorder.none,
                 icon: const Icon(Icons.search, color: Colors.white38),
-                suffixIcon: controller.searchQuery.value.isNotEmpty
+                suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
                     ? IconButton(
                         icon: const Icon(
                           Icons.clear,
@@ -241,9 +241,9 @@ class OrganizationCardsView extends GetView<CardManagementController> {
                           controller.searchQuery.value = '';
                         },
                       )
-                    : null,
+                    : const SizedBox.shrink()),
               ),
-            )),
+            ),
           ),
         ),
         const SizedBox(width: 12),

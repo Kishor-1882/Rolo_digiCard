@@ -18,6 +18,7 @@ class GroupManagementController extends GetxController {
 
   var isLoading = false.obs;
   var groups = <GroupModel>[].obs;
+  final TextEditingController searchController = TextEditingController();
   final searchQuery = ''.obs;
   final RxString errorMessage = ''.obs;
   final Rx<GroupModel?> selectedGroup = Rx<GroupModel?>(null);
@@ -73,8 +74,6 @@ class GroupManagementController extends GetxController {
 
   @override
   void onClose() {
-    // nameController.dispose();
-    // descriptionController.dispose();
     super.onClose();
   }
 
@@ -230,6 +229,54 @@ class GroupManagementController extends GetxController {
     }
   }
 
+  // Toggle Group Active Status
+  Future<void> toggleGroupActiveStatus(String groupId, bool isActive) async {
+    try {
+      isLoading.value = true;
+      update();
+
+      final response = await _dio.put(
+        ApiEndpoints.updateOrganizationGroup(groupId),
+        data: {'isActive': isActive},
+      );
+
+      if (response.statusCode == 200) {
+        CommonSnackbar.success(isActive ? 'Group activated successfully' : 'Group deactivated successfully');
+        getGroups();
+      }
+    } on DioException catch (e) {
+      log("Toggle Group Active Status Error: $e");
+      CommonSnackbar.error("Failed to update group status");
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
+
+  // Toggle Group Public Status
+  Future<void> toggleGroupPublicStatus(String groupId, bool isPublic) async {
+    try {
+      isLoading.value = true;
+      update();
+
+      final response = await _dio.put(
+        ApiEndpoints.updateOrganizationGroup(groupId),
+        data: {'isPublic': isPublic},
+      );
+
+      if (response.statusCode == 200) {
+        CommonSnackbar.success(isPublic ? 'Group is now public' : 'Group is now private');
+        getGroups();
+      }
+    } on DioException catch (e) {
+      log("Toggle Group Public Status Error: $e");
+      CommonSnackbar.error("Failed to update group visibility");
+    } finally {
+      isLoading.value = false;
+      update();
+    }
+  }
+
   // Get Group Users
   Future<void> getGroupUsers(String groupId) async {
     try {
@@ -254,6 +301,7 @@ class GroupManagementController extends GetxController {
 
   // Get Group Cards
   Future<void> getGroupCards(String groupId) async {
+    log("Group ID for Cards: $groupId");
     try {
       isLoading.value = true;
       update();
@@ -284,8 +332,10 @@ class GroupManagementController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        Get.back();
         CommonSnackbar.success('Cards added to group');
         getGroupCards(groupId);
+        getGroupById(groupId);
       }
     } on DioException catch (e) {
       log("Add Group Cards Error: $e");
@@ -308,7 +358,7 @@ class GroupManagementController extends GetxController {
 
       if (response.statusCode == 200) {
         CommonSnackbar.success('Card removed from group');
-        getGroupCards(groupId);
+        getGroupById(groupId);
       }
     } on DioException catch (e) {
       log("Remove Group Card Error: $e");

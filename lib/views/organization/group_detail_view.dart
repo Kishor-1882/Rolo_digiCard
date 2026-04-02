@@ -272,6 +272,218 @@ void _confirmUnlink(String groupId, String groupName) {
   );
 }
 
+  // ── Remove User from Group ────────────────────────────────────────────────
+
+  void _confirmRemoveUser(String userId, String userName) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.6),
+      builder: (ctx) => Dialog(
+        backgroundColor: const Color(0xFF1A1A26),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Red trash icon in circle
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.red,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Title
+              const Text(
+                'Remove User?',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Body text
+              const Text(
+                'Are you sure you want to remove this user from the group?\nThey will lose access to any resources shared with this group.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Colors.white60, fontSize: 13, height: 1.5),
+              ),
+              const SizedBox(height: 24),
+
+              // Cancel + Remove buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                            color: Colors.white.withOpacity(0.2)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.of(ctx).pop();
+                        await controller.removeMemberFromGroup(
+                            widget.group.id, userId);
+                        await controller.getGroupById(widget.group.id);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Remove',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmRemoveCard(String cardId, String cardName) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.6),
+      builder: (ctx) => Dialog(
+        backgroundColor: const Color(0xFF1A1A26),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Red trash icon in circle
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.red,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Title
+              const Text(
+                'Remove Card?',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Body text
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: const TextStyle(
+                      color: Colors.white60, fontSize: 13, height: 1.5),
+                  children: [
+                    const TextSpan(text: 'Are you sure you want to remove '),
+                    TextSpan(
+                      text: cardName,
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    const TextSpan(text: ' from this group?'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Cancel + Remove buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                            color: Colors.white.withOpacity(0.2)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.of(ctx).pop();
+                        await controller.removeGroupCard(widget.group.id, cardId);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Remove',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -619,9 +831,9 @@ void _confirmUnlink(String groupId, String groupName) {
                         ),
                         const SizedBox(width: 12),
                         GestureDetector(
-                          onTap: () async {
+                          onTap: () {
                             if (cardId.isNotEmpty) {
-                              await controller.removeGroupCard(widget.group.id, cardId);
+                              _confirmRemoveCard(cardId, firstName);
                             }
                           },
                           child: const Icon(Icons.delete_outline,
@@ -833,9 +1045,7 @@ Widget _buildUsersTab() {
                     final ownerId =
                         controller.selectedGroup.value?.ownerId;
                     final userId = user.id ??  '';
-                    final isOwner = ownerId != null &&
-                        (ownerId == userId ||
-                            (ownerId is Map && ownerId.id == userId));
+                    final isOwner = ownerId != null && ownerId.id == userId;
                     final role = user.organizationRole ?? '';
 
                     final avatarColors = [
@@ -962,6 +1172,13 @@ Widget _buildUsersTab() {
                                 color: Color(0xFF4FC3F7),
                                 size: 20),
                           ),
+                          if (!isOwner) ...[
+                            const SizedBox(width: 12),
+                            GestureDetector(
+                              onTap: () => _confirmRemoveUser(userId, '$firstName $lastName'),
+                              child: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                            ),
+                          ],
                         ],
                       ),
                     );
@@ -1861,13 +2078,24 @@ class _LinkCardGroupsDialogState extends State<_LinkCardGroupsDialog> {
                 controller: _searchController,
                 style:
                     const TextStyle(color: Colors.white, fontSize: 14),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Search card groups...',
-                  hintStyle: TextStyle(color: Colors.white38),
+                  hintStyle: const TextStyle(color: Colors.white38),
                   prefixIcon:
-                      Icon(Icons.search, color: Colors.white38, size: 20),
+                      const Icon(Icons.search, color: Colors.white38, size: 20),
+                  suffixIcon: _search.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.white38, size: 18),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() => _search = '');
+                          },
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        )
+                      : null,
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 onChanged: (v) => setState(() => _search = v),
               ),

@@ -153,19 +153,23 @@ class OrganizationSavedView extends GetView<SavedItemsController> {
         border: Border.all(color: Colors.white10),
       ),
       child: TextField(
-        onChanged: (value) => controller.setSearchQuery(value),
+        controller: controller.searchController,
+        onChanged: (value) => controller.searchQuery.value = value,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           hintText: 'Search saved items...',
           hintStyle: const TextStyle(color: Colors.white24),
           border: InputBorder.none,
           icon: const Icon(Icons.search, color: Colors.white24),
-          suffixIcon: controller.searchQuery.value.isNotEmpty 
+          suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty 
             ? IconButton(
                 icon: const Icon(Icons.clear, color: Colors.white24, size: 18),
-                onPressed: () => controller.setSearchQuery(''),
+                onPressed: () {
+                  controller.searchController.clear();
+                  controller.searchQuery.value = '';
+                },
               )
-            : null,
+            : const SizedBox.shrink()),
         ),
       ),
     );
