@@ -41,31 +41,36 @@ class CreateGroupDialog extends GetView<GroupManagementController> {
                   hint: 'Describe this group...',
                   maxLines: 4,
                 ),
-                // const SizedBox(height: 32),
-                // _buildLabel('Visibility'),
-                // const SizedBox(height: 16),
-                // Obx(() => Column(
-                //   children: [
-                //     _buildVisibilityOption(
-                //       isActive: controller.isShared.value,
-                //       title: 'Shared with Organization',
-                //       subtitle: 'Visible to all team members',
-                //       icon: Icons.public,
-                //       onTap: () => controller.isShared.value = true,
-                //     ),
-                //     const SizedBox(height: 12),
-                //     _buildVisibilityOption(
-                //       isActive: !controller.isShared.value,
-                //       title: 'Private Group',
-                //       subtitle: 'Only invited members can access',
-                //       icon: Icons.lock_outline,
-                //       onTap: () => controller.isShared.value = false,
-                //     ),
-                //   ],
-                // )),
-                // const SizedBox(height: 24),
-                // _buildInfoBox(),
+                if (controller.groupType.value == 'user') ...[
+                  const SizedBox(height: 32),
+                  _buildLabel('Visibility'),
+                  const SizedBox(height: 16),
+                  Obx(() => Row(
+                        children: [
+                          Expanded(
+                            child: _buildVisibilityOption(
+                              isActive: controller.isShared.value,
+                              title: 'Public',
+                              subtitle: 'Visible to all organization members.',
+                              icon: Icons.public,
+                              onTap: () => controller.isShared.value = true,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildVisibilityOption(
+                              isActive: !controller.isShared.value,
+                              title: 'Private',
+                              subtitle: 'Only visible to people under the group.',
+                              icon: Icons.lock_outline,
+                              onTap: () => controller.isShared.value = false,
+                            ),
+                          ),
+                        ],
+                      )),
+                ],
                 const SizedBox(height: 32),
+
                 _buildActions(),
               ],
             ),
@@ -149,59 +154,50 @@ class CreateGroupDialog extends GetView<GroupManagementController> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(isActive ? 0.08 : 0.04),
-          borderRadius: BorderRadius.circular(20),
+          color: isActive ? Colors.white.withOpacity(0.08) : const Color(0xFF1E1E2C),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isActive ? Colors.white24 : Colors.transparent,
+            color: isActive ? const Color(0xFFD431BD) : Colors.white10,
+            width: isActive ? 2 : 1,
           ),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 20,
-              height: 20,
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isActive ? const Color(0xFFD431BD) : Colors.white24,
-                  width: 2,
-                ),
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: isActive
-                  ? Center(
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFD431BD),
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    )
-                  : null,
+              child: Icon(
+                icon,
+                color: isActive ? const Color(0xFFD431BD) : Colors.white38,
+                size: 20,
+              ),
             ),
-            const SizedBox(width: 16),
-            Icon(icon, color: Colors.blueAccent.shade200, size: 24),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: isActive ? const Color(0xFFD431BD) : Colors.white,
                       fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     subtitle,
                     style: const TextStyle(
                       color: Colors.white38,
-                      fontSize: 12,
+                      fontSize: 11,
+                      height: 1.2,
                     ),
                   ),
                 ],
