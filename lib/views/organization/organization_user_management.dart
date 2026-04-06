@@ -157,26 +157,18 @@ class OrganizationUserManagement extends StatelessWidget {
                 const Color(0xFFE91E8E),
               ),
             ),
-            const SizedBox(width: 8),
+        
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
              Expanded(
               child: _buildStatBox(
                 controller.activeUsers.toString(),
                 'Active',
                 Icons.check_circle_outline,
                 Colors.greenAccent,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatBox(
-                controller.inactiveUsers.toString(),
-                'Inactive',
-                Icons.pause_circle_outline,
-                Colors.orangeAccent,
               ),
             ),
             const SizedBox(width: 8),
@@ -186,15 +178,6 @@ class OrganizationUserManagement extends StatelessWidget {
                 'Pending',
                 Icons.hourglass_empty,
                 Colors.amberAccent,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildStatBox(
-                controller.expiredUsers.toString(),
-                'Expired',
-                Icons.timer_off_outlined,
-                Colors.redAccent.withOpacity(0.7),
               ),
             ),
           ],
@@ -382,7 +365,7 @@ class OrganizationUserManagement extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: () => Get.to(() => OrgUserDetailPage(userId: user.id)),
+      onTap: () => Get.to(() => OrgUserDetailPage(userId: user.id))?.then((_) => controller.fetchUsers()),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
@@ -470,7 +453,7 @@ class OrganizationUserManagement extends StatelessWidget {
                         onSelected: (value) {
                           switch (value) {
                             case 'view':
-                              Get.to(() => OrgUserDetailPage(userId: user.id));
+                              Get.to(() => OrgUserDetailPage(userId: user.id))?.then((_) => controller.fetchUsers());
                               break;
                             case 'activate':
                               controller.updateUserStatus(user.id, isActive: true);
@@ -488,9 +471,9 @@ class OrganizationUserManagement extends StatelessWidget {
                         },
                         itemBuilder: (_) => [
                           _menuItem('view', Icons.visibility_outlined, 'View Details', Colors.white),
-                          if (!user.isActive && !user.isBlocked && user.organizationRole != 'owner')
+                          if (!user.isActive && !user.isBlocked && user.organizationRole != 'owner' && user.organizationRole!='admin')
                             _menuItem('activate', Icons.check_circle_outline, 'Activate', Colors.greenAccent),
-                          if (user.isActive && user.organizationRole != 'owner')
+                          if (user.isActive && user.organizationRole != 'owner'  && user.organizationRole!='admin' )
                             _menuItem('deactivate', Icons.pause_circle_outline, 'Deactivate', Colors.orangeAccent),
                           if (!user.isEmailVerified)
                             _menuItem('resend', Icons.send_outlined, 'Resend Invite', Colors.blueAccent),

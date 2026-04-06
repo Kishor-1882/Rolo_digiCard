@@ -641,7 +641,10 @@ class _OrgUserDetailPageState extends State<OrgUserDetailPage>
             itemCount: cards.length,
             separatorBuilder: (_, __) => const SizedBox(height: 10),
             itemBuilder: (context, index) =>
-                _CardListTile(card: cards[index]),
+                _CardListTile(
+                  card: cards[index],
+                  onRefresh: () => _loadCards(),
+                ),
           ),
         ),
       ],
@@ -691,13 +694,14 @@ class _OrgUserDetailPageState extends State<OrgUserDetailPage>
 
 
 class _CardListTile extends StatelessWidget {
-  const _CardListTile({required this.card});
+  const _CardListTile({required this.card, required this.onRefresh});
   final OrgCard card;
+  final VoidCallback onRefresh;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Get.to(() => CardDetailPage(card: card)),
+      onTap: () => Get.to(() => CardDetailPage(card: card))?.then((_) => onRefresh()),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -771,7 +775,7 @@ class _CardListTile extends StatelessWidget {
                 _ActiveBadge(isActive: card.isActive),
                 const SizedBox(height: 8),
                 GestureDetector(
-                  onTap: () => Get.to(() => CardDetailPage(card: card)),
+                  onTap: () => Get.to(() => CardDetailPage(card: card))?.then((_) => onRefresh()),
                   child: const Text(
                     'View',
                     style: TextStyle(

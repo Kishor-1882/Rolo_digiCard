@@ -225,18 +225,24 @@ final active =
             border: Border.all(color: Colors.white.withOpacity(0.05)),
           ),
           child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              dropdownColor: const Color(0xFF1E1E2C),
-              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white54, size: 18),
-              value: 'All', // This should be bound to controller
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              items: <String>['All', 'Active', 'Inactive'].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (_) {}, // Implement filter logic
+            child: Obx(
+              () => DropdownButton<String>(
+                dropdownColor: const Color(0xFF1E1E2C),
+                icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white54, size: 18),
+                value: controller.statusFilter.value,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                items: <String>['All', 'Active', 'Inactive'].map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (newValue) {
+                  if (newValue != null) {
+                    controller.statusFilter.value = newValue;
+                  }
+                },
+              ),
             ),
           ),
         ),

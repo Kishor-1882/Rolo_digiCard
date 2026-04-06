@@ -1202,7 +1202,6 @@ enum DateFilterOption {
   last30Days,
   thisYear,
   lastYear,
-  custom,
 }
 
 extension DateFilterOptionLabel on DateFilterOption {
@@ -1217,7 +1216,6 @@ extension DateFilterOptionLabel on DateFilterOption {
       case DateFilterOption.last30Days: return 'Last 30 Days';
       case DateFilterOption.thisYear:   return 'This Year';
       case DateFilterOption.lastYear:   return 'Last Year';
-      case DateFilterOption.custom:     return 'Custom';
     }
   }
 
@@ -1288,9 +1286,7 @@ extension DateFilterOptionLabel on DateFilterOption {
         end   = DateTime.utc(now.year, 1, 1).subtract(const Duration(hours: 5, minutes: 30, milliseconds: 1));
         break;
 
-      case DateFilterOption.custom:
-        // Return empty — caller handles custom date picker
-        return {'startDate': '', 'endDate': ''};
+  
     }
 
     log('Start: $start, End: $end');

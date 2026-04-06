@@ -14,6 +14,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LoginController extends GetxController {
   final FlutterSecureStorage storage = const FlutterSecureStorage();
   bool isLoginMode = true;
+  bool showVerificationUI = false;
+
+  void closeVerificationUI() {
+    showVerificationUI = false;
+    isLoginMode = true;
+    clearFields();
+    update();
+  }
   //login
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -154,11 +162,11 @@ class LoginController extends GetxController {
       );
       log("Response register:${response.data}");
 
-      if (response.statusCode == 200) {
-        CommonSnackbar.success('Account created. Please login.');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        showVerificationUI = true;
+        log("Registration success, showVerificationUI = true");
       }
       isLoading.value = false;
-      isLoginMode = true;
       update();
     } catch (e) {
       String errorMessage = 'Registration failed';

@@ -288,12 +288,19 @@ class _CreateNewCardState extends State<CreateNewCard> {
             controller: controller.companyController,
           ),
           const SizedBox(height: 20),
-          CustomFormTextField(
-            isImportant: true,
+          PhoneInputField(
             title: 'Phone Number',
-            hintText: 'Enter your phone number',
-            controller: controller.phoneController,
-            keyboardType: TextInputType.number, // 👈 Number keyboard
+            isImportant: true,
+            countryCode: controller.workPhoneCountryCode.value,
+            onCountryChanged: (c) {
+              controller.workPhoneCountryCode.value = c.code ?? 'US';
+              controller.workPhoneDialCode.value = c.dialCode ?? '+1';
+              controller.update();
+            },
+            numberController: controller.phoneController,
+            extController: controller.workPhoneExtController,
+            numberHint: '5551234567',
+            extHint: '5555',
           ),
           const SizedBox(height: 20),
           CustomFormTextField(
@@ -396,21 +403,25 @@ class _CreateNewCardState extends State<CreateNewCard> {
             children: [
               Expanded(
                 child: CustomFormTextField(
-                  title: 'Address Line 1',
-                  hintText: '123 Main St',
-                  controller: controller.addressLine1Controller,
+                  title: 'Zip Code',
+                  hintText: '628002',
+                  controller: controller.zipController,
+                  keyboardType: TextInputType.number,
+                  onUnfocus: () => controller.fetchGeocodeByZip(controller.zipController.text),
                 ),
               ),
-              const SizedBox(width: 10),
+  const SizedBox(width: 10),
               Expanded(
                 child: CustomFormTextField(
-                  title: 'Address Line 2',
-                  hintText: 'Apt, Suite',
-                  controller: controller.addressLine2Controller,
+                  title: 'Country',
+                  hintText: 'United States',
+                  controller: controller.countryController,
                 ),
               ),
+          
             ],
           ),
+        
           const SizedBox(height: 10),
           Row(
             children: [
@@ -431,24 +442,22 @@ class _CreateNewCardState extends State<CreateNewCard> {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+            const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
                 child: CustomFormTextField(
-                  title: 'Country',
-                  hintText: 'United States',
-                  controller: controller.countryController,
+                  title: 'Address Line 1',
+                  hintText: '123 Main St',
+                  controller: controller.addressLine1Controller,
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: CustomFormTextField(
-                  title: 'Zip Code',
-                  hintText: '628002',
-                  controller: controller.zipController,
-                  keyboardType: TextInputType.number,
-                  onUnfocus: () => controller.fetchGeocodeByZip(controller.zipController.text),
+                  title: 'Address Line 2',
+                  hintText: 'Apt, Suite',
+                  controller: controller.addressLine2Controller,
                 ),
               ),
             ],
@@ -469,12 +478,12 @@ class _CreateNewCardState extends State<CreateNewCard> {
             hintText: 'Enter your industry',
             controller: controller.industryController,
           ),
-          const SizedBox(height: 20),
-          CustomFormTextField(
-            title: 'Department',
-            hintText: 'Enter your department',
-            controller: controller.departmentController,
-          ),
+          // const SizedBox(height: 20),
+          // CustomFormTextField(
+          //   title: 'Department',
+          //   hintText: 'Enter your department',
+          //   controller: controller.departmentController,
+          // ),
           const SizedBox(height: 20),
           CustomFormTextField(
             title: 'Bio',

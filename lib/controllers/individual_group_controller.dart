@@ -23,12 +23,33 @@ class IndividualGroupController extends GetxController {
   final descriptionController = TextEditingController();
   var isShared = false.obs;
 
+  var sortBy = 'Sort by Date'.obs;
+  var isAscending = false.obs;
+
   List<GroupModel> get filteredGroups {
-    if (searchQuery.value.isEmpty) return groups;
-    return groups.where((group) => 
-      group.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-      (group.description?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false)
-    ).toList();
+    List<GroupModel> result = groups.toList();
+    if (searchQuery.value.isNotEmpty) {
+      result = result.where((group) => 
+        group.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+        (group.description?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false)
+      ).toList();
+    }
+
+    result.sort((a, b) {
+      if (sortBy.value == 'Sort by Name') {
+        int cmp = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        return isAscending.value ? cmp : -cmp;
+      } else {
+        // Sort by Date using id for fallback if no timestamp or just use id
+        int cmp = a.id.compareTo(b.id);
+        if (a.createdAt != null && b.createdAt != null) {
+          cmp = a.createdAt!.compareTo(b.createdAt!);
+        }
+        return isAscending.value ? cmp : -cmp;
+      }
+    });
+
+    return result;
   }
 
   @override

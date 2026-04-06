@@ -14,6 +14,167 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   LoginController loginConftroller = Get.put(LoginController());
 
+  Widget _buildVerificationUI(BuildContext context, LoginController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 20),
+          Align(
+            alignment: Alignment.topLeft,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: AppColors.textPrimary),
+              onPressed: () {
+                controller.closeVerificationUI();
+              },
+            ),
+          ),
+          const SizedBox(height: 40),
+          Container(
+            width: 70,
+            height: 70,
+            decoration: BoxDecoration(
+              color: const Color(0xFF9810FA).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Center(
+              child: Icon(Icons.mail_outline, color: Color(0xFF9810FA), size: 36),
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Please verify your account',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Please verify the message sent to your email id:',
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 15,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            controller.emailController.text,
+            style: const TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              fontFamily: 'Courier',
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF18181B), // dark card bg
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AppColors.textPrimary.withOpacity(0.10),
+              ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 2),
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF22C55E).withOpacity(0.1),
+                        border: Border.all(color: const Color(0xFF22C55E)),
+                      ),
+                      child: const Icon(Icons.check, color: Color(0xFF22C55E), size: 12),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Click the verification link',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Open the email we just sent and click "Verify Email" to activate your account.',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 2),
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF22C55E).withOpacity(0.1),
+                        border: Border.all(color: const Color(0xFF22C55E)),
+                      ),
+                      child: const Icon(Icons.check, color: Color(0xFF22C55E), size: 12),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Complete your profile',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Once verified, you\'ll be redirected to login and can start creating your digital cards.',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 40),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,6 +187,9 @@ class _LoginPageState extends State<LoginPage> {
           child: SingleChildScrollView(
             child: GetBuilder<LoginController>(
               builder: (controller) {
+                if (controller.showVerificationUI) {
+                  return _buildVerificationUI(context, controller);
+                }
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(

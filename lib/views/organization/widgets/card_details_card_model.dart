@@ -21,11 +21,15 @@ class CardDetailsCardModel extends StatefulWidget {
 
 class _CardDetailsCardModelState extends State<CardDetailsCardModel> {
   late OrgCard currentCard;
+  final orgCardController = Get.find<CardManagementController>();
 
   @override
   void initState() {
     super.initState();
-    currentCard = widget.card;
+    // Try to find the latest version of the card from the main organization cards list
+    final latestCard = orgCardController.orgCards
+        .firstWhereOrNull((c) => c.id == widget.card.id);
+    currentCard = latestCard ?? widget.card;
   }
 
   void _onUpdate(OrgCard updatedCard) {
@@ -38,44 +42,53 @@ class _CardDetailsCardModelState extends State<CardDetailsCardModel> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF12121C),
-      appBar: AppBar(
+    return Obx(() {
+      // Keep currentCard in sync with the controller's version if it changes
+      final latestCard = orgCardController.orgCards
+          .firstWhereOrNull((c) => c.id == widget.card.id);
+      if (latestCard != null) {
+        currentCard = latestCard;
+      }
+
+      return Scaffold(
         backgroundColor: const Color(0xFF12121C),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Get.back(),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF12121C),
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Get.back(),
+          ),
+          title: const Text(
+            'Card Details',
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
         ),
-        title: const Text(
-          'Card Details',
-          style: TextStyle(color: Colors.white, fontSize: 16),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ── Metrics Row ──
+              _MetricsRow(card: currentCard),
+              const SizedBox(height: 16),
+
+              // ── Card Preview ──
+              _CardPreviewSection(card: currentCard),
+              const SizedBox(height: 16),
+
+              // ── Assignment ──
+              _AssignmentSection(card: currentCard, onUpdate: _onUpdate),
+              const SizedBox(height: 16),
+
+              // ── Actions ──
+              _ActionsSection(card: currentCard, onUpdate: _onUpdate),
+              const SizedBox(height: 32),
+            ],
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // ── Metrics Row ──
-            _MetricsRow(card: currentCard),
-            const SizedBox(height: 16),
-
-            // ── Card Preview ──
-            _CardPreviewSection(card: currentCard),
-            const SizedBox(height: 16),
-
-            // ── Assignment ──
-            _AssignmentSection(card: currentCard, onUpdate: _onUpdate),
-            const SizedBox(height: 16),
-
-            // ── Actions ──
-            _ActionsSection(card: currentCard, onUpdate: _onUpdate),
-            const SizedBox(height: 32),
-          ],
-        ),
-      ),
-    );
+      );
+    });
   }
 }
 

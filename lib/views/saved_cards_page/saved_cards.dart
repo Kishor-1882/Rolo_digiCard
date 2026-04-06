@@ -220,9 +220,7 @@ class SavedCards extends StatelessWidget {
                         child: Column(
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                // Title and count
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -244,36 +242,88 @@ class SavedCards extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-
-                                // Sort dropdown
-                                GestureDetector(
-                                  onTap: () => _showSortOptions(context, controller),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            
+                            // Filter and Sort in SAME ROW
+                            Row(
+                              children: [
+                                // Search Bar
+                                Expanded(
+                                  flex: 3,
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 8),
                                     decoration: BoxDecoration(
-                                      color: AppColors.gradientStart,
-                                      borderRadius: BorderRadius.circular(15),
-                                      border: Border.all(
-                                        color: AppColors.textPrimary.withOpacity(0.10),
+                                      color: const Color(0xFF1E1E2E),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                                    ),
+                                    child: TextField(
+                                      onChanged: (value) {
+                                        controller.updateSearchQuery(value);
+                                        controller.filterCards();
+                                      },
+                                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                                      decoration: InputDecoration(
+                                        hintText: 'Search...',
+                                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 13),
+                                        prefixIcon: Icon(Icons.search, color: Colors.white.withOpacity(0.5), size: 18),
+                                        border: InputBorder.none,
+                                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
                                       ),
                                     ),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          _getSortText(controller.sortBy.value),
-                                          style: TextStyle(
-                                            color: AppColors.textGrayPrimary,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        Icon(
-                                          Icons.keyboard_arrow_down,
-                                          color: AppColors.iconGrey,
-                                          size: 20,
-                                        ),
-                                      ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+
+                                // Sort Dropdown
+                                Expanded(
+                                  flex: 2,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF1E1E2E),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                                    ),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        isExpanded: true,
+                                        value: controller.sortBy.value,
+                                        dropdownColor: const Color(0xFF1E1E2E),
+                                        icon: Icon(Icons.keyboard_arrow_down, color: Colors.white.withOpacity(0.5), size: 18),
+                                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                                        items: const [
+                                          DropdownMenuItem(value: 'date', child: Text('Date', overflow: TextOverflow.ellipsis)),
+                                          DropdownMenuItem(value: 'name', child: Text('Name', overflow: TextOverflow.ellipsis)),
+                                          DropdownMenuItem(value: 'company', child: Text('Company', overflow: TextOverflow.ellipsis)),
+                                        ],
+                                        onChanged: (value) {
+                                          controller.changeSortBy(value!);
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+
+                                // Ascending/Descending Toggle
+                                GestureDetector(
+                                  onTap: () {
+                                    controller.isAscending.toggle();
+                                    controller.sortCards();
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF1E1E2E),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                                    ),
+                                    child: Icon(
+                                      controller.isAscending.value ? Icons.south : Icons.sort,
+                                      color: Colors.white.withOpacity(0.7),
+                                      size: 18,
                                     ),
                                   ),
                                 ),
@@ -516,77 +566,7 @@ class SavedCards extends StatelessWidget {
     return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
-  String _getSortText(String sortBy) {
-    switch (sortBy) {
-      case 'date':
-        return 'Sort by Date';
-      case 'name':
-        return 'Sort by Name';
-      case 'company':
-        return 'Sort by Company';
-      default:
-        return 'Sort by Date';
-    }
-  }
 
-  void _showSortOptions(BuildContext context, SaveController controller) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.gradientStart,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Sort By',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: 16),
-              _buildSortOption(context, controller, 'date', 'Date'),
-              _buildSortOption(context, controller, 'name', 'Name'),
-              _buildSortOption(context, controller, 'company', 'Company'),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildSortOption(
-      BuildContext context,
-      SaveController controller,
-      String value,
-      String label,
-      ) {
-    return Obx(() {
-      final isSelected = controller.sortBy.value == value;
-      return ListTile(
-        title: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? AppColors.iconBlue : AppColors.textPrimary,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-          ),
-        ),
-        trailing: isSelected
-            ? Icon(Icons.check, color: AppColors.iconBlue)
-            : null,
-        onTap: () {
-          controller.changeSortBy(value);
-          Navigator.pop(context);
-        },
-      );
-    });
-  }
 
   void _showCardOptions(
       BuildContext context,

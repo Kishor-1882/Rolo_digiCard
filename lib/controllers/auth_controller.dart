@@ -70,7 +70,7 @@ class AuthController extends GetxController {
       }
 
       final response = await dioClient.post(
-        'https://digi-bend.roloscan.com/api/auth/logout',
+        'http://localhost:8080/https://digi-bend.roloscan.com/api/auth/logout',
       );
 
       if (response.statusCode == 200) {

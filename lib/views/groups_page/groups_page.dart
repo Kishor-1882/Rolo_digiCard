@@ -17,7 +17,6 @@ class MyGroupsPage extends StatefulWidget {
 
 class _MyGroupsPageState extends State<MyGroupsPage> {
   bool isGridView = true;
-  String sortOption = 'Sort by Date';
   final IndividualGroupController controller = Get.put(IndividualGroupController());
   final TextEditingController _searchController = TextEditingController();
 
@@ -183,8 +182,8 @@ class _MyGroupsPageState extends State<MyGroupsPage> {
                       border: Border.all(color: Colors.white12),
                     ),
                     child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: sortOption,
+                      child: Obx(() => DropdownButton<String>(
+                        value: controller.sortBy.value,
                         dropdownColor: const Color(0xFF2A2A38),
                         icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white54, size: 20),
                         style: const TextStyle(color: Colors.white, fontSize: 14),
@@ -192,35 +191,44 @@ class _MyGroupsPageState extends State<MyGroupsPage> {
                             .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                             .toList(),
                         onChanged: (val) {
-                          if (val != null) setState(() => sortOption = val);
+                          if (val != null) controller.sortBy.value = val;
                         },
-                      ),
+                      )),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E2C),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white12),
+                  GestureDetector(
+                    onTap: () {
+                      controller.isAscending.toggle();
+                    },
+                    child: Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E1E2C),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: Obx(() => Icon(
+                        controller.isAscending.value ? Icons.south : Icons.sort,
+                        color: Colors.grey[400],
+                        size: 20,
+                      )),
                     ),
-                    child: Icon(Icons.filter_list, color: Colors.grey[400], size: 20),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            // const SizedBox(height: 12),
 
-            // Meta Info
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                'Showing 1 of 1 cards',
-                style: TextStyle(color: Colors.grey[400], fontSize: 12),
-              ),
-            ),
+            // // Meta Info
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            //   child: Text(
+            //     'Showing 1 of 1 cards',
+            //     style: TextStyle(color: Colors.grey[400], fontSize: 12),
+            //   ),
+            // ),
             const SizedBox(height: 16),
 
             // Cards/List View

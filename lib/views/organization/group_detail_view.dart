@@ -1363,14 +1363,26 @@ Widget _buildUsersTab() {
                           ),
                           GestureDetector(
                             onTap: () {
-                              log("dd");
-                              // Navigate to card group detail if needed
-                              // Get.to(() => CardDetailsCardModel(card:));
+                              log("clicjjked");
+                              log("${g.runtimeType}");
+                              if (g is Map<String, dynamic>) {
+                                log("Ok ");
+                                final linkedGroup = GroupModel.fromJson(g);
+                                Get.to(
+                                  () => GroupDetailView(
+                                    key: UniqueKey(),
+                                    group: linkedGroup,
+                                    isUserGroup: false,
+                                  ),
+                                  preventDuplicates: false,
+                                );
+                                log("Navigation triggered");
+                              } else {
+                                log("${g.runtimeType}");
+                              }
                             },
-                            child: const Icon(
-                                Icons.remove_red_eye_outlined,
-                                color: Color(0xFF4FC3F7),
-                                size: 20),
+                            child: const Icon(Icons.remove_red_eye_outlined,
+                                color: Color(0xFF4FC3F7), size: 20),
                           ),
                           const SizedBox(width: 14),
                           GestureDetector(
@@ -1428,6 +1440,7 @@ Widget _buildStatsRow() {
     children: [
       Row(
         children: [
+          if(widget.isUserGroup)
           Expanded(
             child: _buildStatBox(
               icon: Icons.group_outlined,
@@ -1436,7 +1449,19 @@ Widget _buildStatsRow() {
               value: '${controller.selectedGroup.value?.members.length ?? 0}',
             ),
           ),
+
+          if(!widget.isUserGroup)
+           Expanded(
+            child: _buildStatBox(
+              icon: Icons.group_outlined,
+              iconColor: const Color(0xFF4FC3F7),
+              label: 'Cards',
+              value: '${controller.selectedGroup.value?.cards.length ?? 0}',
+            ),
+          ),
+
           const SizedBox(width: 10),
+        if(widget.isUserGroup)
           Expanded(
             child: _buildStatBox(
               icon: Icons.layers_outlined,

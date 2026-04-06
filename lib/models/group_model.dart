@@ -47,7 +47,7 @@ class GroupModel {
   });
 
   factory GroupModel.fromJson(Map<String, dynamic> json) {
-    log("Parsing GroupModel from JSON: ${json.toString()}");
+    log("Kanchana Parsing GroupModel from JSON: ${json.toString()}");
   return GroupModel(
     id: json['_id'] ?? json['id'] ?? '',
     name: json['name'] ?? '',

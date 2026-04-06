@@ -22,6 +22,7 @@ class SaveController extends GetxController {
   final RxBool isRefreshing = false.obs;
   final RxString sortBy = 'date'.obs; // date, name, company
   final RxString searchQuery = ''.obs;
+  final RxBool isAscending = false.obs;
   final RxSet<String> selectedCards = <String>{}.obs;
   final RxBool isSelectionMode = false.obs;
   final RxList<CardModel> allCardDetails = <CardModel>[].obs;
@@ -154,13 +155,19 @@ class SaveController extends GetxController {
     print("DUmmy");
     switch (sortBy.value) {
       case 'date':
-        filteredCards.sort((a, b) => b.savedAt.compareTo(a.savedAt));
+        filteredCards.sort((a, b) => isAscending.value 
+          ? a.savedAt.compareTo(b.savedAt) 
+          : b.savedAt.compareTo(a.savedAt));
         break;
       case 'name':
-        filteredCards.sort((a, b) => a.card.name.compareTo(b.card.name));
+        filteredCards.sort((a, b) => isAscending.value 
+          ? a.card.name.compareTo(b.card.name) 
+          : b.card.name.compareTo(a.card.name));
         break;
       case 'company':
-        filteredCards.sort((a, b) => a.card.company.compareTo(b.card.company));
+        filteredCards.sort((a, b) => isAscending.value 
+          ? a.card.company.compareTo(b.card.company) 
+          : b.card.company.compareTo(a.card.company));
         break;
     }
     update();

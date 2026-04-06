@@ -696,6 +696,18 @@ Map<String, dynamic> cardDataMap = buildCardDataMap(themeColors);
   }
 
   Map<String, dynamic> buildCardDataMap(Map<String, String> themeColors) {
+    String encodedProfileImage = '';
+    String profileFileName = '';
+    if (profileImage != null) {
+      try {
+        final bytes = profileImage!.readAsBytesSync();
+        encodedProfileImage = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+        profileFileName = profileImage!.path.split('/').last;
+      } catch (e) {
+        log("Error encoding profile image: $e");
+      }
+    }
+
     return {
       'name': nameController.text.trim(),
       'title': designationController.text.trim(),
@@ -740,8 +752,8 @@ Map<String, dynamic> cardDataMap = buildCardDataMap(themeColors);
         'hideWorkPhonePrivacy': false,
         'hidePersonalPhonePrivacy': false,
       },
-      'profile': '',
-      'profileFileName': '',
+      'profile': encodedProfileImage.isNotEmpty ? encodedProfileImage : '',
+      'profileFileName': profileFileName,
       'linkedinUrl': toValidUrl(
         linkedinController.text.trim(),
         platform: 'linkedin',

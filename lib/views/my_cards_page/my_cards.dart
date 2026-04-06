@@ -18,68 +18,40 @@ class MyCardsPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: const Color(0xFF1E1E2C),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: Row(
-            children: [
-              Icon(
-                Icons.warning_amber_rounded,
-                color: Colors.red,
-                size: 28,
-              ),
-              SizedBox(width: 12),
-              Text(
-                'Delete Card',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          content: Text(
+          title: const Text('Delete Card', style: TextStyle(color: Colors.white)),
+          content: const Text(
             'Are you sure you want to delete this card? This action cannot be undone.',
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(color: Colors.white70),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 16,
-                ),
-              ),
+              child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
             ),
             Obx(
-              ()=> ElevatedButton(
+              ()=> TextButton(
                 onPressed: controller.isLoading.value
                     ? null
                     : () {
                   Navigator.of(context).pop();
                   controller.deleteCard(context, cardId);
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
                 child: controller.isLoading.value
-                    ? SizedBox(
+                    ? const SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.redAccent),
                   ),
                 )
-                    : Text(
+                    : const Text(
                   'Delete',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(color: Colors.redAccent),
                 ),
               ),
             ),

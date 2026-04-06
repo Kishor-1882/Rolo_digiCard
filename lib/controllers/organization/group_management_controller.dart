@@ -24,20 +24,32 @@ class GroupManagementController extends GetxController {
   final Rx<GroupModel?> selectedGroup = Rx<GroupModel?>(null);
   var cardsList = <CheckCardModel>[].obs;
 
+  final statusFilter = 'All'.obs;
+
   List<GroupModel> get filteredGroups {
-    if (searchQuery.value.isEmpty) return groups;
-    return groups
-        .where(
-          (group) =>
-              group.name.toLowerCase().contains(
-                searchQuery.value.toLowerCase(),
-              ) ||
-              (group.description?.toLowerCase().contains(
-                    searchQuery.value.toLowerCase(),
-                  ) ??
-                  false),
-        )
-        .toList();
+    var result = groups.toList();
+    
+    if (searchQuery.value.isNotEmpty) {
+      result = result
+          .where(
+            (group) =>
+                group.name.toLowerCase().contains(
+                  searchQuery.value.toLowerCase(),
+                ) ||
+                (group.description?.toLowerCase().contains(
+                      searchQuery.value.toLowerCase(),
+                    ) ??
+                    false),
+          )
+          .toList();
+    }
+    
+    if (statusFilter.value != 'All') {
+      final bool filterActive = statusFilter.value == 'Active';
+      result = result.where((group) => group.isActive == filterActive).toList();
+    }
+    
+    return result;
   }
 
   var currentGroup = Rxn<GroupModel>();
@@ -145,7 +157,7 @@ class GroupManagementController extends GetxController {
         'name': nameController.text.trim(),
         'description': descriptionController.text.trim(),
         'groupType': groupType.value,
-        'isShared': isShared.value,
+        'isPublic': isShared.value,
       };
 
       final response = await _dio.post(

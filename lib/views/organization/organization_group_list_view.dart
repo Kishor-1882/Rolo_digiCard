@@ -261,25 +261,29 @@ final active =
             border: Border.all(color: Colors.white.withOpacity(0.05)),
           ),
           child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              dropdownColor: const Color(0xFF1E1E2C),
-               value: 'Active', // Placeholder
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              items: <String>['Active', 'Inactive']
-                  .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  })
-                  .toList(),
-              onChanged: (String? newValue) {
-                // controller.groupStatusFilter.value = newValue!;
-              },
-              icon: const Icon(
-                Icons.keyboard_arrow_down,
-                color: Colors.white54,
-                size: 18
+            child: Obx(
+              () => DropdownButton<String>(
+                dropdownColor: const Color(0xFF1E1E2C),
+                value: controller.statusFilter.value,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                items: <String>['All', 'Active', 'Inactive']
+                    .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    })
+                    .toList(),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    controller.statusFilter.value = newValue;
+                  }
+                },
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: Colors.white54,
+                  size: 18
+                ),
               ),
             ),
           ),
