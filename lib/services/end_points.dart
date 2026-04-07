@@ -5,6 +5,7 @@ class ApiEndpoints {
   // Auth
   static const String register = "/api/auth/register";
   static const String login = "/api/auth/login";
+  static const String changePassword = "/api/auth/me/password";
 
   // Profile
   static const String getUserProfile = "/api/auth/profile";
@@ -45,11 +46,12 @@ class ApiEndpoints {
   static const String getOrganization = "/api/organization/me";
   static const String organizationDashboard = "/api/organization/dashboard";
   static const String organizationSettings = "/api/organization/settings";
+  static const String adminPermission = "/api/organization/settings/admin-permission";
   static const String deactivateOrganization = "/api/organization/deactivate";
   static const String activateOrganization = "/api/organization/activate";
   static const String addCustomDomain = "/api/organization/domains";
   static String removeCustomDomain(String domain) => "/api/organization/domains/$domain";
-  static const String transferOwnership = "/api/organization/transfer-ownership";
+  static const String transferOwnership = "/api/organization/ownership/transfer";
 
   // User Management
   static const String organizationUsers = "/api/organization/users";

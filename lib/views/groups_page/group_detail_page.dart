@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -73,7 +74,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
         child: Obx(() {
           final group = currentGroup;
           final totalCards = group.cardIds.length;
-          final activeCards = groupCards.where((c) => true).length; // CardModel has no isActive, show total
+          final activeCards = groupCards.where((c) => c.isActive).length; // CardModel has no isActive, show total
 
           return CustomScrollView(
             slivers: [
@@ -386,6 +387,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
     final initials = card.name.isNotEmpty ? card.name[0].toUpperCase() : '?';
     final title = card.title ?? '';
     final company = card.company ?? '';
+    log("Card Active:${card.isActive}");
 
     return Container(
       padding: const EdgeInsets.all(14),

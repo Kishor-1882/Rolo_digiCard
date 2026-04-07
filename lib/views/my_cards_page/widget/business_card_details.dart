@@ -505,27 +505,26 @@ class _BusinessCardProfilePageState extends State<BusinessCardProfilePage> {
                                    children: card.socialLinks!.toMap().entries
                                        .where((e) => e.value != null && e.value!.isNotEmpty)
                                        .map((e) {
-                                     return Container(
-                                       width: 44,
-                                       height: 44,
-                                       decoration: BoxDecoration(
-                                         color: Color(0xFFF3F4F6),
-                                         borderRadius: BorderRadius.circular(8),
-                                         border: Border.all(
-                                           color: Color(0xFFE0E0E0),
-                                           width: 1,
+                                     return GestureDetector(
+                                      onTap: () => launchUrl(Uri.parse(e.value!)),
+                                       child: Container(
+                                         width: 44,
+                                         height: 44,
+                                         decoration: BoxDecoration(
+                                           color: Color(0xFFF3F4F6),
+                                           borderRadius: BorderRadius.circular(8),
+                                           border: Border.all(
+                                             color: Color(0xFFE0E0E0),
+                                             width: 1,
+                                           ),
                                          ),
-                                       ),
-                                       child: IconButton(
-                                         icon: Icon(
-                                           e.key == 'linkedin' ? Icons.link :
-                                           e.key == 'twitter' ? Icons.link :
-                                           e.key == 'facebook' ? Icons.facebook :
-                                           Icons.link,
-                                           color: Color(0xFF4F39F6),
-                                           size: 24,
-                                         ),
-                                         onPressed: () => launchUrl(Uri.parse(e.value!)),
+                                         child:e.key == 'linkedin' ? Image.asset('assets/icons/linkedin.png', width: 24, height: 24) : 
+                                         e.key == 'twitter' ? Image.asset('assets/icons/twitter.png', width: 24, height: 24) :
+                                          e.key == 'facebook' ? Image.asset('assets/icons/facebook.png', width: 24, height: 24) :
+                                           e.key == 'instagram' ? Image.asset('assets/icons/instagram.png', width: 24, height: 24) :
+                                           e.key == 'github' ? Image.asset('assets/icons/github.png', width: 24, height: 24) :
+                                           e.key == 'youtube' ? Image.asset('assets/icons/youtube.png', width: 24, height: 24) : 
+                                          Icon(Icons.language, color: Color(0xFF4F39F6), size: 24)
                                        ),
                                      );
                                    }).toList(),

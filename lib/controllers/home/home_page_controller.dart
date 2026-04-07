@@ -85,7 +85,7 @@ class HomePageController extends GetxController {
     super.onInit();
     getDashboardAnalytics();
     getRecentCards();
-    
+
     // Add listener for search
     searchController.addListener(() {
       searchText.value = searchController.text;
@@ -170,37 +170,64 @@ class HomePageController extends GetxController {
 
   String _buildLocation() {
     final parts = <String>[];
-    if (cityController.text.trim().isNotEmpty) parts.add(cityController.text.trim());
-    if (stateController.text.trim().isNotEmpty) parts.add(stateController.text.trim());
-    if (countryController.text.trim().isNotEmpty) parts.add(countryController.text.trim());
-    if (zipController.text.trim().isNotEmpty) parts.add(zipController.text.trim());
+    if (cityController.text.trim().isNotEmpty)
+      parts.add(cityController.text.trim());
+    if (stateController.text.trim().isNotEmpty)
+      parts.add(stateController.text.trim());
+    if (countryController.text.trim().isNotEmpty)
+      parts.add(countryController.text.trim());
+    if (zipController.text.trim().isNotEmpty)
+      parts.add(zipController.text.trim());
     return parts.join(', ');
   }
 
   /// Parses "dialCode number ext. extNum" into (countryCode, dialCode, number, ext).
   /// Maps common dial codes to ISO country codes for CountryCodePicker.
   static const Map<String, String> _dialToIso = {
-    '+1': 'US', '+91': 'IN', '+44': 'GB', '+81': 'JP', '+86': 'CN',
-    '+49': 'DE', '+33': 'FR', '+39': 'IT', '+34': 'ES', '+61': 'AU',
-    '+55': 'BR', '+7': 'RU', '+82': 'KR', '+380': 'UA', '+971': 'AE',
+    '+1': 'US',
+    '+91': 'IN',
+    '+44': 'GB',
+    '+81': 'JP',
+    '+86': 'CN',
+    '+49': 'DE',
+    '+33': 'FR',
+    '+39': 'IT',
+    '+34': 'ES',
+    '+61': 'AU',
+    '+55': 'BR',
+    '+7': 'RU',
+    '+82': 'KR',
+    '+380': 'UA',
+    '+971': 'AE',
   };
 
-  static ({String countryCode, String dialCode, String number, String ext}) parsePhone(String? full) {
+  static ({String countryCode, String dialCode, String number, String ext})
+      parsePhone(String? full) {
     if (full == null || full.trim().isEmpty) {
       return (countryCode: 'US', dialCode: '+1', number: '', ext: '');
     }
     final s = full.trim();
-    final extMatch = RegExp(r'\s+ext\.\s*(.+)$', caseSensitive: false).firstMatch(s);
+    final extMatch =
+        RegExp(r'\s+ext\.\s*(.+)$', caseSensitive: false).firstMatch(s);
     final ext = extMatch != null ? extMatch.group(1)?.trim() ?? '' : '';
-    final withoutExt = extMatch != null ? s.substring(0, extMatch.start).trim() : s;
+    final withoutExt =
+        extMatch != null ? s.substring(0, extMatch.start).trim() : s;
     final parts = withoutExt.split(RegExp(r'\s+'));
-    if (parts.isEmpty) return (countryCode: 'US', dialCode: '+1', number: '', ext: ext);
-    if (parts.length == 1) return (countryCode: 'US', dialCode: '+1', number: parts[0], ext: ext);
+    if (parts.isEmpty)
+      return (countryCode: 'US', dialCode: '+1', number: '', ext: ext);
+    if (parts.length == 1)
+      return (countryCode: 'US', dialCode: '+1', number: parts[0], ext: ext);
     final first = parts[0];
     final dialCode = first.startsWith('+') ? first : '+1';
     final countryCode = _dialToIso[dialCode] ?? 'US';
-    final number = first.startsWith('+') ? parts.sublist(1).join('') : withoutExt;
-    return (countryCode: countryCode, dialCode: dialCode, number: number, ext: ext);
+    final number =
+        first.startsWith('+') ? parts.sublist(1).join('') : withoutExt;
+    return (
+      countryCode: countryCode,
+      dialCode: dialCode,
+      number: number,
+      ext: ext
+    );
   }
 
   // Map theme to color values
@@ -283,6 +310,12 @@ class HomePageController extends GetxController {
       return false;
     }
 
+    if (personalEmailController.text.trim().isNotEmpty &&
+        !GetUtils.isEmail(personalEmailController.text.trim())) {
+      CommonSnackbar.error('Please enter a valid personal email');
+      return false;
+    }
+
     if (personalPhoneController.text.trim().isNotEmpty) {
       final personalPhoneError = validatePhoneNumber(
         personalPhoneController.text.trim(),
@@ -305,13 +338,15 @@ class HomePageController extends GetxController {
     }
 
     if (linkedinController.text.trim().isNotEmpty &&
-        !isValidUrl(toValidUrl(linkedinController.text.trim(), platform: 'linkedin'))) {
+        !isValidUrl(
+            toValidUrl(linkedinController.text.trim(), platform: 'linkedin'))) {
       CommonSnackbar.error('Please enter a valid LinkedIn URL');
       return false;
     }
 
     if (twitterController.text.trim().isNotEmpty &&
-        !isValidUrl(toValidUrl(twitterController.text.trim(), platform: 'twitter'))) {
+        !isValidUrl(
+            toValidUrl(twitterController.text.trim(), platform: 'twitter'))) {
       CommonSnackbar.error('Please enter a valid Twitter URL');
       return false;
     }
@@ -323,25 +358,29 @@ class HomePageController extends GetxController {
     }
 
     if (instagramController.text.trim().isNotEmpty &&
-        !isValidUrl(toValidUrl(instagramController.text.trim(), platform: 'instagram'))) {
+        !isValidUrl(toValidUrl(instagramController.text.trim(),
+            platform: 'instagram'))) {
       CommonSnackbar.error('Please enter a valid Instagram URL');
       return false;
     }
 
     if (githubController.text.trim().isNotEmpty &&
-        !isValidUrl(toValidUrl(githubController.text.trim(), platform: 'github'))) {
+        !isValidUrl(
+            toValidUrl(githubController.text.trim(), platform: 'github'))) {
       CommonSnackbar.error('Please enter a valid GitHub URL');
       return false;
     }
 
     if (youtubeController.text.trim().isNotEmpty &&
-        !isValidUrl(toValidUrl(youtubeController.text.trim(), platform: 'youtube'))) {
+        !isValidUrl(
+            toValidUrl(youtubeController.text.trim(), platform: 'youtube'))) {
       CommonSnackbar.error('Please enter a valid YouTube URL');
       return false;
     }
 
     if (facebookController.text.trim().isNotEmpty &&
-        !isValidUrl(toValidUrl(facebookController.text.trim(), platform: 'facebook'))) {
+        !isValidUrl(
+            toValidUrl(facebookController.text.trim(), platform: 'facebook'))) {
       CommonSnackbar.error('Please enter a valid Facebook URL');
       return false;
     }
@@ -391,7 +430,7 @@ class HomePageController extends GetxController {
 
       // Prepare the request body matching your API structure
       // Prepare the request body
-Map<String, dynamic> cardDataMap = buildCardDataMap(themeColors);
+      Map<String, dynamic> cardDataMap = buildCardDataMap(themeColors);
 
       log("Create Card Data:${jsonEncode(cardDataMap)}");
 
@@ -544,9 +583,9 @@ Map<String, dynamic> cardDataMap = buildCardDataMap(themeColors);
 
   List<CardModel> get filteredCards {
     if (cardsResponse == null) return [];
-    
+
     List<CardModel> list = List.from(cardsResponse!.cards);
-    
+
     // 1. Search Filter
     if (searchText.value.isNotEmpty) {
       final query = searchText.value.toLowerCase();
@@ -555,20 +594,20 @@ Map<String, dynamic> cardDataMap = buildCardDataMap(themeColors);
         final title = card.title.toLowerCase();
         final company = card.company.toLowerCase();
         final tags = card.tags.join(' ').toLowerCase();
-        return name.contains(query) || 
-               title.contains(query) || 
-               company.contains(query) || 
-               tags.contains(query);
+        return name.contains(query) ||
+            title.contains(query) ||
+            company.contains(query) ||
+            tags.contains(query);
       }).toList();
     }
-    
+
     // 2. Visibility Filter
     if (selectedFilter.value == 'Public Card') {
       list = list.where((card) => card.isPublic).toList();
     } else if (selectedFilter.value == 'Private Card') {
       list = list.where((card) => !card.isPublic).toList();
     }
-    
+
     // 3. Sorting
     list.sort((a, b) {
       int result = 0;
@@ -576,12 +615,13 @@ Map<String, dynamic> cardDataMap = buildCardDataMap(themeColors);
         result = a.name.toLowerCase().compareTo(b.name.toLowerCase());
       } else if (selectedSort.value == 'Sort by View') {
         result = a.viewCount.compareTo(b.viewCount);
-      } else { // Sort by Date
+      } else {
+        // Sort by Date
         result = a.createdAt.compareTo(b.createdAt);
       }
       return isAscending.value ? result : -result;
     });
-    
+
     return list;
   }
 
@@ -759,12 +799,17 @@ Map<String, dynamic> cardDataMap = buildCardDataMap(themeColors);
         platform: 'linkedin',
       ),
       'socialLinks': {
-        'linkedin': toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
-        'twitter': toValidUrl(twitterController.text.trim(), platform: 'twitter'),
-        'facebook': toValidUrl(facebookController.text.trim(), platform: 'facebook'),
+        'linkedin':
+            toValidUrl(linkedinController.text.trim(), platform: 'linkedin'),
+        'twitter':
+            toValidUrl(twitterController.text.trim(), platform: 'twitter'),
+        'facebook':
+            toValidUrl(facebookController.text.trim(), platform: 'facebook'),
         'github': toValidUrl(githubController.text.trim(), platform: 'github'),
-        'instagram': toValidUrl(instagramController.text.trim(), platform: 'instagram'),
-        'youtube': toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
+        'instagram':
+            toValidUrl(instagramController.text.trim(), platform: 'instagram'),
+        'youtube':
+            toValidUrl(youtubeController.text.trim(), platform: 'youtube'),
       },
       'tags': skills.toList(),
       'theme': {

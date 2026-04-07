@@ -196,6 +196,7 @@ class IndividualGroupController extends GetxController {
       final response = await _dio.get(ApiEndpoints.myCards);
 
       if (response.statusCode == 200) {
+        log("My Cards Response: ${response.data}");
         final data = response.data;
         List<dynamic> cardsList = [];
         

@@ -139,7 +139,11 @@ class RecentActivityPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   const SizedBox(height: 16),
+
                   // Recent Activity List
+                
+                Center(child: Text("No recent activity",style: TextStyle(color: AppColors.textSecondary),),),
+                if(false)
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(

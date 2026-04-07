@@ -83,6 +83,8 @@ flutter:
      - assets/home_page/
      - assets/create_page/
      - assets/card_background/
+     - assets/icons/
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

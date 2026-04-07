@@ -34,10 +34,12 @@ class CustomFormTextField extends StatefulWidget {
 
 class _CustomFormTextFieldState extends State<CustomFormTextField> {
   FocusNode? _focusNode;
+  late bool _obscureText;
 
   @override
   void initState() {
     super.initState();
+    _obscureText = widget.isPassword;
     if (widget.onUnfocus != null) {
       _focusNode = FocusNode()..addListener(_onFocusChange);
     }
@@ -81,7 +83,7 @@ class _CustomFormTextFieldState extends State<CustomFormTextField> {
             controller: widget.controller,
             initialValue: widget.initialValue,
             focusNode: _focusNode,
-            obscureText: widget.isPassword,
+            obscureText: _obscureText,
             onEditingComplete: widget.onEditingComplete,
             keyboardType: widget.keyboardType,
             inputFormatters: widget.urlPlatform != null
@@ -100,6 +102,22 @@ class _CustomFormTextFieldState extends State<CustomFormTextField> {
               ),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+              suffixIcon: widget.isPassword
+                  ? IconButton(
+                      icon: Icon(
+                        _obscureText ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.white54,
+                        size: 18,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureText = !_obscureText;
+                        });
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    )
+                  : null,
             ),
           ),
         ),

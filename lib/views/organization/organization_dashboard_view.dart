@@ -8,6 +8,8 @@ import 'package:rolo_digi_card/models/organization_model.dart';
 import 'package:rolo_digi_card/utils/color.dart';
 import 'package:rolo_digi_card/views/organization/organization_qr_scanner_view.dart';
 import 'package:rolo_digi_card/views/organization/widgets/line_chart_painter.dart';
+import 'package:rolo_digi_card/views/organization/widgets/organization_activity_chart.dart';
+import 'package:rolo_digi_card/views/organization/organization_settings_view.dart';
 import 'package:rolo_digi_card/views/profile_page/profile_page.dart';
 
 class OrganizationDashboardView extends GetView<OrganizationController> {
@@ -138,11 +140,6 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
       children: [
         Row(
           children: [
-            // IconButton(
-            //   onPressed: () {},
-            //   icon: const Icon(Icons.menu, color: AppColors.textPrimary),
-            // ),
-            // const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.all(8),
               decoration: const BoxDecoration(
@@ -169,25 +166,36 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
             ),
           ],
         ),
-        GestureDetector(
-          onTap: () {
-            Get.to(() => const ProfilePage());
-            // Profile action
-          },
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.purple.shade400,
-              shape: BoxShape.circle,
+        Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.settings, color: Colors.white70),
+              onPressed: () {
+                Get.to(() => const OrganizationSettingsView());
+              },
             ),
-            child: Text(
-              controller.currentUser.value?.initials ?? 'JD',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () {
+                Get.to(() => const ProfilePage());
+                // Profile action
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.purple.shade400,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  controller.currentUser.value?.initials ?? 'JD',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ],
     );
@@ -511,7 +519,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
         SizedBox(
           height: 150,
           width: double.infinity,
-          child: CustomPaint(painter: LineChartPainter(trendData)),
+          child: OrganizationActivityChart(chartData: trendData),
         ),
         const SizedBox(height: 20),
         SingleChildScrollView(

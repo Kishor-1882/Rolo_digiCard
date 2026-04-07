@@ -126,8 +126,10 @@ class _CreateNewCardState extends State<CreateNewCard> {
     // New Fields
     homePageController.personalEmailController.text =
         editingCard!.contact.personalEmail ?? '';
-    final personalPhone = HomePageController.parsePhone(editingCard!.contact.personalPhone);
-    homePageController.personalPhoneCountryCode.value = personalPhone.countryCode;
+    final personalPhone =
+        HomePageController.parsePhone(editingCard!.contact.personalPhone);
+    homePageController.personalPhoneCountryCode.value =
+        personalPhone.countryCode;
     homePageController.personalPhoneDialCode.value = personalPhone.dialCode;
     homePageController.personalPhoneController.text = personalPhone.number;
     homePageController.personalPhoneExtController.text = personalPhone.ext;
@@ -159,9 +161,13 @@ class _CreateNewCardState extends State<CreateNewCard> {
     homePageController.facebookController.text = editingCard!.facebookUrl ?? '';
     homePageController.youtubeController.text = editingCard!.youtubeUrl ?? '';
 
-    // Set theme
-    homePageController.selectedTheme.value =
-        editingCard!.theme.cardStyle.capitalize ?? 'Light';
+    // Set theme (map 'professional' back to 'Light', and capitalize others)
+    String themeStyle = editingCard!.theme.cardStyle;
+    if (themeStyle.toLowerCase() == 'professional') {
+      homePageController.selectedTheme.value = 'Light';
+    } else {
+      homePageController.selectedTheme.value = themeStyle.capitalize ?? 'Light';
+    }
 
     // Set public/private
     homePageController.isPublicCard.value = editingCard!.isPublic;
@@ -204,18 +210,17 @@ class _CreateNewCardState extends State<CreateNewCard> {
                         )
                       // If no local image, check if we're editing and have a profile URL
                       : (isEditMode &&
-                            editingCard?.profile != null &&
-                            editingCard!.profile!.isNotEmpty)
-                      ? DecorationImage(
-                          image: NetworkImage(
-                            editingCard!.profile!,
-                          ), // You might want to use a cached network image
-                          fit: BoxFit.cover,
-                        )
-                      : null,
+                              editingCard?.profile != null &&
+                              editingCard!.profile!.isNotEmpty)
+                          ? DecorationImage(
+                              image: NetworkImage(
+                                editingCard!.profile!,
+                              ), // You might want to use a cached network image
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                 ),
-                child:
-                    controller.profileImage == null &&
+                child: controller.profileImage == null &&
                         (!isEditMode || editingCard?.profile == null)
                     ? Icon(Icons.person, size: 40, color: Colors.grey)
                     : null,
@@ -407,10 +412,11 @@ class _CreateNewCardState extends State<CreateNewCard> {
                   hintText: '628002',
                   controller: controller.zipController,
                   keyboardType: TextInputType.number,
-                  onUnfocus: () => controller.fetchGeocodeByZip(controller.zipController.text),
+                  onUnfocus: () => controller
+                      .fetchGeocodeByZip(controller.zipController.text),
                 ),
               ),
-  const SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: CustomFormTextField(
                   title: 'Country',
@@ -418,10 +424,9 @@ class _CreateNewCardState extends State<CreateNewCard> {
                   controller: controller.countryController,
                 ),
               ),
-          
             ],
           ),
-        
+
           const SizedBox(height: 10),
           Row(
             children: [
@@ -442,7 +447,7 @@ class _CreateNewCardState extends State<CreateNewCard> {
               ),
             ],
           ),
-            const SizedBox(height: 10),
+          const SizedBox(height: 10),
           Row(
             children: [
               Expanded(
@@ -574,6 +579,8 @@ class _CreateNewCardState extends State<CreateNewCard> {
                 ],
               ),
               if (controller.skills.isNotEmpty)
+                SizedBox(height:10),
+              if (controller.skills.isNotEmpty)
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -593,7 +600,7 @@ class _CreateNewCardState extends State<CreateNewCard> {
                           controller.skills.remove(skill);
                         });
                       },
-                      backgroundColor: AppColors.progressPink,
+                      backgroundColor: AppColors.darkBackground,
                     );
                   }).toList(),
                 ),
@@ -883,7 +890,6 @@ class _CreateNewCardState extends State<CreateNewCard> {
         ),
         height: MediaQuery.of(context).size.height * 0.70,
         width: MediaQuery.of(context).size.width * 0.90,
-
         child: Stack(
           children: [
             Column(
@@ -1044,7 +1050,6 @@ class _CreateNewCardState extends State<CreateNewCard> {
                 ),
               ],
             ),
-
             Positioned(
               top: 16,
               right: 16,
@@ -1121,104 +1126,104 @@ class _CreateNewCardState extends State<CreateNewCard> {
             child: controller.isLoading.value
                 ? Center(child: CircularProgressIndicator())
                 : controller.showSuccess.value
-                ? buildSuccessScreen(controller)
-                : SingleChildScrollView(
-                    // Wrap the main content in a SingleChildScrollView
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          // All form sections are now built sequentially
-                          _buildProfilePictureSection(controller),
-                          _buildBasicInformationSection(controller),
-                          Visibility(
-                            visible: !isMinimalView,
-                            child: _buildContactSection(controller),
-                          ),
-                          Visibility(
-                            visible: !isMinimalView,
-                            child: _buildProfessionalSection(controller),
-                          ),
-                          Visibility(
-                            visible: !isMinimalView,
-                            child: _buildSocialLinksSection(controller),
-                          ),
-                          Visibility(
-                            visible: !isMinimalView,
-                            child: _buildCustomizeYourCardSection(controller),
-                          ),
-                          Visibility(
-                            visible: !isMinimalView,
-                            child: _buildCardVisibilitySection(controller),
-                          ),
+                    ? buildSuccessScreen(controller)
+                    : SingleChildScrollView(
+                        // Wrap the main content in a SingleChildScrollView
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              // All form sections are now built sequentially
+                              _buildProfilePictureSection(controller),
+                              _buildBasicInformationSection(controller),
+                              Visibility(
+                                visible: !isMinimalView,
+                                child: _buildContactSection(controller),
+                              ),
+                              Visibility(
+                                visible: !isMinimalView,
+                                child: _buildProfessionalSection(controller),
+                              ),
+                              Visibility(
+                                visible: !isMinimalView,
+                                child: _buildSocialLinksSection(controller),
+                              ),
+                              Visibility(
+                                visible: !isMinimalView,
+                                child:
+                                    _buildCustomizeYourCardSection(controller),
+                              ),
+                              Visibility(
+                                visible: !isMinimalView,
+                                child: _buildCardVisibilitySection(controller),
+                              ),
 
-                          // Single Save Card button at the bottom
-                          Container(
-                            width: double.infinity,
-                            height: 36,
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 20,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.progressPink,
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                if (isOrganization) {
-                                  final orgController =
-                                      Get.isRegistered<
-                                        CardManagementController
-                                      >()
-                                      ? Get.find<CardManagementController>()
-                                      : Get.put(CardManagementController());
-                                  final cardDataMap = controller
-                                      .buildCardDataMap(
-                                        controller.getThemeColors(),
-                                      );
-                                  if (isEditMode) {
-                                    orgController.updateOrgCard(
-                                      editingCard!.id,
-                                      cardDataMap,
-                                    );
-                                  } else {
-                                    orgController.createOrgCard(cardDataMap);
-                                  }
-                                } else {
-                                  if (isEditMode) {
-                                    controller.updateCard(editingCard!.id);
-                                  } else {
-                                    controller.createCard();
-                                  }
-                                }
-                              },
-                              icon: Icon(
-                                Icons.check,
-                                color: AppColors.buttonBlack,
-                                size: 20,
-                              ),
-                              label: Text(
-                                'Save Card',
-                                style: TextStyle(
-                                  color: AppColors.buttonBlack,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                              // Single Save Card button at the bottom
+                              Container(
+                                width: double.infinity,
+                                height: 36,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 20,
                                 ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
+                                decoration: BoxDecoration(
+                                  color: AppColors.progressPink,
                                   borderRadius: BorderRadius.circular(15),
                                 ),
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    if (isOrganization) {
+                                      final orgController = Get.isRegistered<
+                                              CardManagementController>()
+                                          ? Get.find<CardManagementController>()
+                                          : Get.put(CardManagementController());
+                                      final cardDataMap =
+                                          controller.buildCardDataMap(
+                                        controller.getThemeColors(),
+                                      );
+                                      if (isEditMode) {
+                                        orgController.updateOrgCard(
+                                          editingCard!.id,
+                                          cardDataMap,
+                                        );
+                                      } else {
+                                        orgController
+                                            .createOrgCard(cardDataMap);
+                                      }
+                                    } else {
+                                      if (isEditMode) {
+                                        controller.updateCard(editingCard!.id);
+                                      } else {
+                                        controller.createCard();
+                                      }
+                                    }
+                                  },
+                                  icon: Icon(
+                                    Icons.check,
+                                    color: AppColors.buttonBlack,
+                                    size: 20,
+                                  ),
+                                  label: Text(
+                                    'Save Card',
+                                    style: TextStyle(
+                                      color: AppColors.buttonBlack,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
           );
         },
       ),
