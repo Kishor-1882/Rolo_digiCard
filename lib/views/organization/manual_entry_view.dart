@@ -20,6 +20,7 @@ class _ManualEntryViewState extends State<ManualEntryView> {
   @override
   void initState() {
     super.initState();
+    
     _controller.addListener(() => setState(() {}));
   }
 
