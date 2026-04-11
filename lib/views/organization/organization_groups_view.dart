@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rolo_digi_card/common/header.dart';
 import 'package:rolo_digi_card/utils/color.dart';
 import 'package:rolo_digi_card/views/organization/organization_group_list_view.dart';
 
@@ -11,86 +12,92 @@ class OrganizationGroupsView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              const Text(
-                'Groups',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Text(
-                'Manage your user and card groups',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 48),
-              
-              // Folder Icon in center
-              Center(
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFE91E8E), Color(0xFF8B5CF6)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+        child: Column(
+          children: [
+            AppHeader(),
+                  SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Groups',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFE91E8E).withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                  ),
+                  const Text(
+                    'Manage your user and card groups',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 48),
+                  
+                  // Folder Icon in center
+                  Center(
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFE91E8E), Color(0xFF8B5CF6)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFE91E8E).withOpacity(0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
-                    ],
+                      child: const Icon(
+                        Icons.folder_open,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.folder_open,
-                    color: Colors.white,
-                    size: 40,
+                  
+                  const SizedBox(height: 48),
+            
+                  // User Groups Button
+                  _buildGroupOptionCard(
+                    title: 'User Groups',
+                    subtitle: 'Manage groups of users and team members',
+                    meta: '5 groups',
+                    icon: Icons.people_outline,
+                    iconColor: const Color(0xFFE040FB), // Pink
+                    onTap: () {
+                       Get.to(() => const OrganizationGroupListView(groupType: 'user'));
+                    },
                   ),
-                ),
+            
+                  const SizedBox(height: 16),
+            
+                  // Card Groups Button
+                  _buildGroupOptionCard(
+                    title: 'Card Groups',
+                    subtitle: 'Organize digital business cards into groups',
+                    meta: '3 groups',
+                    icon: Icons.credit_card,
+                    iconColor: Colors.blueAccent,
+                    onTap: () {
+                       Get.to(() => const OrganizationGroupListView(groupType: 'card'));
+                    },
+                  ),
+                ],
               ),
-              
-              const SizedBox(height: 48),
-
-              // User Groups Button
-              _buildGroupOptionCard(
-                title: 'User Groups',
-                subtitle: 'Manage groups of users and team members',
-                meta: '5 groups',
-                icon: Icons.people_outline,
-                iconColor: const Color(0xFFE040FB), // Pink
-                onTap: () {
-                   Get.to(() => const OrganizationGroupListView(groupType: 'user'));
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Card Groups Button
-              _buildGroupOptionCard(
-                title: 'Card Groups',
-                subtitle: 'Organize digital business cards into groups',
-                meta: '3 groups',
-                icon: Icons.credit_card,
-                iconColor: Colors.blueAccent,
-                onTap: () {
-                   Get.to(() => const OrganizationGroupListView(groupType: 'card'));
-                },
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

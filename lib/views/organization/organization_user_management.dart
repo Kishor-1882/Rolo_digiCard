@@ -24,40 +24,47 @@ class OrganizationUserManagement extends StatelessWidget {
       backgroundColor: AppColors.darkBackground,
       body: SafeArea(
         child: Obx(() {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppHeader(),
-                SizedBox(height: 10),
-                _buildHeader(controller),
-                const SizedBox(height: 24),
-                _buildStatsGrid(controller),
-                const SizedBox(height: 24),
-                _buildSearchAndFilter(controller),
-                const SizedBox(height: 16),
-                Text(
-                  '${controller.filteredUsers.length} users found',
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                ),
-                const SizedBox(height: 16),
-                if (controller.isLoading.value)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: CircularProgressIndicator(
-                        color: Color(0xFFE91E8E),
+          return Column(
+            children: [
+              AppHeader(), // ← Outside padding, no horizontal insets
+              SizedBox(height: 10),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(controller),
+                      const SizedBox(height: 24),
+                      _buildStatsGrid(controller),
+                      const SizedBox(height: 24),
+                      _buildSearchAndFilter(controller),
+                      const SizedBox(height: 16),
+                      Text(
+                        '${controller.filteredUsers.length} users found',
+                        style: const TextStyle(
+                            color: AppColors.textSecondary, fontSize: 14),
                       ),
-                    ),
-                  )
-                else if (controller.filteredUsers.isEmpty)
-                  _buildEmptyState()
-                else
-                  _buildUserList(controller.filteredUsers),
-                const SizedBox(height: 32),
-              ],
-            ),
+                      const SizedBox(height: 16),
+                      if (controller.isLoading.value)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32),
+                            child: CircularProgressIndicator(
+                              color: Color(0xFFE91E8E),
+                            ),
+                          ),
+                        )
+                      else if (controller.filteredUsers.isEmpty)
+                        _buildEmptyState()
+                      else
+                        _buildUserList(controller.filteredUsers),
+                      const SizedBox(height: 32),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           );
         }),
       ),
@@ -91,12 +98,13 @@ class OrganizationUserManagement extends StatelessWidget {
                     ),
                     Text(
                       'Manage your team members',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                      style: TextStyle(
+                          color: AppColors.textSecondary, fontSize: 14),
                     ),
                   ],
                 ),
               ),
-                          const SizedBox(width: 8),  // ← add spacing between the two sides
+              const SizedBox(width: 8), // ← add spacing between the two sides
 
               Container(
                 decoration: BoxDecoration(
@@ -115,12 +123,14 @@ class OrganizationUserManagement extends StatelessWidget {
                   icon: const Icon(Icons.add, color: Colors.white, size: 18),
                   label: const Text(
                     'New User',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -157,13 +167,12 @@ class OrganizationUserManagement extends StatelessWidget {
                 const Color(0xFFE91E8E),
               ),
             ),
-        
           ],
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-             Expanded(
+            Expanded(
               child: _buildStatBox(
                 controller.activeUsers.toString(),
                 'Active',
@@ -186,7 +195,8 @@ class OrganizationUserManagement extends StatelessWidget {
     );
   }
 
-  Widget _buildStatBox(String value, String label, IconData icon, Color accentColor) {
+  Widget _buildStatBox(
+      String value, String label, IconData icon, Color accentColor) {
     return Container(
       height: 100,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
@@ -249,7 +259,8 @@ class OrganizationUserManagement extends StatelessWidget {
                 icon: const Icon(Icons.search, color: Colors.white38),
                 suffixIcon: Obx(() => controller.searchQuery.value.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.white38, size: 18),
+                        icon: const Icon(Icons.clear,
+                            color: Colors.white38, size: 18),
                         onPressed: () {
                           controller.searchController.clear();
                           controller.searchQuery.value = '';
@@ -273,17 +284,35 @@ class OrganizationUserManagement extends StatelessWidget {
               () => DropdownButton<String>(
                 dropdownColor: const Color(0xFF1E1E2C),
                 value: controller.statusFilter.value,
-                hint: const Text('Status', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                selectedItemBuilder: (context) => <String>['All', 'Active', 'Inactive', 'Pending', 'Expired']
-                    .map((v) => Center(
-                          child: Text(
-                            v == 'All' ? 'Status' : v,
-                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                          ),
-                        ))
-                    .toList(),
-                items: <String>['All', 'Active', 'Inactive', 'Pending', 'Expired']
-                    .map((v) => DropdownMenuItem(value: v, child: Text(v, style: const TextStyle(color: Colors.white, fontSize: 13))))
+                hint: const Text('Status',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold)),
+                selectedItemBuilder: (context) =>
+                    <String>['All', 'Active', 'Inactive', 'Pending', 'Expired']
+                        .map((v) => Center(
+                              child: Text(
+                                v == 'All' ? 'Status' : v,
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ))
+                        .toList(),
+                items: <String>[
+                  'All',
+                  'Active',
+                  'Inactive',
+                  'Pending',
+                  'Expired'
+                ]
+                    .map((v) => DropdownMenuItem(
+                        value: v,
+                        child: Text(v,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13))))
                     .toList(),
                 onChanged: (v) {
                   if (v != null) controller.statusFilter.value = v;
@@ -310,17 +339,29 @@ class OrganizationUserManagement extends StatelessWidget {
               () => DropdownButton<String>(
                 dropdownColor: const Color(0xFF1E1E2C),
                 value: controller.roleFilter.value,
-                hint: const Text('Role', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                selectedItemBuilder: (context) => <String>['All', 'Admin', 'User', 'Owner']
-                    .map((v) => Center(
-                          child: Text(
-                            v == 'All' ? 'Role' : v,
-                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                          ),
-                        ))
-                    .toList(),
+                hint: const Text('Role',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold)),
+                selectedItemBuilder: (context) =>
+                    <String>['All', 'Admin', 'User', 'Owner']
+                        .map((v) => Center(
+                              child: Text(
+                                v == 'All' ? 'Role' : v,
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ))
+                        .toList(),
                 items: <String>['All', 'Admin', 'User', 'Owner']
-                    .map((v) => DropdownMenuItem(value: v, child: Text(v, style: const TextStyle(color: Colors.white, fontSize: 13))))
+                    .map((v) => DropdownMenuItem(
+                        value: v,
+                        child: Text(v,
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13))))
                     .toList(),
                 onChanged: (v) {
                   if (v != null) controller.roleFilter.value = v;
@@ -353,7 +394,7 @@ class OrganizationUserManagement extends StatelessWidget {
 
     Color statusColor;
     final state = user.userState.toLowerCase();
-    
+
     if (state == 'expired') {
       statusColor = Colors.redAccent.withOpacity(0.7);
     } else if (!user.isEmailVerified) {
@@ -365,7 +406,8 @@ class OrganizationUserManagement extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap: () => Get.to(() => OrgUserDetailPage(userId: user.id))?.then((_) => controller.fetchUsers()),
+      onTap: () => Get.to(() => OrgUserDetailPage(userId: user.id))
+          ?.then((_) => controller.fetchUsers()),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
@@ -428,11 +470,13 @@ class OrganizationUserManagement extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: statusColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: statusColor.withOpacity(0.5)),
+                          border:
+                              Border.all(color: statusColor.withOpacity(0.5)),
                         ),
                         child: Text(
                           user.statusLabel,
@@ -445,7 +489,8 @@ class OrganizationUserManagement extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       PopupMenuButton<String>(
-                        icon: const Icon(Icons.more_vert, color: Colors.white54),
+                        icon:
+                            const Icon(Icons.more_vert, color: Colors.white54),
                         color: const Color(0xFF2B2B36),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -453,13 +498,16 @@ class OrganizationUserManagement extends StatelessWidget {
                         onSelected: (value) {
                           switch (value) {
                             case 'view':
-                              Get.to(() => OrgUserDetailPage(userId: user.id))?.then((_) => controller.fetchUsers());
+                              Get.to(() => OrgUserDetailPage(userId: user.id))
+                                  ?.then((_) => controller.fetchUsers());
                               break;
                             case 'activate':
-                              controller.updateUserStatus(user.id, isActive: true);
+                              controller.updateUserStatus(user.id,
+                                  isActive: true);
                               break;
                             case 'deactivate':
-                              controller.updateUserStatus(user.id, isActive: false);
+                              controller.updateUserStatus(user.id,
+                                  isActive: false);
                               break;
                             case 'resend':
                               controller.resendInvitation(user.id);
@@ -470,15 +518,25 @@ class OrganizationUserManagement extends StatelessWidget {
                           }
                         },
                         itemBuilder: (_) => [
-                          _menuItem('view', Icons.visibility_outlined, 'View Details', Colors.white),
-                          if (!user.isActive && !user.isBlocked && user.organizationRole != 'owner' && user.organizationRole!='admin')
-                            _menuItem('activate', Icons.check_circle_outline, 'Activate', Colors.greenAccent),
-                          if (user.isActive && user.organizationRole != 'owner'  && user.organizationRole!='admin' )
-                            _menuItem('deactivate', Icons.pause_circle_outline, 'Deactivate', Colors.orangeAccent),
+                          _menuItem('view', Icons.visibility_outlined,
+                              'View Details', Colors.white),
+                          if (!user.isActive &&
+                              !user.isBlocked &&
+                              user.organizationRole != 'owner' &&
+                              user.organizationRole != 'admin')
+                            _menuItem('activate', Icons.check_circle_outline,
+                                'Activate', Colors.greenAccent),
+                          if (user.isActive &&
+                              user.organizationRole != 'owner' &&
+                              user.organizationRole != 'admin')
+                            _menuItem('deactivate', Icons.pause_circle_outline,
+                                'Deactivate', Colors.orangeAccent),
                           if (!user.isEmailVerified)
-                            _menuItem('resend', Icons.send_outlined, 'Resend Invite', Colors.blueAccent),
+                            _menuItem('resend', Icons.send_outlined,
+                                'Resend Invite', Colors.blueAccent),
                           if (user.organizationRole != 'owner')
-                            _menuItem('delete', Icons.delete_outline, 'Remove User', Colors.redAccent),
+                            _menuItem('delete', Icons.delete_outline,
+                                'Remove User', Colors.redAccent),
                         ],
                       ),
                     ],
@@ -493,18 +551,22 @@ class OrganizationUserManagement extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.badge_outlined, color: Colors.white38, size: 14),
+                      Icon(Icons.badge_outlined,
+                          color: Colors.white38, size: 14),
                       const SizedBox(width: 4),
                       Text(
                         user.displayRole,
-                        style: const TextStyle(color: Colors.white38, fontSize: 12),
+                        style: const TextStyle(
+                            color: Colors.white38, fontSize: 12),
                       ),
                       const SizedBox(width: 12),
-                      Icon(Icons.credit_card_outlined, color: Colors.white38, size: 14),
+                      Icon(Icons.credit_card_outlined,
+                          color: Colors.white38, size: 14),
                       const SizedBox(width: 4),
                       Text(
                         '${user.cardCount} cards',
-                        style: const TextStyle(color: Colors.white38, fontSize: 12),
+                        style: const TextStyle(
+                            color: Colors.white38, fontSize: 12),
                       ),
                     ],
                   ),
@@ -517,7 +579,8 @@ class OrganizationUserManagement extends StatelessWidget {
     );
   }
 
-  PopupMenuItem<String> _menuItem(String value, IconData icon, String label, Color color) {
+  PopupMenuItem<String> _menuItem(
+      String value, IconData icon, String label, Color color) {
     return PopupMenuItem<String>(
       value: value,
       child: Row(
@@ -573,7 +636,8 @@ class OrganizationUserManagement extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+            child:
+                const Text('Cancel', style: TextStyle(color: Colors.white54)),
           ),
           TextButton(
             onPressed: () async {
@@ -581,7 +645,8 @@ class OrganizationUserManagement extends StatelessWidget {
               final success = await controller.removeUser(user.id);
               if (success) Get.back();
             },
-            child: const Text('Remove', style: TextStyle(color: Colors.redAccent)),
+            child:
+                const Text('Remove', style: TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),

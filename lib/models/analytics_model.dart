@@ -26,7 +26,7 @@ class GeographyModel {
 class AnalyticsHealth {
   final int totalUsers;
   final int filteredUsersCount;
-  final dynamic activeUsersPercentage; // can be int or string "100.0"
+  final dynamic activeUsersPercentage;
   final int totalCards;
   final int filteredCardsCount;
   final dynamic activeCardsPercentage;
@@ -84,26 +84,83 @@ class AnalyticsEngagement {
   }
 }
 
+class GroupAnalyticsModel {
+  final List<dynamic> distribution;
+  final List<dynamic> status;
+  final List<dynamic> topUserGroups;
+  final int totalUserGroups;
+  final int totalCardGroups;
+
+  GroupAnalyticsModel({
+    required this.distribution,
+    required this.status,
+    required this.topUserGroups,
+    required this.totalUserGroups,
+    required this.totalCardGroups,
+  });
+
+  factory GroupAnalyticsModel.fromJson(Map<String, dynamic> json) {
+    return GroupAnalyticsModel(
+      distribution: json['distribution'] ?? [],
+      status: json['status'] ?? [],
+      topUserGroups: json['topUserGroups'] ?? [],
+      totalUserGroups: json['totalUserGroups'] ?? 0,
+      totalCardGroups: json['totalCardGroups'] ?? 0,
+    );
+  }
+}
+
+class CardGroupAnalyticsModel {
+  final List<dynamic> cardsPerGroup;
+  final List<dynamic> topActiveCardGroups;
+  final List<dynamic> cardGroupsPerUserGroup;
+
+  CardGroupAnalyticsModel({
+    required this.cardsPerGroup,
+    required this.topActiveCardGroups,
+    required this.cardGroupsPerUserGroup,
+  });
+
+  factory CardGroupAnalyticsModel.fromJson(Map<String, dynamic> json) {
+    return CardGroupAnalyticsModel(
+      cardsPerGroup: json['cardsPerGroup'] ?? [],
+      topActiveCardGroups: json['topActiveCardGroups'] ?? [],
+      cardGroupsPerUserGroup: json['cardGroupsPerUserGroup'] ?? [],
+    );
+  }
+}
+
 // Overview / Owner Response
 class AnalyticsOverviewModel {
   final AnalyticsHealth health;
   final AnalyticsEngagement engagement;
+  final GroupAnalyticsModel groupAnalytics;
+  final CardGroupAnalyticsModel cardGroupAnalytics;
   final List<dynamic> groupComparison;
   final List<dynamic> zeroActivityGroups;
+  final List<GeographyModel> geography;
 
   AnalyticsOverviewModel({
     required this.health,
     required this.engagement,
+    required this.groupAnalytics,
+    required this.cardGroupAnalytics,
     required this.groupComparison,
     required this.zeroActivityGroups,
+    required this.geography,
   });
 
   factory AnalyticsOverviewModel.fromJson(Map<String, dynamic> json) {
     return AnalyticsOverviewModel(
       health: AnalyticsHealth.fromJson(json['health'] ?? {}),
       engagement: AnalyticsEngagement.fromJson(json['engagement'] ?? {}),
+      groupAnalytics: GroupAnalyticsModel.fromJson(json['groupAnalytics'] ?? {}),
+      cardGroupAnalytics: CardGroupAnalyticsModel.fromJson(json['cardGroupAnalytics'] ?? {}),
       groupComparison: json['groupComparison'] ?? [],
       zeroActivityGroups: json['zeroActivityGroups'] ?? [],
+      geography: (json['geography'] as List? ?? [])
+          .map((e) => GeographyModel.fromJson(e))
+          .toList(),
     );
   }
 }
@@ -135,10 +192,10 @@ class AnalyticsAdminModel {
   }
 
   // Helper for UI if needed
-  List<dynamic> get funnel => []; 
+  List<dynamic> get funnel => [];
 }
 
-// User / Cards Response (They share structure mainly)
+// User / Cards Response
 class AnalyticsUserCardsModel {
   final Map<String, dynamic> kpi;
   final List<dynamic> cardPerformance;

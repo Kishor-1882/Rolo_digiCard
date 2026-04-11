@@ -6,6 +6,7 @@ import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/models/analytics_model.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
 import 'package:rolo_digi_card/services/end_points.dart';
+import 'package:rolo_digi_card/views/organization/widgets/date_filter_dropdown.dart';
 
 class AnalyticsController extends GetxController {
   final Dio _dio = dioClient;
@@ -19,16 +20,19 @@ class AnalyticsController extends GetxController {
   var cardsData = Rxn<AnalyticsUserCardsModel>();
   var geographyData = <GeographyModel>[].obs;
 
+  final selectedFilter = DateFilterOption.last30Days.obs;
+
   @override
   void onInit() {
     super.onInit();
     final authController = Get.find<AuthController>();
     if (authController.userType.value == 'organization') {
-      getOverview();
-      getAdminAnalytics();
-      getUserAnalytics();
-      getCardsAnalytics();
-      getGeographyAnalytics();
+      getOwnerAnalytics(days: selectedFilter.value.days);
+      // Optional: keep other specialized analytics if needed for other tabs/views
+      // getAdminAnalytics();
+      // getUserAnalytics();
+      // getCardsAnalytics();
+      // getGeographyAnalytics();
     } else {
       log(
         "Skipping AnalyticsController API calls - User is not an organization",
@@ -104,6 +108,7 @@ class AnalyticsController extends GetxController {
       final response = await _dio.get(ApiEndpoints.analyticsUser);
 
       if (response.statusCode == 200) {
+        log("Get User Analytics response: ${response.data}");
         userData.value = AnalyticsUserCardsModel.fromJson(response.data);
       }
     } on DioException catch (e) {

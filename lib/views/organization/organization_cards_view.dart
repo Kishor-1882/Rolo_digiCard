@@ -27,44 +27,49 @@ class OrganizationCardsView extends GetView<CardManagementController> {
           final cards = controller.filteredCards;
           final stats = controller.cardStats;
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-
-                AppHeader(),
-                SizedBox(height: 10),
-                _buildHeader(),
-                const SizedBox(height: 24),
-                _buildStatsGrid(stats),
-                const SizedBox(height: 24),
-                _buildSearchAndFilter(),
-                const SizedBox(height: 16),
-                Text(
-                  '${cards.length} cards found',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
+          return Column(
+            children: [
+              AppHeader(),
+                  SizedBox(height: 10),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 24),
+                      _buildStatsGrid(stats),
+                      const SizedBox(height: 24),
+                      _buildSearchAndFilter(),
+                      const SizedBox(height: 16),
+                      Text(
+                        '${cards.length} cards found',
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      if (controller.isLoading.value)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32),
+                            child: CircularProgressIndicator(
+                              color: Color(0xFFE91E8E),
+                            ),
+                          ),
+                        )
+                      else if (cards.isEmpty)
+                        _buildEmptyState()
+                      else
+                        _buildCardList(cards),
+                      const SizedBox(height: 32),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                if (controller.isLoading.value)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: CircularProgressIndicator(
-                        color: Color(0xFFE91E8E),
-                      ),
-                    ),
-                  )
-                else if (cards.isEmpty)
-                  _buildEmptyState()
-                else
-                  _buildCardList(cards),
-                const SizedBox(height: 32),
-              ],
-            ),
+              ),
+            ],
           );
         }),
       ),

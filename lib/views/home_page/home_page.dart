@@ -317,8 +317,8 @@ class DashboardPage extends StatelessWidget {
                               const SizedBox(height: 16),
                               const ProgressBarWidget(
                                 title: 'Profile Completion',
-                                percentage: '60%',
-                                progress: 0.6,
+                                percentage: '0%',
+                                progress: 0,
                               ),
                               const ProgressBarWidget(
                                 title: 'Engagement Rate',

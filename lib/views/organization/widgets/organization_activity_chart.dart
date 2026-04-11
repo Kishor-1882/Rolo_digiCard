@@ -141,6 +141,7 @@ class OrganizationActivityChart extends StatelessWidget {
     return LineChartBarData(
       spots: spots,
       isCurved: true,
+      preventCurveOverShooting: true,
       color: color,
       barWidth: 2,
       isStrokeCapRound: true,

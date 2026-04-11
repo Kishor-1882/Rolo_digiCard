@@ -163,15 +163,24 @@ class _OrganizationSettingsViewState extends State<OrganizationSettingsView> {
                 const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => controller.updateSettings(),
+                  child: Obx(() => ElevatedButton(
+                    onPressed: controller.isLoading.value ? null : () => controller.updateSettings(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryPink,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Save Changes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ),
+                    child: controller.isLoading.value
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text('Save Changes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  )),
                 ),
               ],
             ),
@@ -309,24 +318,39 @@ class _OrganizationSettingsViewState extends State<OrganizationSettingsView> {
               Get.dialog(const TransferOwnershipDialog());
             },
           ),
-          _buildAdvancedActionCard(
-            title: 'Deactivate Organization',
-            subtitle: 'Temporarily disable access. Data is preserved and can be reactivated.',
-            buttonText: 'Deactivate',
+          Obx(() => _buildAdvancedActionCard(
+            title: controller.isDeactivated.value ? 'Activate Organization' : 'Deactivate Organization',
+            subtitle: controller.isDeactivated.value 
+                ? 'Restore access to the organization and all its data.' 
+                : 'Temporarily disable access. Data is preserved and can be reactivated.',
+            buttonText: controller.isDeactivated.value ? 'Activate' : 'Deactivate',
             icon: Icons.power_settings_new,
             onPressed: () {
-              _showConfirmDialog(
-                title: 'Deactivate Organization',
-                content: 'Are you sure you want to deactivate this organization? Users will lose access until reactivated.',
-                confirmText: 'Deactivate',
-                isDestructive: true,
-                onConfirm: () {
-                  Get.back();
-                  controller.deactivateOrganization();
-                },
-              );
+              if (controller.isDeactivated.value) {
+                _showConfirmDialog(
+                  title: 'Activate Organization',
+                  content: 'Are you sure you want to reactivate this organization? Users will regain access immediately.',
+                  confirmText: 'Activate',
+                  isDestructive: false,
+                  onConfirm: () {
+                    Get.back();
+                    controller.activateOrganization();
+                  },
+                );
+              } else {
+                _showConfirmDialog(
+                  title: 'Deactivate Organization',
+                  content: 'Are you sure you want to deactivate this organization? Users will lose access until reactivated.',
+                  confirmText: 'Deactivate',
+                  isDestructive: true,
+                  onConfirm: () {
+                    Get.back();
+                    controller.deactivateOrganization();
+                  },
+                );
+              }
             },
-          ),
+          )),
           _buildAdvancedActionCard(
             title: 'Delete Organization',
             subtitle: 'Permanently remove this organization. This action cannot be undone.',
@@ -334,7 +358,16 @@ class _OrganizationSettingsViewState extends State<OrganizationSettingsView> {
             icon: Icons.delete_outline,
             isDestructive: true,
             onPressed: () {
-              CommonSnackbar.success("Coming soon!");
+              _showConfirmDialog(
+                title: 'Delete Organization',
+                content: 'Are you sure you want to permanently delete this organization? All data will be lost and this action cannot be undone.',
+                confirmText: 'Delete',
+                isDestructive: true,
+                onConfirm: () {
+                  Get.back();
+                  controller.deleteOrganization();
+                },
+              );
             },
           ),
         ];

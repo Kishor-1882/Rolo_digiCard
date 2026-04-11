@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,6 +11,7 @@ import 'package:rolo_digi_card/views/organization/organization_qr_scanner_view.d
 import 'package:rolo_digi_card/views/organization/widgets/line_chart_painter.dart';
 import 'package:rolo_digi_card/views/organization/widgets/organization_activity_chart.dart';
 import 'package:rolo_digi_card/views/organization/organization_settings_view.dart';
+import 'package:rolo_digi_card/views/organization/widgets/date_filter_dropdown.dart';
 import 'package:rolo_digi_card/views/profile_page/profile_page.dart';
 
 class OrganizationDashboardView extends GetView<OrganizationController> {
@@ -27,7 +29,6 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
           final org = controller.organization.value;
           final totalScans = stats?.summary?['totalScans'] ?? 0;
 
-          log("Dashboard Build:${stats?.summary}");
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
@@ -49,7 +50,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Obx(() => _DateFilterButton(
+                    Obx(() => DateFilterDropdown(
                       selected: selectedFilter.value,
                       onChanged: (value) {
                        selectedFilter.value = value;
@@ -123,7 +124,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                 ),
                 if (Get.find<AuthController>().hasPermission('card:read')) ...[
                   const SizedBox(height: 24),
-                  _buildScannedCards(),
+                  _buildScannedCards(stats?.savedCards),
                 ],
                 const SizedBox(height: 32),
               ],
@@ -664,7 +665,6 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
   }
 
   Widget _buildTopPerformingCards(List<dynamic>? topCards) {
-    log("Top performing cards: $topCards");
     if (topCards == null || topCards.isEmpty) {
       return const Center(
         child: Text(
@@ -778,7 +778,6 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
     Map<String, dynamic>? groupStats,
     List<dynamic>? recentGroups,
   ) {
-    log("Group stats: $groupStats");
     final total = groupStats?['total'] ?? 0;
     // final shared = groupStats?['shared'] ?? 0;
    final shared = recentGroups?.where((group) => group['isShared'] == true).length ?? 0;
@@ -977,7 +976,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
     }
   }
 
-  Widget _buildScannedCards() {
+  Widget _buildScannedCards(List<dynamic>? savedCards) {
     return Column(
       children: [
         Container(
@@ -989,6 +988,7 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
             border: Border.all(color: Colors.white10),
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Row(
                 children: [
@@ -1004,34 +1004,55 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
                   ),
                 ],
               ),
-              const SizedBox(height: 48),
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Icon(
-                  Icons.qr_code_2,
-                  color: Colors.white24,
-                  size: 64,
-                ),
-              ),
               const SizedBox(height: 24),
-              const Text(
-                'No scanned cards yet',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              if (savedCards == null || savedCards.isEmpty) ...[
+                const SizedBox(height: 24),
+                Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(
+                          Icons.qr_code_2,
+                          color: Colors.white24,
+                          size: 64,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'No scanned cards yet',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Scan a card to see it appear here',
+                        style: TextStyle(color: Colors.white54, fontSize: 14),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ] else ...[
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: savedCards.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final savedCard = savedCards[index];
+                    return _buildSavedCardItem(savedCard);
+                  },
+                ),
+              ],
               const SizedBox(height: 8),
-              const Text(
-                'Scan a card to see it appear here',
-                style: TextStyle(color: Colors.white54, fontSize: 14),
-              ),
-              const SizedBox(height: 32),
             ],
           ),
         ),
@@ -1083,225 +1104,62 @@ class OrganizationDashboardView extends GetView<OrganizationController> {
       ],
     );
   }
-}
 
+  Widget _buildSavedCardItem(dynamic savedCard) {
+    final card = savedCard['cardId'];
+    if (card == null) return const SizedBox.shrink();
 
-class _DateFilterButton extends StatelessWidget {
-  final DateFilterOption selected;
-  final ValueChanged<DateFilterOption> onChanged;
+    final name = card['name'] ?? 'Untitled';
+    final title = card['title'] ?? '';
+    final company = card['company'] ?? '';
+    final primaryColor = card['theme']?['primaryColor'] != null
+        ? Color(int.parse(card['theme']?['primaryColor'].replaceAll('#', '0xFF')))
+        : AppColors.primaryPink;
 
-  const _DateFilterButton({
-    required this.selected,
-    required this.onChanged,
-  });
-
-  static const _bgColor      = Color(0xFF1E1E2E);
-  static const _borderColor  = Color(0xFF2E2E45);
-  static const _accentColor  = Color(0xFF7C5CFC);
-  static const _selectedBg   = Color(0xFF2A2A3E);
-  static const _textColor    = Color(0xFFE8E8F0);
-  static const _mutedColor   = Color(0xFF9090A8);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _showMenu(context),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: _bgColor,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: _borderColor),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.calendar_today_rounded, color: _accentColor, size: 14),
-            const SizedBox(width: 6),
-            Text(
-              selected.label,
-              style: const TextStyle(
-                color: _textColor,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(width: 4),
-            const Icon(Icons.keyboard_arrow_down_rounded, color: _mutedColor, size: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showMenu(BuildContext context) async {
-    // Find the button's position on screen
-    final RenderBox button = context.findRenderObject() as RenderBox;
-    final RenderBox overlay =
-        Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
-    final RelativeRect position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(
-          button.size.bottomRight(Offset.zero),
-          ancestor: overlay,
-        ),
-      ),
-      Offset.zero & overlay.size,
-    );
-
-    final result = await showMenu<DateFilterOption>(
-      context: context,
-      position: position,
-      color: const Color(0xFF1A1A28),
-      shape: RoundedRectangleBorder(
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFF2E2E45)),
+        border: Border.all(color: Colors.white10),
       ),
-      elevation: 12,
-      items: DateFilterOption.values.map((option) {
-        final isSelected = option == selected;
-        return PopupMenuItem<DateFilterOption>(
-          value: option,
-          padding: EdgeInsets.zero,
-          child: Container(
-            width: double.infinity,
-            color: isSelected ? _selectedBg : Colors.transparent,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Row(
+        children: [
+          // Container(
+          //   width: 44,
+          //   height: 44,
+          //   decoration: BoxDecoration(
+          //     color: primaryColor.withOpacity(0.2),
+          //     borderRadius: BorderRadius.circular(10),
+          //   ),
+          //   child: Icon(Icons.person, color: primaryColor),
+          // ),
+          // const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  option.label,
-                  style: TextStyle(
-                    color: isSelected ? _accentColor : _textColor,
+                  name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                     fontSize: 14,
-                    fontWeight:
-                        isSelected ? FontWeight.w700 : FontWeight.w400,
                   ),
                 ),
-                if (isSelected)
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: const BoxDecoration(
-                      color: _accentColor,
-                      shape: BoxShape.circle,
-                    ),
+                Text(
+                  [title, company].where((e) => e.isNotEmpty).join(' • '),
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    fontSize: 12,
                   ),
+                ),
               ],
             ),
           ),
-        );
-      }).toList(),
+          // Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.3)),
+        ],
+      ),
     );
-
-    if (result != null) onChanged(result);
-  }
-}
-
-enum DateFilterOption {
-  today,
-  yesterday,
-  thisWeek,
-  lastWeek,
-  thisMonth,
-  lastMonth,
-  last30Days,
-  thisYear,
-  lastYear,
-}
-
-extension DateFilterOptionLabel on DateFilterOption {
-  String get label {
-    switch (this) {
-      case DateFilterOption.today:      return 'Today';
-      case DateFilterOption.yesterday:  return 'Yesterday';
-      case DateFilterOption.thisWeek:   return 'This Week';
-      case DateFilterOption.lastWeek:   return 'Last Week';
-      case DateFilterOption.thisMonth:  return 'This Month';
-      case DateFilterOption.lastMonth:  return 'Last Month';
-      case DateFilterOption.last30Days: return 'Last 30 Days';
-      case DateFilterOption.thisYear:   return 'This Year';
-      case DateFilterOption.lastYear:   return 'Last Year';
-    }
-  }
-
-   /// Logic mirrors your API: day boundaries are at 18:30 UTC (midnight IST).
-  Map<String, String> get dateRange {
-    final now = DateTime.now().toUtc();
-
-    // IST midnight = 18:30 UTC previous day
-    // "Start of today" in IST means 18:30 UTC of the previous calendar day.
-    DateTime todayStart = DateTime.utc(now.year, now.month, now.day - 1, 18, 30, 0, 0);
-    // If current UTC time is already past 18:30, today's IST start is today at 18:30 UTC
-    if (now.hour > 18 || (now.hour == 18 && now.minute >= 30)) {
-      todayStart = DateTime.utc(now.year, now.month, now.day, 18, 30, 0, 0);
-    }
-    final todayEnd = todayStart.add(const Duration(days: 1)).subtract(const Duration(milliseconds: 1));
-
-    DateTime start;
-    DateTime end;
-
-    switch (this) {
-      case DateFilterOption.today:
-        start = todayStart;
-        end   = todayEnd;
-        break;
-
-      case DateFilterOption.yesterday:
-        start = todayStart.subtract(const Duration(days: 1));
-        end   = todayStart.subtract(const Duration(milliseconds: 1));
-        break;
-
-      case DateFilterOption.thisWeek:
-        // Week starts Monday IST
-        final daysFromMonday = now.weekday - 1; // Monday = 1
-        start = todayStart.subtract(Duration(days: daysFromMonday));
-        end   = todayEnd;
-        break;
-
-      case DateFilterOption.lastWeek:
-        final daysFromMonday = now.weekday - 1;
-        end   = todayStart.subtract(Duration(days: daysFromMonday)).subtract(const Duration(milliseconds: 1));
-        start = end.subtract(const Duration(days: 6)).copyWith(hour: 18, minute: 30, second: 0, millisecond: 0);
-        break;
-
-      case DateFilterOption.thisMonth:
-        // Start of current month in IST = last day of previous month at 18:30 UTC
-        start = DateTime.utc(now.year, now.month, 1).subtract(const Duration(hours: 5, minutes: 30));
-        end   = todayEnd;
-        break;
-
-      case DateFilterOption.lastMonth:
-        final firstOfThisMonth = DateTime.utc(now.year, now.month, 1).subtract(const Duration(hours: 5, minutes: 30));
-        end   = firstOfThisMonth.subtract(const Duration(milliseconds: 1));
-        start = DateTime.utc(now.year, now.month - 1, 1).subtract(const Duration(hours: 5, minutes: 30));
-        break;
-
-      case DateFilterOption.last30Days:
-        start = todayStart.subtract(const Duration(days: 30));
-        end   = todayEnd;
-        break;
-
-      case DateFilterOption.thisYear:
-        start = DateTime.utc(now.year, 1, 1).subtract(const Duration(hours: 5, minutes: 30));
-        end   = todayEnd;
-        break;
-
-      case DateFilterOption.lastYear:
-        start = DateTime.utc(now.year - 1, 1, 1).subtract(const Duration(hours: 5, minutes: 30));
-        end   = DateTime.utc(now.year, 1, 1).subtract(const Duration(hours: 5, minutes: 30, milliseconds: 1));
-        break;
-
-  
-    }
-
-    log('Start: $start, End: $end');
-    log('Start Iso: ${start.toIso8601String()}, End Iso: ${end.toIso8601String()}');
-    return {
-      'startDate': start.toIso8601String(),
-      'endDate':   end.toIso8601String(),
-    };
   }
 }

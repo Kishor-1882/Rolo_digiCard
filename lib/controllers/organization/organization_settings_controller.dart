@@ -23,6 +23,7 @@ class OrganizationSettingsController extends GetxController {
 
   // Advanced Security State
   var adminSettingsPermission = false.obs;
+  var isDeactivated = false.obs;
 
   @override
   void onInit() {
@@ -47,20 +48,25 @@ class OrganizationSettingsController extends GetxController {
         final data = response.data;
         nameController.text = data['name'] ?? '';
         descriptionController.text = data['description'] ?? '';
-        
+
         if (data['domains'] != null && data['domains'].isNotEmpty) {
           domainController.text = data['domains'].first;
         }
 
-        if (data['logo'] != null && data['logo'].toString().startsWith('data:image')) {
-           logoBase64.value = data['logo'];
+        if (data['logo'] != null &&
+            data['logo'].toString().startsWith('data:image')) {
+          logoBase64.value = data['logo'];
         } else {
-           logoUrl.value = data['logo'] ?? '';
+          logoUrl.value = data['logo'] ?? '';
         }
 
         if (data['settings'] != null) {
-          adminSettingsPermission.value = data['settings']['adminSettingsPermission'] ?? false;
+          adminSettingsPermission.value =
+              data['settings']['adminSettingsPermission'] ?? false;
         }
+
+        isDeactivated.value =
+            data['status'] == 'deactivated' || data['isActive'] == false;
       }
     } on DioException catch (e) {
       log("Fetch Settings Error: $e");
@@ -94,9 +100,9 @@ class OrganizationSettingsController extends GetxController {
         "description": descriptionController.text.trim(),
         "domain": domainController.text.trim(),
       };
-      
+
       if (logoBase64.value.isNotEmpty) {
-         payload["logo"] = logoBase64.value;
+        payload["logo"] = logoBase64.value;
       }
 
       log("Update Settings Payload: ${jsonEncode(payload)}");
@@ -111,20 +117,22 @@ class OrganizationSettingsController extends GetxController {
       }
     } on DioException catch (e) {
       log("Update Settings Error: $e");
-      CommonSnackbar.error(e.response?.data?['message'] ?? "Failed to update settings");
+      CommonSnackbar.error(
+          e.response?.data?['message'] ?? "Failed to update settings");
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> changePassword(String currentPassword, String newPassword) async {
+  Future<void> changePassword(
+      String currentPassword, String newPassword) async {
     try {
       isLoading.value = true;
       final payload = {
         "oldPassword": currentPassword,
         "newPassword": newPassword,
       };
-      
+
       log("Change Password Payload: ${jsonEncode(payload)}");
 
       final response = await _dio.put(
@@ -138,7 +146,8 @@ class OrganizationSettingsController extends GetxController {
       }
     } on DioException catch (e) {
       log("Change Password Error: $e");
-      CommonSnackbar.error(e.response?.data?['message'] ?? "Failed to change password");
+      CommonSnackbar.error(
+          e.response?.data?['message'] ?? "Failed to change password");
     } finally {
       isLoading.value = false;
     }
@@ -147,7 +156,7 @@ class OrganizationSettingsController extends GetxController {
   Future<void> toggleAdminAccess(bool value) async {
     try {
       adminSettingsPermission.value = value;
-      
+
       final response = await _dio.patch(
         ApiEndpoints.adminPermission,
         data: {
@@ -156,7 +165,7 @@ class OrganizationSettingsController extends GetxController {
       );
 
       if (response.statusCode != 200 && response.statusCode != 201) {
-          throw Exception("Invalid status code ${response.statusCode}");
+        throw Exception("Invalid status code ${response.statusCode}");
       }
       CommonSnackbar.success("Admin access updated");
     } on DioException catch (e) {
@@ -176,18 +185,21 @@ class OrganizationSettingsController extends GetxController {
     try {
       final response = await _dio.get(ApiEndpoints.organizationUsers);
       if (response.statusCode == 200) {
-        orgMembers.value = response.data['users'] ?? response.data ?? [];
+        log("Organization Members: ${response.data}");
+        orgMembers.value = response.data ?? response.data ?? [];
       }
     } catch (e) {
       log("Fetch Organization Members Error: $e");
     }
   }
 
-  Future<void> transferOwnership({String? toUserId, String? toEmail, required String note}) async {
+  Future<void> transferOwnership(
+      {String? toUserId, String? toEmail, required String note}) async {
     try {
       isLoading.value = true;
       final payload = {"note": note};
-      if (toUserId != null && toUserId.isNotEmpty) payload["toUserId"] = toUserId;
+      if (toUserId != null && toUserId.isNotEmpty)
+        payload["toUserId"] = toUserId;
       if (toEmail != null && toEmail.isNotEmpty) payload["toEmail"] = toEmail;
 
       log("Transfer Ownership Payload: ${jsonEncode(payload)}");
@@ -203,7 +215,8 @@ class OrganizationSettingsController extends GetxController {
       }
     } on DioException catch (e) {
       log("Transfer Ownership Error: $e");
-      CommonSnackbar.error(e.response?.data?['message'] ?? "Failed to transfer ownership");
+      CommonSnackbar.error(
+          e.response?.data?['message'] ?? "Failed to transfer ownership");
     } finally {
       isLoading.value = false;
     }
@@ -213,13 +226,16 @@ class OrganizationSettingsController extends GetxController {
     try {
       isLoading.value = true;
       log("Deactivate Organization");
-      final response = await _dio.post(ApiEndpoints.deactivateOrganization, data: {});
+      final response =
+          await _dio.post(ApiEndpoints.deactivateOrganization, data: {});
       if (response.statusCode == 200 || response.statusCode == 201) {
+        isDeactivated.value = true;
         CommonSnackbar.success("Organization deactivated successfully");
       }
     } on DioException catch (e) {
       log("Deactivate Error: $e");
-      CommonSnackbar.error(e.response?.data?['message'] ?? "Failed to deactivate organization");
+      CommonSnackbar.error(
+          e.response?.data?['message'] ?? "Failed to deactivate organization");
     } finally {
       isLoading.value = false;
     }
@@ -229,16 +245,36 @@ class OrganizationSettingsController extends GetxController {
     try {
       isLoading.value = true;
       log("Activate Organization");
-      final response = await _dio.post(ApiEndpoints.activateOrganization, data: {});
+      final response =
+          await _dio.post(ApiEndpoints.activateOrganization, data: {});
       if (response.statusCode == 200 || response.statusCode == 201) {
+        isDeactivated.value = false;
         CommonSnackbar.success("Organization activated successfully");
       }
     } on DioException catch (e) {
       log("Activate Error: $e");
-      CommonSnackbar.error(e.response?.data?['message'] ?? "Failed to activate organization");
+      CommonSnackbar.error(
+          e.response?.data?['message'] ?? "Failed to activate organization");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> deleteOrganization() async {
+    try {
+      isLoading.value = true;
+      log("Delete Organization");
+      final response = await _dio.delete(ApiEndpoints.createOrganization);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        CommonSnackbar.success("Organization deleted successfully");
+        // Navigation or post-delete logic could go here
+      }
+    } on DioException catch (e) {
+      log("Delete Error: $e");
+      CommonSnackbar.error(
+          e.response?.data?['message'] ?? "Failed to delete organization");
     } finally {
       isLoading.value = false;
     }
   }
 }
-

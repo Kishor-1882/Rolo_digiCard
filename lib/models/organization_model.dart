@@ -114,6 +114,7 @@ class OrgDashboardStats {
   final List<dynamic>? activityTrend;
   final List<OrgRecentActivity>? recentActivities;
   final List<dynamic>? recentGroups;
+  final List<dynamic>? savedCards;
 
   // KPIs for UI
   int get totalUsers => users?['total'] ?? users?['totalUsers'] ?? 0;
@@ -141,6 +142,7 @@ class OrgDashboardStats {
     this.activityTrend,
     this.recentActivities,
     this.recentGroups,
+    this.savedCards,
   });
 
   factory OrgDashboardStats.fromJson(Map<String, dynamic> json) {
@@ -159,6 +161,7 @@ class OrgDashboardStats {
               .toList()
           : [],
       recentGroups: json['recentGroups'],
+      savedCards: json['savedCards'],
     );
   }
 }

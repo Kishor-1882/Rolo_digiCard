@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:rolo_digi_card/common/snack_bar.dart';
+import 'package:rolo_digi_card/controllers/organization/organization_controller.dart';
 import 'package:rolo_digi_card/services/dio_client.dart';
 import 'package:rolo_digi_card/services/end_points.dart';
 import 'package:rolo_digi_card/utils/color.dart';
@@ -62,6 +65,14 @@ class _OrganizationQRScannerViewState extends State<OrganizationQRScannerView> {
         final response = await dioClient.post(ApiEndpoints.saveCard(cardId));
         if (response.statusCode == 200 || response.statusCode == 201) {
           CommonSnackbar.success('Card saved successfully!');
+          // Refresh dashboard data
+          try {
+            if (Get.isRegistered<OrganizationController>()) {
+              Get.find<OrganizationController>().getDashboardStats();
+            }
+          } catch (e) {
+            log("Error refreshing dashboard: $e");
+          }
           Get.offAllNamed('/sidebar');
         } else {
           CommonSnackbar.error('Failed to save card');

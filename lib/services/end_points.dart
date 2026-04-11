@@ -1,6 +1,6 @@
 class ApiEndpoints {
   //baseUrl
-  static const String baseUrl = "http://localhost:8080/https://digi-bend.roloscan.com";
+  static const String baseUrl = "https://digi-bend.roloscan.com";
 
   // Auth
   static const String register = "/api/auth/register";
