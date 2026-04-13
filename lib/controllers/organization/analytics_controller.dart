@@ -21,6 +21,7 @@ class AnalyticsController extends GetxController {
   var geographyData = <GeographyModel>[].obs;
 
   final selectedFilter = DateFilterOption.last30Days.obs;
+  var selectedTabIndex = 0.obs;
 
   @override
   void onInit() {
@@ -28,8 +29,8 @@ class AnalyticsController extends GetxController {
     final authController = Get.find<AuthController>();
     if (authController.userType.value == 'organization') {
       getOwnerAnalytics(days: selectedFilter.value.days);
+      getAdminAnalytics(days: selectedFilter.value.days);
       // Optional: keep other specialized analytics if needed for other tabs/views
-      // getAdminAnalytics();
       // getUserAnalytics();
       // getCardsAnalytics();
       // getGeographyAnalytics();

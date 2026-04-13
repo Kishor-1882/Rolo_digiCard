@@ -493,13 +493,15 @@ class HomePageController extends GetxController {
         getRecentCards();
       }
     } on DioException catch (e, t) {
-      isLoading.value = true;
+      isLoading.value = false;
       update();
       String errorMessage = 'Failed to create card';
       log("Error in $e $t ${e.response}");
-      if (e.response != null) {
+      if (e.response != null && e.response?.data != null) {
         // Server responded with an error
-        errorMessage = e.response?.data['message'] ?? errorMessage;
+        errorMessage = e.response?.data['message'] ?? 
+                       e.response?.data['error'] ?? 
+                       errorMessage;
       } else if (e.type == DioExceptionType.connectionTimeout) {
         errorMessage =
             'Connection timeout. Please check your internet connection.';
@@ -510,7 +512,7 @@ class HomePageController extends GetxController {
       }
       CommonSnackbar.error(errorMessage);
     } catch (e) {
-      isLoading.value = true;
+      isLoading.value = false;
       update();
       CommonSnackbar.error('An unexpected error occurred: ${e.toString()}');
     } finally {
@@ -560,9 +562,11 @@ class HomePageController extends GetxController {
       update();
       String errorMessage = 'Failed to update card';
 
-      if (e.response != null) {
+      if (e.response != null && e.response?.data != null) {
         // Server responded with an error
-        errorMessage = e.response?.data['message'] ?? errorMessage;
+        errorMessage = e.response?.data['message'] ?? 
+                       e.response?.data['error'] ?? 
+                       errorMessage;
       } else if (e.type == DioExceptionType.connectionTimeout) {
         errorMessage =
             'Connection timeout. Please check your internet connection.';

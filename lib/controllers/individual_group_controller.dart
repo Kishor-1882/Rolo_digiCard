@@ -162,7 +162,13 @@ class IndividualGroupController extends GetxController {
       }
     } on DioException catch (e) {
       log("Edit Group Error: $e");
-      CommonSnackbar.error("Failed to update group");
+      String errorMessage = 'Failed to update group';
+      if (e.response != null && e.response?.data != null) {
+        errorMessage = e.response?.data['message'] ?? 
+                       e.response?.data['error'] ?? 
+                       errorMessage;
+      }
+      CommonSnackbar.error(errorMessage);
     } finally {
       isLoading.value = false;
     }
@@ -181,7 +187,13 @@ class IndividualGroupController extends GetxController {
       }
     } on DioException catch (e) {
       log("Delete Group Error: $e");
-      CommonSnackbar.error("Failed to delete group");
+      String errorMessage = 'Failed to delete group';
+      if (e.response != null && e.response?.data != null) {
+        errorMessage = e.response?.data['message'] ?? 
+                       e.response?.data['error'] ?? 
+                       errorMessage;
+      }
+      CommonSnackbar.error(errorMessage);
     } finally {
       isLoading.value = false;
     }
@@ -235,7 +247,13 @@ class IndividualGroupController extends GetxController {
       }
     } on DioException catch (e) {
       log("Add Cards To Group Error: $e");
-      CommonSnackbar.error("Failed to add cards");
+      String errorMessage = 'Failed to add cards';
+      if (e.response != null && e.response?.data != null) {
+        errorMessage = e.response?.data['message'] ?? 
+                       e.response?.data['error'] ?? 
+                       errorMessage;
+      }
+      CommonSnackbar.error(errorMessage);
     } finally {
       isLoading.value = false;
     }
@@ -254,7 +272,13 @@ class IndividualGroupController extends GetxController {
       }
     } on DioException catch (e) {
       log("Remove Card From Group Error: $e");
-      CommonSnackbar.error("Failed to remove card");
+      String errorMessage = 'Failed to remove card';
+      if (e.response != null && e.response?.data != null) {
+        errorMessage = e.response?.data['message'] ?? 
+                       e.response?.data['error'] ?? 
+                       errorMessage;
+      }
+      CommonSnackbar.error(errorMessage);
     }
   }
 

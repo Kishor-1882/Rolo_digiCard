@@ -170,15 +170,21 @@ class AnalyticsAdminModel {
   final Map<String, dynamic> summary;
   final Map<String, dynamic> inventory;
   final Map<String, dynamic> groups;
+  final Map<String, dynamic> groupDetails;
   final List<dynamic> userPerformance;
   final List<dynamic> topPerformingCards;
+  final List<dynamic> usageTrends;
+  final Map<String, dynamic> geography;
 
   AnalyticsAdminModel({
     required this.summary,
     required this.inventory,
     required this.groups,
+    required this.groupDetails,
     required this.userPerformance,
     required this.topPerformingCards,
+    required this.usageTrends,
+    required this.geography,
   });
 
   factory AnalyticsAdminModel.fromJson(Map<String, dynamic> json) {
@@ -186,8 +192,11 @@ class AnalyticsAdminModel {
       summary: json['summary'] ?? {},
       inventory: json['inventory'] ?? {},
       groups: json['groups'] ?? {},
+      groupDetails: json['groupDetails'] ?? {},
       userPerformance: json['userPerformance'] ?? [],
       topPerformingCards: json['topPerformingCards'] ?? [],
+      usageTrends: json['usageTrends'] ?? [],
+      geography: json['geography'] ?? {},
     );
   }
 

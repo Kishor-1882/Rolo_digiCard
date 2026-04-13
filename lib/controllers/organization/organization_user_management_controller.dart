@@ -111,7 +111,7 @@ class OrgUserManagementController extends GetxController {
       }
     } on DioException catch (e) {
       log('Fetch users error: $e');
-      CommonSnackbar.error(_extractMessage(e, 'Failed to load users'));
+      // CommonSnackbar.error(_extractMessage(e, 'Failed to load users'));
     } finally {
       isLoading.value = false;
     }
@@ -130,7 +130,7 @@ class OrgUserManagementController extends GetxController {
       }
     } on DioException catch (e) {
       log('Get user error: $e');
-      CommonSnackbar.error(_extractMessage(e, 'Failed to load user'));
+      // CommonSnackbar.error(_extractMessage(e, 'Failed to load user'));
     }
     return null;
   }

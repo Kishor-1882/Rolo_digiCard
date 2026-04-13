@@ -4,8 +4,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rolo_digi_card/common/header.dart';
+import 'package:rolo_digi_card/controllers/auth_controller.dart';
 import 'package:rolo_digi_card/controllers/organization/analytics_controller.dart';
 import 'package:rolo_digi_card/utils/color.dart';
+import 'package:rolo_digi_card/views/organization/admin_analytics_view.dart';
 import 'package:rolo_digi_card/views/organization/widgets/date_filter_dropdown.dart';
 
 class AnalyticsView extends GetView<AnalyticsController> {
@@ -13,118 +15,163 @@ class AnalyticsView extends GetView<AnalyticsController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.darkBackground,
-      body: SafeArea(
-        child: Obx(() {
-          final isLoading = controller.isLoading.value;
-          final overview = controller.overviewData.value;
+    return Obx(() {
+      final authController = Get.find<AuthController>();
+      final user = authController.user.value;
+      final role = user?.organizationRole?.toLowerCase() ?? '';
 
-          if (isLoading && overview == null) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryPink),
-            );
-          }
+      // Redirect to dedicated Admin view if applicable
+      if (role == 'admin') {
+        return const AdminAnalyticsView();
+      }
 
-          if (overview == null) {
-            return const Center(
-              child: Text(
-                'No analytics data available',
-                style: TextStyle(color: Colors.white54),
-              ),
-            );
-          }
+      // Default Owner UI (Preserved from the restored version)
+      return Scaffold(
+        backgroundColor: AppColors.darkBackground,
+        body: SafeArea(
+          child: Obx(() {
+            final isLoading = controller.isLoading.value;
+            final overview = controller.overviewData.value;
 
-          return Stack(
-            children: [
-              
-              Column(
-                children: [
-                  AppHeader(),
-                  SizedBox(height: 10),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 16),
-                          _buildHeader(context),
-                          const SizedBox(height: 24),
-                    
-                          // 0. KPI Cards
-                          _buildKPIStats(overview.health, overview.groupAnalytics, overview.engagement),
-                          const SizedBox(height: 24),
-                          
-                          // 1. Card Activity (Bar Chart)
-                          _buildSectionCard(
-                            title: 'Card Activity',
-                            icon: Icons.bar_chart,
-                            child: _buildCardActivityChart(overview.engagement.chartData),
-                          ),
-                          const SizedBox(height: 24),
-                    
-                          // 2. Cards Status Distribution (Donut Chart)
-                          _buildSectionCard(
-                            title: 'Cards Status Distribution',
-                            icon: Icons.donut_large,
-                            child: _buildStatusDonutChart(overview.engagement.combinedStatus),
-                          ),
-                          const SizedBox(height: 24),
-                    
-                          // 3. Funnel Analysis
-                          _buildSectionCard(
-                            title: 'Funnel Analysis',
-                            subtitle: 'Conversion journey through stages',
-                            icon: Icons.filter_list,
-                            child: _buildFunnelAnalysis(overview.engagement.funnel),
-                          ),
-                          const SizedBox(height: 24),
-                    
-                          // 4. Group Distribution Analytics (Pie Chart)
-                          _buildSectionCard(
-                            title: 'Group Distribution Analytics',
-                            subtitle: 'Card Groups vs User Groups',
-                            icon: Icons.pie_chart,
-                            child: _buildGroupDistributionPie(overview.groupAnalytics.distribution),
-                          ),
-                          const SizedBox(height: 24),
-                    
-                          // 5. Active vs Inactive User Groups (Donut Chart)
-                          _buildSectionCard(
-                            title: 'Active vs Inactive User Groups',
-                            subtitle: 'User Group Status Overview',
-                            icon: Icons.donut_small,
-                            child: _buildUserGroupStatusDonut(overview.groupAnalytics.status),
-                          ),
-                          const SizedBox(height: 24),
-                    
-                          // 6. Members per User Group (Bar Chart)
-                          _buildSectionCard(
-                            title: 'Members per User Group',
-                            subtitle: 'Member count distribution across user groups',
-                            icon: Icons.groups_outlined,
-                            child: _buildMembersPerGroupChart(overview.groupAnalytics.topUserGroups),
-                          ),
-                          const SizedBox(height: 32),
-                        ],
+            if (isLoading && overview == null) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.primaryPink),
+              );
+            }
+
+            if (overview == null) {
+              return const Center(
+                child: Text(
+                  'No analytics data available',
+                  style: TextStyle(color: Colors.white54),
+                ),
+              );
+            }
+
+            return Stack(
+              children: [
+                Column(
+                  children: [
+                    AppHeader(),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 16),
+                            _buildHeader(context),
+                            const SizedBox(height: 24),
+                      
+                            // 0. KPI Stats
+                            _buildKPIStats(overview.health, overview.groupAnalytics, overview.engagement),
+                            const SizedBox(height: 24),
+
+                            // Tab Switcher
+                            _buildTabSwitcher(),
+                            const SizedBox(height: 24),
+
+                            Obx(() => controller.selectedTabIndex.value == 0 
+                              ? Column(
+                                  children: [
+                                    // 4. Group Distribution Analytics (Pie Chart)
+                                    _buildSectionCard(
+                                      title: 'Group Distribution Analytics',
+                                      subtitle: 'Card Groups vs User Groups',
+                                      child: _buildGroupDistributionPie(overview.groupAnalytics.distribution),
+                                    ),
+                                    const SizedBox(height: 24),
+                              
+                                    // 5. Active vs Inactive User Groups (Donut Chart)
+                                    _buildSectionCard(
+                                      title: 'Active vs Inactive User Groups',
+                                      subtitle: 'User Group Status Overview',
+                                      child: _buildUserGroupStatusDonut(overview.groupAnalytics.status),
+                                    ),
+
+                                    const SizedBox(height: 24),
+
+                                    // 6. Members per User Group (Bar Chart)
+                                    _buildSectionCard(
+                                      title: 'Members per User Group',
+                                      subtitle: 'Member count distribution across user groups',
+                                      icon: Icons.groups_outlined,
+                                      child: _buildMembersPerGroupChart(overview.groupAnalytics.topUserGroups),
+                                    ),
+                                  ],
+                                )
+                              : Column(
+                                  children: [
+                                    // Card Groups Specific Analytics (Mockup 2 Style)
+                                    _buildSectionCard(
+                                      title: 'Top Performing Groups',
+                                      icon: Icons.emoji_events_outlined, // Trophy icon like mockup
+                                      child: _buildTopPerformingGroupsList(overview.cardGroupAnalytics.topActiveCardGroups),
+                                    ),
+                                    const SizedBox(height: 24),
+
+                                    _buildSectionCard(
+                                      title: 'Cards per Card Group',
+                                      subtitle: 'Distribution of cards across card groups',
+                                      child: _buildCardsPerGroupBarChart(overview.cardGroupAnalytics.cardsPerGroup),
+                                    ),
+                                  ],
+                                )
+
+                            ),
+                            
+                            const SizedBox(height: 24),
+                            
+                            const Text(
+                              "General Engagement",
+                              style: TextStyle(color: Colors.white70, fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 16),
+
+                            // 1. Card Activity (Bar Chart)
+                            _buildSectionCard(
+                              title: 'Card Activity',
+                              icon: Icons.bar_chart,
+                              child: _buildCardActivityChart(overview.engagement.chartData),
+                            ),
+                            const SizedBox(height: 24),
+                      
+                            // 2. Cards Status Distribution (Donut Chart)
+                            _buildSectionCard(
+                              title: 'Cards Status Distribution',
+                              icon: Icons.donut_large,
+                              child: _buildStatusDonutChart(overview.engagement.combinedStatus),
+                            ),
+                            const SizedBox(height: 24),
+                      
+                            // 3. Funnel Analysis
+                            _buildSectionCard(
+                              title: 'Funnel Analysis',
+                              subtitle: 'Conversion journey through stages',
+                              icon: Icons.filter_list,
+                              child: _buildFunnelAnalysis(overview.engagement.funnel),
+                            ),
+                            const SizedBox(height: 32),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              if (isLoading)
-                Container(
-                  color: Colors.black26,
-                  child: const Center(
-                    child: CircularProgressIndicator(color: AppColors.primaryPink),
-                  ),
+                  ],
                 ),
-            ],
-          );
-        }),
-      ),
-    );
+                if (isLoading)
+                  Container(
+                    color: Colors.black26,
+                    child: const Center(
+                      child: CircularProgressIndicator(color: AppColors.primaryPink),
+                    ),
+                  ),
+              ],
+            );
+          }),
+        ),
+      );
+    });
   }
 
   Widget _buildKPIStats(dynamic health, dynamic groupAnalytics, dynamic engagement) {
@@ -200,7 +247,57 @@ class AnalyticsView extends GetView<AnalyticsController> {
     );
   }
 
+  Widget _buildTabSwitcher() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Obx(() => Row(
+        children: [
+          _buildTabItem(0, 'User Groups', Icons.people_outline),
+          _buildTabItem(1, 'Card Groups', Icons.credit_card_outlined),
+        ],
+      )),
+    );
+  }
+
+  Widget _buildTabItem(int index, String label, IconData icon) {
+    final isSelected = controller.selectedTabIndex.value == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => controller.selectedTabIndex.value = index,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white.withOpacity(0.1) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: isSelected ? AppColors.primaryPink : Colors.white54, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.white54,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildHeader(BuildContext context) {
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -235,7 +332,7 @@ class AnalyticsView extends GetView<AnalyticsController> {
   Widget _buildSectionCard({
     required String title,
     String? subtitle,
-    required IconData icon,
+    IconData? icon,
     required Widget child,
   }) {
     return Container(
@@ -251,14 +348,16 @@ class AnalyticsView extends GetView<AnalyticsController> {
         children: [
           Row(
             children: [
-              Icon(icon, color: Colors.white70, size: 20),
-              const SizedBox(width: 8),
+              if (icon != null) ...[
+                Icon(icon, color: Colors.white70, size: 20),
+                const SizedBox(width: 10),
+              ],
               Expanded(
                 child: Text(
                   title,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 17,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -475,16 +574,21 @@ class AnalyticsView extends GetView<AnalyticsController> {
     return Column(
       children: [
         SizedBox(
-          height: 150,
+          height: 180,
           child: PieChart(
             PieChartData(
               sectionsSpace: 0,
               centerSpaceRadius: 0,
               sections: distribution.map((item) {
+                // Use mockup-specific colors if names match
+                Color color = _hexToColor(item['color'] ?? '#6366f1');
+                if (item['name'] == 'Card Groups') color = const Color(0xFF6366f1);
+                if (item['name'] == 'User Groups') color = const Color(0xFF10b981);
+
                 return PieChartSectionData(
                   value: ((item['value'] ?? 1) as num).toDouble(),
-                  color: _hexToColor(item['color'] ?? '#6366f1'),
-                  radius: 70,
+                  color: color,
+                  radius: 80,
                   showTitle: false,
                 );
               }).toList(),
@@ -495,9 +599,13 @@ class AnalyticsView extends GetView<AnalyticsController> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: distribution.map((item) {
+            Color color = _hexToColor(item['color'] ?? '#6366f1');
+            if (item['name'] == 'Card Groups') color = const Color(0xFF6366f1);
+            if (item['name'] == 'User Groups') color = const Color(0xFF10b981);
+            
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: _buildLegendItem(item['name'], _hexToColor(item['color'] ?? '#6366f1')),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: _buildLegendItem(item['name'], color),
             );
           }).toList(),
         ),
@@ -515,18 +623,18 @@ class AnalyticsView extends GetView<AnalyticsController> {
     return Column(
       children: [
         SizedBox(
-          height: 150,
+          height: 180,
           child: PieChart(
             PieChartData(
               sectionsSpace: 2,
-              centerSpaceRadius: 40,
+              centerSpaceRadius: 60, // Thinner ring as per mockup
               sections: totalValue == 0 
-                ? [PieChartSectionData(value: 1, color: Colors.white12, radius: 12, showTitle: false)]
+                ? [PieChartSectionData(value: 1, color: Colors.white12, radius: 15, showTitle: false)]
                 : status.map((item) {
                     return PieChartSectionData(
                       value: ((item['value'] ?? 0) as num).toDouble(),
                       color: _getUserGroupStatusColor(item['name']),
-                      radius: 12,
+                      radius: 18,
                       showTitle: false,
                     );
                   }).toList(),
@@ -640,27 +748,205 @@ class AnalyticsView extends GetView<AnalyticsController> {
     );
   }
 
+  // --- 8. Cards Per Group Bar Chart (Refined as per Mockup 2) ---
+  Widget _buildCardsPerGroupBarChart(List<dynamic> groupData) {
+    log("Kanchi Group Data:$groupData");
+    if (groupData.isEmpty) {
+      return const SizedBox(
+        height: 150,
+        child: Center(child: Text('No group distribution data', style: TextStyle(color: Colors.white38))),
+      );
+    }
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 240,
+          child: BarChart(
+            BarChartData(
+              alignment: BarChartAlignment.spaceAround,
+              maxY: groupData.fold<double>(0, (max, e) => (e['totalCards'] ?? 0) > max ? (e['totalCards'] as num).toDouble() : max) + 1,
+              barGroups: groupData.asMap().entries.map((entry) {
+                return BarChartGroupData(
+                  x: entry.key,
+                  barRods: [
+                    BarChartRodData(
+                      toY: ((entry.value['totalCards'] ?? 0) as num).toDouble(),
+                      color: const Color(0xFF8166FF), // Purple color from mockup
+                      width: 22,
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                    ),
+                  ],
+                );
+              }).toList(),
+              titlesData: FlTitlesData(
+                show: true,
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 40,
+                    getTitlesWidget: (value, meta) {
+                      int idx = value.toInt();
+                      if (idx >= 0 && idx < groupData.length) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Transform.rotate(
+                            angle: -0.8,
+                            child: Text(
+                              groupData[idx]['groupName'] ?? '',
+                              style: const TextStyle(color: Colors.white38, fontSize: 10),
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox();
+                    },
+                  ),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 30,
+                    getTitlesWidget: (value, meta) => Text(
+                      value.toInt().toString(),
+                      style: const TextStyle(color: Colors.white38, fontSize: 10),
+                    ),
+                  ),
+                ),
+                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              ),
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: false,
+                getDrawingHorizontalLine: (value) => const FlLine(color: Colors.white10, strokeWidth: 1, dashArray: [5, 5]),
+              ),
+              borderData: FlBorderData(show: false),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- 9. Top Performing Groups List (Mockup 2 Style) ---
+  Widget _buildTopPerformingGroupsList(List<dynamic> groups) {
+    if (groups.isEmpty) {
+      return const SizedBox(
+        height: 100,
+        child: Center(child: Text('No performance data', style: TextStyle(color: Colors.white38))),
+      );
+    }
+
+    return Column(
+      children: groups.asMap().entries.map((entry) {
+        final idx = entry.key;
+        final group = entry.value;
+        final isFirst = idx == 0;
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.03),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isFirst ? Colors.yellow.withOpacity(0.3) : Colors.white10,
+              width: isFirst ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              // Rank Circle
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: isFirst ? Colors.white : Colors.white10,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  (idx + 1).toString(),
+                  style: TextStyle(
+                    color: isFirst ? Colors.black : Colors.white70,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Group Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      group['name'] ?? '',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(color: Color(0xFF10B981), shape: BoxShape.circle),
+                        ),
+                        const SizedBox(width: 6),
+                        const Text(
+                          'Active',
+                          style: TextStyle(color: Colors.white38, fontSize: 11),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // Card Count
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    (group['cardCount'] ?? group['count'] ?? 0).toString(),
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  const Text(
+                    'CARDS',
+                    style: TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   // --- Helper Widgets & Methods ---
+
+
 
   Widget _buildLegendItem(String label, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 8),
         Text(
           label,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
+          style: const TextStyle(color: Colors.white70, fontSize: 11),
         ),
       ],
     );
   }
 
   Color _getStatusColor(String? name) {
+
     switch (name) {
       case 'Active & Assigned': return const Color(0xFF10b981);
       case 'Active & Unassigned': return const Color(0xFFf59e0b);
