@@ -16,8 +16,14 @@ import 'views/my_cards_page/widget/business_card_details.dart';
 import 'views/organization/manual_entry_view.dart';
 import 'views/scan_screen/scan_screen.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:rolo_digi_card/firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   Get.put(AuthController());
   runApp(const MyApp());
 }

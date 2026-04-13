@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "219440040411",
+    "project_id": "digi-roloscan",
+    "storage_bucket": "digi-roloscan.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:219440040411:android:70ec773e587e3cb273fffe",
+        "android_client_info": {
+          "package_name": "com.example.rolo_digi_card"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5iLX8-8dqb12zbvcvPleh1pwIsuBTDzs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

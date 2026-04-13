@@ -64,20 +64,22 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
                           _buildInventoryHealth(inventory),
                           const SizedBox(height: 24),
 
-                          // 3. Usage Trends (Line Chart)
-                          _buildUsageTrendsChart(adminData.usageTrends),
-                          const SizedBox(height: 24),
+                          // // 3. Usage Trends (Line Chart)
+                          // _buildUsageTrendsChart(adminData.usageTrends),
+                          // const SizedBox(height: 24),
 
                           // 4. Tabbed Group Analytics
                           _buildGroupAnalyticsSection(adminData),
                           const SizedBox(height: 24),
 
                           // 5. User Performance Overview
-                          _buildUserPerformanceSection(adminData.userPerformance),
+                          _buildUserPerformanceSection(
+                              adminData.userPerformance),
                           const SizedBox(height: 24),
 
                           // 6. Top Performing Cards
-                          _buildTopPerformingCardsSection(adminData.topPerformingCards),
+                          _buildTopPerformingCardsSection(
+                              adminData.topPerformingCards),
                           const SizedBox(height: 32),
                         ],
                       ),
@@ -89,7 +91,8 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
                 Container(
                   color: Colors.black26,
                   child: const Center(
-                    child: CircularProgressIndicator(color: AppColors.primaryPink),
+                    child:
+                        CircularProgressIndicator(color: AppColors.primaryPink),
                   ),
                 ),
             ],
@@ -121,27 +124,39 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
           ],
         ),
         Obx(() => DateFilterDropdown(
-          selected: controller.selectedFilter.value,
-          onChanged: (value) {
-            controller.selectedFilter.value = value;
-            controller.getAdminAnalytics(days: value.days);
-          },
-        )),
+              selected: controller.selectedFilter.value,
+              onChanged: (value) {
+                controller.selectedFilter.value = value;
+                controller.getAdminAnalytics(days: value.days);
+              },
+            )),
       ],
     );
   }
 
-  Widget _buildKPIGrid(Map<String, dynamic> summary, Map<String, dynamic> groups) {
+  Widget _buildKPIGrid(
+      Map<String, dynamic> summary, Map<String, dynamic> groups) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
         children: [
-          _buildKPICard('Total Users', summary['totalUsers']?.toString() ?? '0', Icons.people_outline, const Color(0xFF8b5cf6)),
-          _buildKPICard('Total Cards', summary['totalCards']?.toString() ?? '0', Icons.credit_card, const Color(0xFF10b981)),
-          _buildKPICard('Active Cards', summary['activeCards']?.toString() ?? '0', Icons.trending_up, const Color(0xFF6366f1)),
-          _buildKPICard('Total Card Groups', groups['cardGroups']?.toString() ?? '0', Icons.groups_outlined, const Color(0xFF10b981)),
-          _buildKPICard('Total Views', summary['totalViews']?.toString() ?? '0', Icons.visibility_outlined, const Color(0xFFf59e0b)),
+          _buildKPICard('Total Users', summary['totalUsers']?.toString() ?? '0',
+              Icons.people_outline, const Color(0xFF8b5cf6)),
+          _buildKPICard('Total Cards', summary['totalCards']?.toString() ?? '0',
+              Icons.credit_card, const Color(0xFF10b981)),
+          _buildKPICard(
+              'Active Cards',
+              summary['activeCards']?.toString() ?? '0',
+              Icons.trending_up,
+              const Color(0xFF6366f1)),
+          _buildKPICard(
+              'Total Card Groups',
+              groups['cardGroups']?.toString() ?? '0',
+              Icons.groups_outlined,
+              const Color(0xFF10b981)),
+          _buildKPICard('Total Views', summary['totalViews']?.toString() ?? '0',
+              Icons.visibility_outlined, const Color(0xFFf59e0b)),
         ],
       ),
     );
@@ -168,7 +183,10 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500),
                 ),
               ),
               Container(
@@ -184,7 +202,8 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
           const SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -197,7 +216,8 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
       children: [
         const Text(
           'Inventory Health',
-          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         SingleChildScrollView(
@@ -205,9 +225,21 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
           physics: const BouncingScrollPhysics(),
           child: Row(
             children: [
-              _buildInventoryCard('Unassigned', inventory['unassignedCards']?.toString() ?? '0', Icons.error_outline, const Color(0xFFef4444)),
-              _buildInventoryCard('Inactive Cards', inventory['inactiveCards']?.toString() ?? '0', Icons.access_time, const Color(0xFFf59e0b)),
-              _buildInventoryCard('Pending Users', inventory['inactiveUsers']?.toString() ?? '0', Icons.person_remove_outlined, const Color(0xFFef4444)),
+              _buildInventoryCard(
+                  'Unassigned',
+                  inventory['unassignedCards']?.toString() ?? '0',
+                  Icons.error_outline,
+                  const Color(0xFFef4444)),
+              _buildInventoryCard(
+                  'Inactive Cards',
+                  inventory['inactiveCards']?.toString() ?? '0',
+                  Icons.access_time,
+                  const Color(0xFFf59e0b)),
+              _buildInventoryCard(
+                  'Pending Users',
+                  inventory['inactiveUsers']?.toString() ?? '0',
+                  Icons.person_remove_outlined,
+                  const Color(0xFFef4444)),
             ],
           ),
         ),
@@ -215,7 +247,8 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
     );
   }
 
-  Widget _buildInventoryCard(String title, String value, IconData icon, Color color) {
+  Widget _buildInventoryCard(
+      String title, String value, IconData icon, Color color) {
     return Container(
       width: 180,
       margin: const EdgeInsets.only(right: 12),
@@ -233,12 +266,18 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
             children: [
               Text(
                 title,
-                style: const TextStyle(color: Colors.white54, fontSize: 13, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                    color: Colors.white54,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 8),
               Text(
                 value,
-                style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -267,12 +306,15 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
             gridData: FlGridData(
               show: true,
               drawVerticalLine: false,
-              getDrawingHorizontalLine: (value) => const FlLine(color: Colors.white10, strokeWidth: 1),
+              getDrawingHorizontalLine: (value) =>
+                  const FlLine(color: Colors.white10, strokeWidth: 1),
             ),
             titlesData: FlTitlesData(
               show: true,
-              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              rightTitles:
+                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              topTitles:
+                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
@@ -283,7 +325,8 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
                           usageTrends[index]['week']?.toString() ?? '',
-                          style: const TextStyle(color: Colors.white38, fontSize: 10),
+                          style: const TextStyle(
+                              color: Colors.white38, fontSize: 10),
                         ),
                       );
                     }
@@ -306,7 +349,8 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
             lineBarsData: [
               _buildLineBar(usageTrends, 'views', const Color(0xFF8b5cf6)),
               _buildLineBar(usageTrends, 'shares', const Color(0xFF10b981)),
-              _buildLineBar(usageTrends, 'activeUsers', const Color(0xFFf59e0b)),
+              _buildLineBar(
+                  usageTrends, 'activeUsers', const Color(0xFFf59e0b)),
             ],
             lineTouchData: LineTouchData(
               touchTooltipData: LineTouchTooltipData(
@@ -322,7 +366,8 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
   LineChartBarData _buildLineBar(List<dynamic> data, String key, Color color) {
     return LineChartBarData(
       spots: data.asMap().entries.map((e) {
-        return FlSpot(e.key.toDouble(), ((e.value[key] ?? 0) as num).toDouble());
+        return FlSpot(
+            e.key.toDouble(), ((e.value[key] ?? 0) as num).toDouble());
       }).toList(),
       isCurved: true,
       color: color,
@@ -339,7 +384,8 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
       children: [
         const Text(
           'Group Analytics',
-          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
         ),
         Text(
           'Detailed group performance metrics',
@@ -349,27 +395,28 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
         _buildTabSwitcher(),
         const SizedBox(height: 20),
         Obx(() => controller.selectedTabIndex.value == 0
-          ? _buildSectionCard(
-              title: 'Group Distribution',
-              subtitle: 'Card Groups vs User Groups',
-              child: _buildGroupDistributionPie(data.groups),
-            )
-          : Column(
-              children: [
-                _buildSectionCard(
-                  title: 'Top Performing Groups',
-                  icon: Icons.emoji_events_outlined,
-                  child: _buildTopPerformingGroupsList(data.groupDetails['cardsPerCardGroup'] ?? []),
-                ),
-                const SizedBox(height: 20),
-                _buildSectionCard(
-                  title: 'Cards per Card Group',
-                  subtitle: 'Top groups by card count',
-                  child: _buildCardsPerGroupBarChart(data.groupDetails['cardsPerCardGroup'] ?? []),
-                ),
-              ],
-            )
-        ),
+            ? _buildSectionCard(
+                title: 'Group Distribution',
+                subtitle: 'Card Groups vs User Groups',
+                child: _buildGroupDistributionPie(data.groups),
+              )
+            : Column(
+                children: [
+                  _buildSectionCard(
+                    title: 'Top Performing Groups',
+                    icon: Icons.emoji_events_outlined,
+                    child: _buildTopPerformingGroupsList(
+                        data.groupDetails['cardsPerCardGroup'] ?? []),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildSectionCard(
+                    title: 'Cards per Card Group',
+                    subtitle: 'Top groups by card count',
+                    child: _buildCardsPerGroupBarChart(
+                        data.groupDetails['cardsPerCardGroup'] ?? []),
+                  ),
+                ],
+              )),
       ],
     );
   }
@@ -378,7 +425,7 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
   Widget _buildGroupDistributionPie(Map<String, dynamic> groups) {
     final cardGroups = (groups['cardGroups'] ?? 0) as num;
     final userGroups = (groups['userGroups'] ?? 0) as num;
-    
+
     if (cardGroups == 0 && userGroups == 0) return const SizedBox.shrink();
 
     return Column(
@@ -390,8 +437,16 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
               sectionsSpace: 0,
               centerSpaceRadius: 0,
               sections: [
-                PieChartSectionData(value: cardGroups.toDouble(), color: const Color(0xFF8b5cf6), radius: 60, showTitle: false),
-                PieChartSectionData(value: userGroups.toDouble(), color: const Color(0xFF10b981), radius: 60, showTitle: false),
+                PieChartSectionData(
+                    value: cardGroups.toDouble(),
+                    color: const Color(0xFF8b5cf6),
+                    radius: 60,
+                    showTitle: false),
+                PieChartSectionData(
+                    value: userGroups.toDouble(),
+                    color: const Color(0xFF10b981),
+                    radius: 60,
+                    showTitle: false),
               ],
             ),
           ),
@@ -439,7 +494,8 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
             backgroundColor: AppColors.primaryPink.withOpacity(0.1),
             child: Text(
               (user['firstName']?[0] ?? '') + (user['lastName']?[0] ?? ''),
-              style: const TextStyle(color: AppColors.primaryPink, fontSize: 12),
+              style:
+                  const TextStyle(color: AppColors.primaryPink, fontSize: 12),
             ),
           ),
           const SizedBox(width: 12),
@@ -449,7 +505,10 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
               children: [
                 Text(
                   '${user['firstName'] ?? ''} ${user['lastName'] ?? ''}',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14),
                 ),
                 Text(
                   user['email'] ?? '',
@@ -463,9 +522,13 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
             children: [
               Text(
                 '${user['cardsAssigned'] ?? 0} Cards',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14),
               ),
-              _buildStatusBadge(user['isActive'] == true ? 'Active' : 'Inactive'),
+              _buildStatusBadge(
+                  user['isActive'] == true ? 'Active' : 'Inactive'),
             ],
           ),
         ],
@@ -500,9 +563,9 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
       child: Row(
         children: [
           const CircleAvatar(
-             backgroundColor: Colors.amber,
-             radius: 14,
-             child: Icon(Icons.star, color: Colors.white, size: 14),
+            backgroundColor: Colors.amber,
+            radius: 14,
+            child: Icon(Icons.star, color: Colors.white, size: 14),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -511,11 +574,15 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
               children: [
                 Text(
                   card['name'] ?? 'Unnamed',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14),
                 ),
                 Text(
                   card['ownerName'] ?? 'Unknown Owner',
-                  style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11),
+                  style: TextStyle(
+                      color: Colors.white.withOpacity(0.6), fontSize: 11),
                 ),
               ],
             ),
@@ -525,7 +592,10 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
             children: [
               Text(
                 '${card['views'] ?? 0} Views',
-                style: const TextStyle(color: AppColors.primaryPink, fontWeight: FontWeight.bold, fontSize: 14),
+                style: const TextStyle(
+                    color: AppColors.primaryPink,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14),
               ),
               Text(
                 '${card['shares'] ?? 0} Shares',
@@ -539,7 +609,11 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
   }
 
   // --- Common UI Helpers ---
-  Widget _buildSectionCard({required String title, String? subtitle, IconData? icon, required Widget child}) {
+  Widget _buildSectionCard(
+      {required String title,
+      String? subtitle,
+      IconData? icon,
+      required Widget child}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -553,15 +627,23 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
         children: [
           Row(
             children: [
-              if (icon != null) ...[Icon(icon, color: Colors.white70, size: 20), const SizedBox(width: 10)],
+              if (icon != null) ...[
+                Icon(icon, color: Colors.white70, size: 20),
+                const SizedBox(width: 10)
+              ],
               Expanded(
-                child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
+                child: Text(title,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold)),
               ),
             ],
           ),
           if (subtitle != null) ...[
             const SizedBox(height: 4),
-            Text(subtitle, style: const TextStyle(color: Colors.white38, fontSize: 12)),
+            Text(subtitle,
+                style: const TextStyle(color: Colors.white38, fontSize: 12)),
           ],
           const SizedBox(height: 24),
           child,
@@ -597,19 +679,24 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(vertical: 10),
             decoration: BoxDecoration(
-              color: isSelected ? Colors.white.withOpacity(0.1) : Colors.transparent,
+              color: isSelected
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: isSelected ? AppColors.primaryPink : Colors.white54, size: 18),
+                Icon(icon,
+                    color: isSelected ? AppColors.primaryPink : Colors.white54,
+                    size: 18),
                 const SizedBox(width: 8),
                 Text(
                   label,
                   style: TextStyle(
                     color: isSelected ? Colors.white : Colors.white54,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                     fontSize: 13,
                   ),
                 ),
@@ -625,9 +712,13 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 8),
-        Text(label, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+        Text(label,
+            style: const TextStyle(color: Colors.white54, fontSize: 12)),
       ],
     );
   }
@@ -637,13 +728,19 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: (isActive ? const Color(0xFF10b981) : Colors.white10).withOpacity(0.1),
+        color: (isActive ? const Color(0xFF10b981) : Colors.white10)
+            .withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: (isActive ? const Color(0xFF10b981) : Colors.white24).withOpacity(0.3)),
+        border: Border.all(
+            color: (isActive ? const Color(0xFF10b981) : Colors.white24)
+                .withOpacity(0.3)),
       ),
       child: Text(
         status,
-        style: TextStyle(color: isActive ? const Color(0xFF10b981) : Colors.white38, fontSize: 10, fontWeight: FontWeight.bold),
+        style: TextStyle(
+            color: isActive ? const Color(0xFF10b981) : Colors.white38,
+            fontSize: 10,
+            fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -661,32 +758,59 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.03),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: isFirst ? Colors.yellow.withOpacity(0.3) : Colors.white10, width: isFirst ? 1.5 : 1),
+            border: Border.all(
+                color:
+                    isFirst ? Colors.yellow.withOpacity(0.3) : Colors.white10,
+                width: isFirst ? 1.5 : 1),
           ),
           child: Row(
             children: [
               Container(
-                width: 32, height: 32,
-                decoration: BoxDecoration(color: isFirst ? Colors.white : Colors.white10, shape: BoxShape.circle),
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                    color: isFirst ? Colors.white : Colors.white10,
+                    shape: BoxShape.circle),
                 alignment: Alignment.center,
-                child: Text((idx + 1).toString(), style: TextStyle(color: isFirst ? Colors.black : Colors.white70, fontWeight: FontWeight.bold)),
+                child: Text((idx + 1).toString(),
+                    style: TextStyle(
+                        color: isFirst ? Colors.black : Colors.white70,
+                        fontWeight: FontWeight.bold)),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(group['name'] ?? group['groupName'] ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text(group['name'] ?? group['groupName'] ?? '',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15)),
                     const SizedBox(height: 4),
-                    const Row(children: [CircleAvatar(radius: 3, backgroundColor: Color(0xFF10B981)), SizedBox(width: 6), Text('Active', style: TextStyle(color: Colors.white38, fontSize: 11))]),
+                    const Row(children: [
+                      CircleAvatar(
+                          radius: 3, backgroundColor: Color(0xFF10B981)),
+                      SizedBox(width: 6),
+                      Text('Active',
+                          style: TextStyle(color: Colors.white38, fontSize: 11))
+                    ]),
                   ],
                 ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text((group['value'] ?? group['totalCards'] ?? 0).toString(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-                  const Text('CARDS', style: TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.w500)),
+                  Text((group['value'] ?? group['totalCards'] ?? 0).toString(),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18)),
+                  const Text('CARDS',
+                      style: TextStyle(
+                          color: Colors.white38,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w500)),
                 ],
               ),
             ],
@@ -702,31 +826,60 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
       child: BarChart(
         BarChartData(
           alignment: BarChartAlignment.spaceAround,
-          maxY: groupData.fold<double>(1, (max, e) => (e['value'] ?? e['totalCards'] ?? 0) > max ? (e['value'] ?? e['totalCards'] as num).toDouble() : max) + 1,
+          maxY: groupData.fold<double>(
+                  1,
+                  (max, e) => (e['value'] ?? e['totalCards'] ?? 0) > max
+                      ? (e['value'] ?? e['totalCards'] as num).toDouble()
+                      : max) +
+              1,
           barGroups: groupData.asMap().entries.take(5).map((entry) {
-            return BarChartGroupData(
-                x: entry.key,
-                barRods: [BarChartRodData(toY: ((entry.value['value'] ?? entry.value['totalCards'] ?? 0) as num).toDouble(), color: const Color(0xFF8b5cf6), width: 16, borderRadius: const BorderRadius.vertical(top: Radius.circular(4)))]);
+            return BarChartGroupData(x: entry.key, barRods: [
+              BarChartRodData(
+                  toY: ((entry.value['value'] ?? entry.value['totalCards'] ?? 0)
+                          as num)
+                      .toDouble(),
+                  color: const Color(0xFF8b5cf6),
+                  width: 16,
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(4)))
+            ]);
           }).toList(),
           titlesData: FlTitlesData(
             show: true,
             bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                   int idx = value.toInt();
-                   if(idx >= 0 && idx < groupData.length) {
-                     return Padding(padding: const EdgeInsets.only(top: 8.0), child: Text(groupData[idx]['name'] ?? groupData[idx]['groupName'] ?? '', style: const TextStyle(color: Colors.white38, fontSize: 9)));
-                   }
-                   return const SizedBox();
-                }
-              )
-            ),
-            leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 20, getTitlesWidget: (v, m) => Text(v.toInt().toString(), style: const TextStyle(color: Colors.white38, fontSize: 9)))),
-            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      int idx = value.toInt();
+                      if (idx >= 0 && idx < groupData.length) {
+                        return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                                groupData[idx]['name'] ??
+                                    groupData[idx]['groupName'] ??
+                                    '',
+                                style: const TextStyle(
+                                    color: Colors.white38, fontSize: 9)));
+                      }
+                      return const SizedBox();
+                    })),
+            leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 20,
+                    getTitlesWidget: (v, m) => Text(v.toInt().toString(),
+                        style: const TextStyle(
+                            color: Colors.white38, fontSize: 9)))),
+            rightTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
-          gridData: FlGridData(show: true, drawVerticalLine: false, getDrawingHorizontalLine: (v) => const FlLine(color: Colors.white10, strokeWidth: 1)),
+          gridData: FlGridData(
+              show: true,
+              drawVerticalLine: false,
+              getDrawingHorizontalLine: (v) =>
+                  const FlLine(color: Colors.white10, strokeWidth: 1)),
           borderData: FlBorderData(show: false),
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
@@ -734,11 +887,17 @@ class AdminAnalyticsView extends GetView<AnalyticsController> {
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 return BarTooltipItem(
                   '${groupData[groupIndex]['name'] ?? groupData[groupIndex]['groupName'] ?? ''}\n',
-                  const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                  const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14),
                   children: [
                     TextSpan(
                       text: rod.toY.toInt().toString(),
-                      style: const TextStyle(color: AppColors.primaryPink, fontSize: 12, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                          color: AppColors.primaryPink,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500),
                     ),
                   ],
                 );
